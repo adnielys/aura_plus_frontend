@@ -1,0 +1,93 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:aura_plus/features/onboarding/domain/entities/onboarding_data.dart';
+import 'package:aura_plus/features/onboarding/domain/repositories/onboarding_repository.dart';
+import 'package:aura_plus/features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'package:aura_plus/shared/domain/enums.dart';
+import 'package:aura_plus/shared/domain/user_profile.dart';
+
+/// Repositorio falso: captura lo enviado y no toca la red.
+class _FakeOnboardingRepository implements OnboardingRepository {
+  OnboardingData? received;
+
+  @override
+  Future<bool> isCompleted() async => false;
+
+  @override
+  Future<UserProfile> complete(OnboardingData data) async {
+    received = data;
+    return const UserProfile(
+      id: 'u1',
+      name: 'Lisi',
+      childrenCount: 2,
+      childrenAges: [ChildAge.small],
+      mainPain: MainPain.family,
+      dailyTimeSlot: TimeSlot.short,
+      preferredMoment: PreferredMoment.night,
+      onboardingCompleted: true,
+    );
+  }
+}
+
+void main() {
+  group('enums · valores del contrato (reconciliación #7)', () {
+    test('coinciden con el snake_case del openapi', () {
+      expect(EmotionalState.scattered.wireValue, 'scattered');
+      expect(TimeSlot.short.wireValue, 'short');
+      expect(PreferredMoment.night.wireValue, 'night');
+      expect(MainPain.family.wireValue, 'family');
+      expect(ChildAge.small.wireValue, 'small');
+      // El caso que más divergía de `.name`:
+      expect(PreferredMoment.earlyMorning.wireValue, 'early_morning');
+    });
+  });
+
+  group('OnboardingController', () {
+    late _FakeOnboardingRepository repo;
+    late ProviderContainer container;
+
+    setUp(() {
+      repo = _FakeOnboardingRepository();
+      container = ProviderContainer(
+        overrides: [onboardingRepositoryProvider.overrideWithValue(repo)],
+      );
+      addTearDown(container.dispose);
+    });
+
+    test('canContinue exige una respuesta en cada paso', () {
+      final controller = container.read(onboardingControllerProvider.notifier);
+
+      expect(container.read(onboardingControllerProvider).canContinue, isFalse);
+      controller.setName('Lisi');
+      expect(container.read(onboardingControllerProvider).canContinue, isTrue);
+
+      controller.next(); // → paso 1 (sentimiento)
+      expect(container.read(onboardingControllerProvider).stepIndex, 1);
+      expect(container.read(onboardingControllerProvider).canContinue, isFalse);
+    });
+
+    test('submit envía los datos y marca el onboarding completo', () async {
+      final controller = container.read(onboardingControllerProvider.notifier)
+        ..setName('  Lisi  ')
+        ..setFeeling(EmotionalState.scattered)
+        ..setChildren(count: 2, ages: [ChildAge.small])
+        ..setMainPain(MainPain.family)
+        ..setTimeSlot(TimeSlot.short)
+        ..setMoment(PreferredMoment.night);
+
+      await controller.submit();
+
+      expect(repo.received, isNotNull);
+      expect(repo.received!.name, 'Lisi'); // recortado
+      expect(repo.received!.dailyTimeSlot, TimeSlot.short);
+      expect(repo.received!.preferredMoment, PreferredMoment.night);
+      expect(repo.received!.childrenAges, [ChildAge.small]);
+      expect(container.read(onboardingControllerProvider).completed, isTrue);
+      expect(
+        container.read(onboardingStatusProvider),
+        OnboardingStatus.complete,
+      );
+    });
+  });
+}
