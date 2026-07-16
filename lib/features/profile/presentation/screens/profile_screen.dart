@@ -98,18 +98,21 @@ class ProfileScreen extends ConsumerWidget {
                   title: 'Daily notification',
                   subtitle: switch (notification.valueOrNull) {
                     null => 'Once a day',
+                    (isEnabled: false, preferredTime: _) => 'Off',
                     final n => 'Once a day · ${n.preferredTime}',
                   },
+                  onTap: () => context.go(AppRoutes.notification),
                 ),
                 const _Row(
                   icon: Icons.track_changes,
                   title: 'My life areas',
                   subtitle: 'Me · Family · Relationships · Work',
                 ),
-                const _Row(
+                _Row(
                   icon: Icons.calendar_today_outlined,
                   title: 'History',
                   subtitle: 'Last 28 days',
+                  onTap: () => context.go(AppRoutes.history),
                 ),
                 _Row(
                   icon: Icons.checklist,

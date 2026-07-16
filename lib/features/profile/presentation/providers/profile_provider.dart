@@ -13,6 +13,21 @@ final profileProvider = FutureProvider<UserProfile>((ref) async {
   return UserProfileModel.fromJson(body);
 });
 
+/// Actualiza los ajustes (`PATCH /notification-settings`) y refresca
+/// [notificationSettingsProvider]. `preferredTime` en formato 'HH:mm'.
+Future<void> updateNotificationSettings(
+  WidgetRef ref, {
+  bool? isEnabled,
+  String? preferredTime,
+}) async {
+  final dio = ref.read(dioProvider);
+  await dio.patch<Object?>('/notification-settings', data: {
+    'is_enabled': ?isEnabled,
+    if (preferredTime != null) 'preferred_time': '$preferredTime:00',
+  });
+  ref.invalidate(notificationSettingsProvider);
+}
+
 /// Ajustes de notificación (`GET /notification-settings`): hora real de la
 /// única notificación diaria (derivada del momento elegido en onboarding).
 final notificationSettingsProvider =

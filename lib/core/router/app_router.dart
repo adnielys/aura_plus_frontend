@@ -15,6 +15,8 @@ import '../../features/constellation/presentation/screens/galaxy_screen.dart';
 import '../../features/onboarding/presentation/providers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
+import '../../features/profile/presentation/screens/history_screen.dart';
+import '../../features/profile/presentation/screens/notification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/session/presentation/screens/celebrate_screen.dart';
 import '../../shared/widgets/app_shell.dart';
@@ -35,6 +37,8 @@ abstract final class AppRoutes {
   static const String cycle = '/cycle';
   static const String profile = '/profile';
   static const String habits = '/habits';
+  static const String history = '/history';
+  static const String notification = '/notification';
 
   // Pantallas a pantalla completa (sin barra).
   static const String checkIn = '/check-in';
@@ -135,6 +139,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.habits,
             builder: (_, _) => const HabitsCatalogScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.history,
+            builder: (_, _) => const HistoryScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.notification,
+            builder: (_, _) => const NotificationScreen(),
           ),
         ],
       ),
