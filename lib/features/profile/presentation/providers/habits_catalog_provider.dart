@@ -12,6 +12,7 @@ typedef CatalogHabit = ({
   String auraCopy,
   HabitArea area,
   int durationMinutes,
+  String? icon,
 });
 
 /// Catálogo completo de microhábitos activos, ordenado por área en el servidor.
@@ -27,6 +28,7 @@ final habitsCatalogProvider = FutureProvider<List<CatalogHabit>>((ref) async {
         auraCopy: (item['aura_copy'] as String?) ?? '',
         area: HabitArea.fromWire(item['area'] as String),
         durationMinutes: (item['duration_minutes'] as int?) ?? 0,
+        icon: item['icon'] as String?,
       ),
   ];
 });

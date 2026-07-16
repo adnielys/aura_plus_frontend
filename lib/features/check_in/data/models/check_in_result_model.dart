@@ -26,6 +26,7 @@ class HabitModel extends Habit {
     required super.auraCopy,
     required super.area,
     required super.durationMinutes,
+    super.icon,
   });
 
   factory HabitModel.fromJson(Map<dynamic, dynamic> json) => HabitModel(
@@ -34,6 +35,7 @@ class HabitModel extends Habit {
         auraCopy: (json['aura_copy'] as String?) ?? '',
         area: HabitArea.fromWire(json['area'] as String),
         durationMinutes: (json['duration_minutes'] as int?) ?? 5,
+        icon: json['icon'] as String?,
       );
 }
 

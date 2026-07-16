@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/habit_icons.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../session/presentation/providers/session_controller.dart';
 import '../../../session/presentation/providers/session_draft_provider.dart';
@@ -326,16 +327,14 @@ class _HabitCard extends StatelessWidget {
   final HabitResult? result;
   final ValueChanged<HabitResult> onMark;
 
-  /// Colores e icono por área (AREA del maquetado).
+  /// Colores por área (AREA del maquetado). El icono es del HÁBITO
+  /// ([habitIconData]); el área solo pone el color, como en el maquetado.
   static const _areaStyle = {
-    HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), Color(0xFFFFF0F4),
-        Icons.self_improvement),
-    HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), Color(0xFFFFF6EE),
-        Icons.auto_stories),
+    HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), Color(0xFFFFF0F4)),
+    HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), Color(0xFFFFF6EE)),
     HabitArea.relationships: (Color(0xFFECE1FB), Color(0xFF9B6FD4),
-        Color(0xFFF6F0FF), Icons.favorite_border),
-    HabitArea.work: (Color(0xFFDCE9F6), Color(0xFF3F7CB0), Color(0xFFEEF5FC),
-        Icons.work_outline),
+        Color(0xFFF6F0FF)),
+    HabitArea.work: (Color(0xFFDCE9F6), Color(0xFF3F7CB0), Color(0xFFEEF5FC)),
   };
 
   /// Etiqueta EN del área (zona reco del maquetado).
@@ -348,7 +347,8 @@ class _HabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (tagBg, tagFg, iconBg, icon) = _areaStyle[habit.area]!;
+    final (tagBg, tagFg, iconBg) = _areaStyle[habit.area]!;
+    final icon = habitIconData(habit.icon, habit.area);
     final isDone = result == HabitResult.done;
     final marked = result != null;
 

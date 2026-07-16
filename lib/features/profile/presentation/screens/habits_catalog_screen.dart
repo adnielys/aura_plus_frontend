@@ -6,34 +6,46 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/habit_icons.dart';
 import '../providers/habits_catalog_provider.dart';
 
 /// Estilo por área de vida (mismos tonos que las HabitCards de la reco).
-typedef _AreaStyle = ({String name, Color bg, Color fg, IconData icon});
+/// El icono de cabecera es el del área; el de cada fila es el del HÁBITO.
+typedef _AreaStyle = ({
+  String name,
+  Color bg,
+  Color fg,
+  Color iconBg,
+  IconData icon,
+});
 
 const Map<HabitArea, _AreaStyle> _areaStyle = {
   HabitArea.self: (
     name: 'Me',
     bg: Color(0xFFFFE3EE),
     fg: Color(0xFFC01448),
+    iconBg: Color(0xFFFFF0F4),
     icon: Icons.self_improvement,
   ),
   HabitArea.family: (
     name: 'Family',
     bg: Color(0xFFFCE9D6),
     fg: Color(0xFFE0894A),
+    iconBg: Color(0xFFFFF6EE),
     icon: Icons.auto_stories,
   ),
   HabitArea.relationships: (
     name: 'Relationships',
     bg: Color(0xFFECE1FB),
     fg: Color(0xFF9B6FD4),
+    iconBg: Color(0xFFF6F0FF),
     icon: Icons.favorite_border,
   ),
   HabitArea.work: (
     name: 'Work',
     bg: Color(0xFFDCE9F6),
     fg: Color(0xFF3F7CB0),
+    iconBg: Color(0xFFEEF5FC),
     icon: Icons.work_outline,
   ),
 };
@@ -145,6 +157,21 @@ class _HabitRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Icono propio del hábito, teñido con el color del área (maquetado).
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: style.iconBg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              habitIconData(habit.icon, habit.area),
+              size: 18,
+              color: style.fg,
+            ),
+          ),
+          const SizedBox(width: 11),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

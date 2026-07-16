@@ -19,6 +19,7 @@ class Habit {
     required this.auraCopy,
     required this.area,
     required this.durationMinutes,
+    this.icon,
   });
 
   final String id;
@@ -28,6 +29,9 @@ class Habit {
   final String auraCopy;
   final HabitArea area;
   final int durationMinutes;
+
+  /// Icono propio del hábito (nombre icons8 del maquetado); null → el del área.
+  final String? icon;
 }
 
 /// Recomendación del día: 1 o 2 hábitos. `habit2` nulo = modo CARE/ANCHOR
