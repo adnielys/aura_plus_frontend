@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 
-/// Botón principal de Aura+: forma "pill", magenta de marca.
-///
-/// Una sola acción por pantalla (UX_01). Estados:
-/// - Deshabilitado (`onPressed == null`): opacidad 0.35, no interactivo.
+/// Botón principal de Aura+ (start-btn del maquetado): pill de 58px con
+/// degradado carmesí, texto Inter ligero y el destello ✦ anclado al borde
+/// derecho. Una sola acción por pantalla (UX_01). Estados:
+/// - Deshabilitado (`onPressed == null`): rosa suave, no interactivo.
 /// - Cargando (`isLoading`): spinner blanco, sin texto.
-/// - Activo: magenta sólido con un destello opcional (✦) como en el maquetado.
 class SoftPrimaryButton extends StatelessWidget {
   const SoftPrimaryButton({
     super.key,
@@ -26,40 +26,64 @@ class SoftPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isEnabled = onPressed != null && !isLoading;
 
-    return Opacity(
-      opacity: isEnabled ? 1 : 0.35,
-      child: SizedBox(
-        height: 56,
-        width: double.infinity,
-        child: FilledButton(
-          onPressed: isEnabled ? onPressed : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.primary,
-            disabledForegroundColor: Colors.white,
-            shape: const StadiumBorder(),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          child: isLoading
-              ? const SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
+    return SizedBox(
+      height: 58,
+      width: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: isEnabled ? AppColors.entryGradient : null,
+          // Deshabilitado: rosa sereno del maquetado, sin sombra.
+          color: isEnabled ? null : const Color(0xFFF2A9C4),
+          borderRadius: BorderRadius.circular(29),
+          boxShadow: isEnabled
+              ? [
+                  BoxShadow(
+                    color: AppColors.entryAccent.withValues(alpha: 0.35),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(label),
-                    if (showSparkle) ...[
-                      const SizedBox(width: 8),
-                      const Icon(Icons.auto_awesome, size: 18),
-                    ],
-                  ],
-                ),
+                ]
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(29),
+            onTap: isEnabled ? onPressed : null,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (isLoading)
+                  const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                else
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontFamily: AppTypography.sans,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.white,
+                    ),
+                  ),
+                // ✦ al borde derecho (right: 26 del maquetado).
+                if (showSparkle && !isLoading)
+                  const Positioned(
+                    right: 26,
+                    child: Text(
+                      '✦',
+                      style: TextStyle(fontSize: 15, color: Colors.white),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );

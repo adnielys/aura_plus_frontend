@@ -21,6 +21,9 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
+      // Inter como sans por defecto (maquetado): todo Text sin fontFamily
+      // explícita la hereda.
+      fontFamily: AppTypography.sans,
       textTheme: AppTypography.textTheme,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.background,

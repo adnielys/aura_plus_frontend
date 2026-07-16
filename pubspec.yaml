@@ -80,9 +80,25 @@ flutter:
     - assets/images/onboarding/
     - assets/images/energy/
     - assets/images/constellation/
+    - assets/images/session/
+    - assets/images/feelings/
+    - assets/images/reco/
 
-  # Fuente serif de marca (maquetado). Sustituye al 'Georgia' solo-iOS.
+  # Tres voces del maquetado: Poltawski (frases emocionales), GFS Didot
+  # (marca/eyebrows), Inter (cuerpo y controles).
   fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: GFS Didot
+      fonts:
+        - asset: assets/fonts/GFSDidot-Regular.ttf
+          weight: 400
     - family: Poltawski Nowy
       fonts:
         - asset: assets/fonts/PoltawskiNowy-Regular.ttf
