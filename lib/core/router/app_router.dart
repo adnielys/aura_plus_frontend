@@ -5,9 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/providers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/check_in/presentation/screens/check_in_screen.dart';
+import '../../features/check_in/presentation/screens/cycle_screen.dart';
 import '../../features/check_in/presentation/screens/home_screen.dart';
+import '../../features/check_in/presentation/screens/reco_screen.dart';
+import '../../features/constellation/presentation/screens/constellation_screen.dart';
+import '../../features/constellation/presentation/screens/galaxy_screen.dart';
 import '../../features/onboarding/presentation/providers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/session/presentation/screens/celebrate_screen.dart';
+import '../../shared/widgets/app_shell.dart';
 
 /// Rutas de la app como constantes (sin strings sueltos).
 abstract final class AppRoutes {
@@ -16,7 +24,18 @@ abstract final class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
   static const String onboarding = '/onboarding';
+
+  // Tabs dentro del shell (barra inferior del maquetado).
   static const String home = '/home';
+  static const String constellation = '/constellation';
+  static const String galaxy = '/galaxy';
+  static const String cycle = '/cycle';
+  static const String profile = '/profile';
+
+  // Pantallas a pantalla completa (sin barra).
+  static const String checkIn = '/check-in';
+  static const String checkInResult = '/check-in/result';
+  static const String dayClose = '/day-close';
 }
 
 /// Router gobernado por [AuthStatus] + [OnboardingStatus].
@@ -68,9 +87,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.onboarding,
         builder: (_, _) => const OnboardingScreen(),
       ),
+      // Flujo del día a pantalla completa (sin barra inferior).
       GoRoute(
-        path: AppRoutes.home,
-        builder: (_, _) => const HomeScreen(),
+        path: AppRoutes.checkIn,
+        builder: (_, _) => const CheckInScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.checkInResult,
+        builder: (_, _) => const RecoScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.dayClose,
+        builder: (_, _) => const CelebrateScreen(),
+      ),
+      // Tabs bajo el shell con la barra del maquetado.
+      ShellRoute(
+        builder: (_, _, child) => AppShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (_, _) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.constellation,
+            builder: (_, _) => const ConstellationScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.galaxy,
+            builder: (_, _) => const GalaxyScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.cycle,
+            builder: (_, _) => const CycleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (_, _) => const ProfileScreen(),
+          ),
+        ],
       ),
     ],
     redirect: (_, state) {

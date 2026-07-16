@@ -43,6 +43,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Iniciar sesión'), findsOneWidget);
+    expect(find.textContaining('Sign in'), findsOneWidget);
   });
 }

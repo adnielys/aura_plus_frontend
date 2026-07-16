@@ -55,22 +55,42 @@ void main() {
       addTearDown(container.dispose);
     });
 
-    test('canContinue exige una respuesta en cada paso', () {
+    test('la frase es progresiva: nombre y sentimiento obligan, edad/peques no',
+        () {
       final controller = container.read(onboardingControllerProvider.notifier);
 
+      // Paso 0 (nombre): requerido.
       expect(container.read(onboardingControllerProvider).canContinue, isFalse);
       controller.setName('Lisi');
       expect(container.read(onboardingControllerProvider).canContinue, isTrue);
 
-      controller.next(); // → paso 1 (sentimiento)
+      // Paso 1 (edad) y paso 2 (peques): saltarlos siempre está permitido.
+      controller.next();
       expect(container.read(onboardingControllerProvider).stepIndex, 1);
+      expect(container.read(onboardingControllerProvider).canContinue, isTrue);
+      controller.next();
+      expect(container.read(onboardingControllerProvider).stepIndex, 2);
+      expect(container.read(onboardingControllerProvider).canContinue, isTrue);
+
+      // Paso 3 (sentimiento): requerido.
+      controller.next();
+      expect(container.read(onboardingControllerProvider).stepIndex, 3);
+      expect(container.read(onboardingControllerProvider).canContinue, isFalse);
+      controller.toggleFeeling(Feeling.exhausted);
+      expect(container.read(onboardingControllerProvider).canContinue, isTrue);
+
+      // Paso 4 (lo que más pesa): pide respuesta.
+      controller.next();
+      expect(container.read(onboardingControllerProvider).stepIndex, 4);
       expect(container.read(onboardingControllerProvider).canContinue, isFalse);
     });
 
-    test('submit envía los datos y marca el onboarding completo', () async {
+    test('submit envía los datos (incluida edad opcional) y marca completo',
+        () async {
       final controller = container.read(onboardingControllerProvider.notifier)
         ..setName('  Lisi  ')
-        ..setFeeling(EmotionalState.scattered)
+        ..setAge(34)
+        ..toggleFeeling(Feeling.exhausted)..toggleFeeling(Feeling.guilty)
         ..setChildren(count: 2, ages: [ChildAge.small])
         ..setMainPain(MainPain.family)
         ..setTimeSlot(TimeSlot.short)
@@ -80,6 +100,8 @@ void main() {
 
       expect(repo.received, isNotNull);
       expect(repo.received!.name, 'Lisi'); // recortado
+      expect(repo.received!.age, 34);
+      expect(repo.received!.feelings, [Feeling.exhausted, Feeling.guilty]);
       expect(repo.received!.dailyTimeSlot, TimeSlot.short);
       expect(repo.received!.preferredMoment, PreferredMoment.night);
       expect(repo.received!.childrenAges, [ChildAge.small]);
@@ -89,5 +111,20 @@ void main() {
         OnboardingStatus.complete,
       );
     });
+
+    test('submit sin edad: el campo viaja nulo (saltarla está permitido)',
+        () async {
+      final controller = container.read(onboardingControllerProvider.notifier)
+        ..setName('Lisi')
+        ..toggleFeeling(Feeling.calm)
+        ..setTimeSlot(TimeSlot.short)
+        ..setMoment(PreferredMoment.night);
+
+      await controller.submit();
+
+      expect(repo.received, isNotNull);
+      expect(repo.received!.age, isNull);
+    });
   });
 }
+
