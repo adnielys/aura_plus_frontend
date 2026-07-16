@@ -164,3 +164,12 @@ Headers: `Authorization: Bearer <access_token>` en endpoints autenticados. El
   `closing_message`). Poblado solo en el POST que cierra el día; null en GET y
   doble cierre. El `fromJson` tolera ausencia del campo (backend viejo) — nunca
   romper el parseo del cierre del día.
+
+## #12 — Escala del check-in: 5 estados cualitativos (no gradiente)
+
+Decision: DECISION_CHECKIN_ESCALA_ESTADOS.md (2026-07-15, CERRADA). El enum del contrato
+manda; la escala de bateria del maquetado (energized/steady/soso/low/empty) queda descartada.
+Labels definitivos: energy=Con energia/Energized ('Lista para avanzar hoy'), tranquil=Tranquila/Steady
+('En modo sostenido'), scattered=Dispersa/Scattered ('La mente va en mil direcciones'),
+exhausted=Agotada/Running on empty ('Pide pausa'), hard=Al limite/At my limit ('Hoy pesa mas').
+Los 5 chips con identica dignidad visual: sin orden semaforico, sin rojo, sin gradiente.
