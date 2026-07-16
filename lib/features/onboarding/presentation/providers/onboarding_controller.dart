@@ -220,4 +220,13 @@ class OnboardingStatusController extends Notifier<OnboardingStatus> {
   void markComplete() => state = OnboardingStatus.complete;
 
   void reset() => state = OnboardingStatus.unknown;
+
+  /// Reinicia el onboarding: `DELETE /onboarding` en el servidor (el cielo se
+  /// conserva), limpia el formulario y fuerza el ruteo de vuelta al flujo.
+  /// Propaga [Failure] para que la UI muestre el error.
+  Future<void> restartOnboarding() async {
+    await ref.read(onboardingRepositoryProvider).restart();
+    ref.read(onboardingControllerProvider.notifier).restart();
+    state = OnboardingStatus.incomplete;
+  }
 }

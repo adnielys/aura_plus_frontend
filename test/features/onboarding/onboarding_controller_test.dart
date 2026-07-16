@@ -10,9 +10,13 @@ import 'package:aura_plus/shared/domain/user_profile.dart';
 /// Repositorio falso: captura lo enviado y no toca la red.
 class _FakeOnboardingRepository implements OnboardingRepository {
   OnboardingData? received;
+  bool restarted = false;
 
   @override
   Future<bool> isCompleted() async => false;
+
+  @override
+  Future<void> restart() async => restarted = true;
 
   @override
   Future<UserProfile> complete(OnboardingData data) async {

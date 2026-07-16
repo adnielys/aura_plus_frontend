@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/providers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
 import '../../features/check_in/presentation/screens/cycle_screen.dart';
@@ -13,6 +14,7 @@ import '../../features/constellation/presentation/screens/constellation_screen.d
 import '../../features/constellation/presentation/screens/galaxy_screen.dart';
 import '../../features/onboarding/presentation/providers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/session/presentation/screens/celebrate_screen.dart';
 import '../../shared/widgets/app_shell.dart';
@@ -23,6 +25,7 @@ abstract final class AppRoutes {
 
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String register = '/register';
   static const String onboarding = '/onboarding';
 
   // Tabs dentro del shell (barra inferior del maquetado).
@@ -31,6 +34,7 @@ abstract final class AppRoutes {
   static const String galaxy = '/galaxy';
   static const String cycle = '/cycle';
   static const String profile = '/profile';
+  static const String habits = '/habits';
 
   // Pantallas a pantalla completa (sin barra).
   static const String checkIn = '/check-in';
@@ -84,6 +88,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const LoginScreen(),
       ),
       GoRoute(
+        path: AppRoutes.register,
+        builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, _) => const OnboardingScreen(),
       ),
@@ -124,6 +132,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.profile,
             builder: (_, _) => const ProfileScreen(),
           ),
+          GoRoute(
+            path: AppRoutes.habits,
+            builder: (_, _) => const HabitsCatalogScreen(),
+          ),
         ],
       ),
     ],
@@ -134,7 +146,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         AuthStatus.unknown =>
           location == AppRoutes.splash ? null : AppRoutes.splash,
         AuthStatus.unauthenticated =>
-          location == AppRoutes.login ? null : AppRoutes.login,
+          (location == AppRoutes.login || location == AppRoutes.register)
+              ? null
+              : AppRoutes.login,
         // Autenticada: el destino depende del onboarding.
         AuthStatus.authenticated => switch (onboardingStatus.value) {
             // Aún consultando el estado: quedarse en el splash.
@@ -144,6 +158,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               location == AppRoutes.onboarding ? null : AppRoutes.onboarding,
             OnboardingStatus.complete => (location == AppRoutes.splash ||
                     location == AppRoutes.login ||
+                    location == AppRoutes.register ||
                     location == AppRoutes.onboarding)
                 ? AppRoutes.home
                 : null,

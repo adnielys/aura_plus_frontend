@@ -113,6 +113,19 @@ class _Body extends StatelessWidget {
                             label: 'stars gathered',
                           ),
                         ),
+                        // Presencia: días con check-in, solo acumula
+                        // (GUARD_TONE_03/04: jamás cuántos faltan).
+                        if (constellation.daysPresent != null) ...[
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _StatTile(
+                              value: '${constellation.daysPresent}',
+                              label: constellation.daysPresent == 1
+                                  ? 'day of presence'
+                                  : 'days of presence',
+                            ),
+                          ),
+                        ],
                         const SizedBox(width: 12),
                         Expanded(
                           child: _StatTile(

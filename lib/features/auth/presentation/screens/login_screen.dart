@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../providers/auth_controller.dart';
@@ -207,6 +209,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.register),
+                      child: const Text(
+                        'Create account',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.entryMuted,
                         ),
                       ),
                     ),

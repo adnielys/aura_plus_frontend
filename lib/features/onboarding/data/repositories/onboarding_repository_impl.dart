@@ -21,6 +21,9 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   Future<UserProfile> complete(OnboardingData data) =>
       _guard(() => _remote.complete(data));
 
+  @override
+  Future<void> restart() => _guard(_remote.restart);
+
   /// Ejecuta [action] traduciendo ApiException/DioException a Failure.
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {

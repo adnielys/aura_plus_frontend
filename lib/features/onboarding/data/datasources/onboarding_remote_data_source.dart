@@ -17,6 +17,12 @@ class OnboardingRemoteDataSource {
     return data['completed'] == true;
   }
 
+  /// Reinicia el onboarding (`DELETE /onboarding`). El servidor borra perfil y
+  /// preferencias; el cielo (estrellas/constelaciones) se conserva.
+  Future<void> restart() async {
+    await _dio.delete<Object?>('/onboarding');
+  }
+
   Future<UserProfileModel> complete(OnboardingData data) async {
     final response = await _dio.post<Object?>(
       '/onboarding/complete',

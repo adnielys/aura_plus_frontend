@@ -13,6 +13,7 @@ class ConstellationModel extends Constellation {
     required super.isComplete,
     required super.isCurrent,
     super.completedAt,
+    super.daysPresent,
   });
 
   /// Construye desde el contenido ya desenvuelto del envelope.
@@ -27,6 +28,7 @@ class ConstellationModel extends Constellation {
       isComplete: (json['is_complete'] as bool?) ?? false,
       isCurrent: (json['is_current'] as bool?) ?? true,
       completedAt: completedAt == null ? null : DateTime.tryParse(completedAt),
+      daysPresent: json['days_present'] as int?,
     );
   }
 }

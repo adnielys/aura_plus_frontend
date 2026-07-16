@@ -12,4 +12,8 @@ abstract interface class OnboardingRepository {
   /// Envía las respuestas y crea el perfil + primera constelación
   /// (`POST /onboarding/complete`). Devuelve el [UserProfile] creado.
   Future<UserProfile> complete(OnboardingData data);
+
+  /// Reinicia el onboarding (`DELETE /onboarding`): borra perfil y
+  /// preferencias en el servidor; las estrellas nunca se pierden.
+  Future<void> restart();
 }

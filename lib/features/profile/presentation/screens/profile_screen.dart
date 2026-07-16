@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
+import '../../../onboarding/presentation/providers/onboarding_controller.dart';
 import '../providers/profile_provider.dart';
 
 /// Perfil (maquetado · tab "perfil"): cabecera con degradado carmesí,
@@ -109,10 +111,11 @@ class ProfileScreen extends ConsumerWidget {
                   title: 'History',
                   subtitle: 'Last 28 days',
                 ),
-                const _Row(
+                _Row(
                   icon: Icons.checklist,
                   title: 'All microhabits',
                   subtitle: 'Browse the full list',
+                  onTap: () => context.go(AppRoutes.habits),
                 ),
                 const SizedBox(height: 18),
                 const Text('PLAN', style: AppTypography.sectionLabel),
@@ -133,6 +136,12 @@ class ProfileScreen extends ConsumerWidget {
                 const Text('SESSION', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
                 _Row(
+                  icon: Icons.replay,
+                  title: 'Restart onboarding',
+                  subtitle: 'Answer again · your stars stay',
+                  onTap: () => _confirmRestart(context, ref),
+                ),
+                _Row(
                   icon: Icons.logout,
                   title: 'Sign out',
                   subtitle: 'See you soon',
@@ -145,6 +154,70 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Confirma y reinicia el onboarding. El servidor conserva el cielo
+  /// (estrellas y constelaciones); el router la lleva de vuelta al flujo.
+  Future<void> _confirmRestart(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Restart onboarding?',
+          style: TextStyle(
+            fontFamily: AppTypography.serif,
+            fontStyle: FontStyle.italic,
+            fontSize: 20,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: const Text(
+          'You will answer the first questions again. '
+          'Your stars and constellations stay exactly as they are.',
+          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text(
+              'Not now',
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text(
+              'Restart',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(onboardingStatusProvider.notifier)
+          .restartOnboarding(); // el router redirige a /onboarding
+      // Datos del perfil quedan obsoletos: refrescar al volver a completar.
+      ref.invalidate(profileProvider);
+      ref.invalidate(notificationSettingsProvider);
+    } on Failure catch (failure) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(failure.message)),
+        );
+      }
+    }
   }
 }
 
