@@ -8,9 +8,11 @@ import '../../data/repositories/onboarding_repository_impl.dart';
 import '../../domain/entities/onboarding_data.dart';
 import '../../domain/repositories/onboarding_repository.dart';
 
-/// Número de pasos del onboarding (nombre → sentimiento → hijos → dolor →
-/// tiempo → momento).
-const int kOnboardingSteps = 6;
+/// Número de pasos del onboarding: la frase continua se construye PROGRESIVA
+/// (maquetado `aura_preview`: cada entrada es un paso con su "Continuar" y la
+/// frase va apareciendo línea a línea) — nombre → edad → peques → sentimiento —
+/// y después dolor → tiempo → momento.
+const int kOnboardingSteps = 7;
 
 /// Estado inmutable del flujo de onboarding: el paso actual + las respuestas en
 /// progreso. Los campos opcionales pueden quedar nulos; los tres requeridos por
@@ -19,7 +21,8 @@ class OnboardingState {
   const OnboardingState({
     this.stepIndex = 0,
     this.name = '',
-    this.initialFeeling,
+    this.age,
+    this.feelings = const [],
     this.childrenCount,
     this.childrenAges = const [],
     this.mainPain,
@@ -32,7 +35,10 @@ class OnboardingState {
 
   final int stepIndex;
   final String name;
-  final EmotionalState? initialFeeling;
+  final int? age;
+
+  /// Sentimientos de hoy (multi-selección, como el maquetado).
+  final List<Feeling> feelings;
   final int? childrenCount;
   final List<ChildAge> childrenAges;
   final MainPain? mainPain;
@@ -44,16 +50,18 @@ class OnboardingState {
 
   bool get isLastStep => stepIndex == kOnboardingSteps - 1;
 
-  /// ¿Puede avanzar desde el paso actual? Cada paso pide una respuesta antes de
-  /// continuar; "0 hijos" es una respuesta válida.
+  /// ¿Puede avanzar desde el paso actual? Nombre y sentimiento son requeridos;
+  /// edad y peques son opcionales (saltarlos siempre está permitido); los
+  /// pasos finales piden su respuesta.
   bool get canContinue {
     return switch (stepIndex) {
       0 => name.trim().isNotEmpty,
-      1 => initialFeeling != null,
-      2 => childrenCount != null,
-      3 => mainPain != null,
-      4 => dailyTimeSlot != null,
-      5 => preferredMoment != null,
+      1 => true, // edad: demográfico opcional
+      2 => true, // peques: opcional (0 es una respuesta válida)
+      3 => feelings.isNotEmpty,
+      4 => mainPain != null,
+      5 => dailyTimeSlot != null,
+      6 => preferredMoment != null,
       _ => false,
     };
   }
@@ -61,7 +69,8 @@ class OnboardingState {
   OnboardingState copyWith({
     int? stepIndex,
     String? name,
-    EmotionalState? initialFeeling,
+    int? age,
+    List<Feeling>? feelings,
     int? childrenCount,
     List<ChildAge>? childrenAges,
     MainPain? mainPain,
@@ -74,7 +83,8 @@ class OnboardingState {
     return OnboardingState(
       stepIndex: stepIndex ?? this.stepIndex,
       name: name ?? this.name,
-      initialFeeling: initialFeeling ?? this.initialFeeling,
+      age: age ?? this.age,
+      feelings: feelings ?? this.feelings,
       childrenCount: childrenCount ?? this.childrenCount,
       childrenAges: childrenAges ?? this.childrenAges,
       mainPain: mainPain ?? this.mainPain,
@@ -108,8 +118,16 @@ class OnboardingController extends Notifier<OnboardingState> {
 
   void setName(String value) => state = state.copyWith(name: value);
 
-  void setFeeling(EmotionalState value) =>
-      state = state.copyWith(initialFeeling: value);
+  /// Edad demográfica opcional. La UI la acota a un rango razonable; el backend
+  /// aplica además su validación laxa (fuera de rango persiste null).
+  void setAge(int value) => state = state.copyWith(age: value);
+
+  /// Marca/desmarca un sentimiento (multi-selección, como el maquetado).
+  void toggleFeeling(Feeling value) {
+    final next = [...state.feelings];
+    if (!next.remove(value)) next.add(value);
+    state = state.copyWith(feelings: next);
+  }
 
   void setChildren({required int count, List<ChildAge> ages = const []}) =>
       state = state.copyWith(childrenCount: count, childrenAges: ages);
@@ -133,6 +151,16 @@ class OnboardingController extends Notifier<OnboardingState> {
     state = state.copyWith(stepIndex: state.stepIndex - 1);
   }
 
+  /// "Cancelar y empezar de nuevo" (maquetado): borra las respuestas y vuelve
+  /// al primer paso de la frase.
+  void restart() => state = const OnboardingState();
+
+  /// "Tap any word to edit it" (maquetado): salta a un paso ya respondido.
+  void goToStep(int index) {
+    if (index < 0 || index >= kOnboardingSteps) return;
+    state = state.copyWith(stepIndex: index);
+  }
+
   /// Envía el onboarding. Solo construible si los tres requeridos están; la UI
   /// impide llegar aquí incompleta, pero lo reverificamos por seguridad.
   Future<void> submit() async {
@@ -147,7 +175,8 @@ class OnboardingController extends Notifier<OnboardingState> {
           name: state.name.trim(),
           dailyTimeSlot: timeSlot,
           preferredMoment: moment,
-          initialFeeling: state.initialFeeling,
+          age: state.age,
+          feelings: state.feelings,
           childrenCount: state.childrenCount,
           childrenAges: state.childrenAges,
           mainPain: state.mainPain,

@@ -15,10 +15,14 @@ class UserProfile {
     required this.dailyTimeSlot,
     required this.preferredMoment,
     required this.onboardingCompleted,
+    this.age,
   });
 
   final String id;
   final String name;
+
+  /// Demográfico opcional (puede no haberse respondido nunca).
+  final int? age;
   final int childrenCount;
   final List<ChildAge> childrenAges;
   final MainPain? mainPain;

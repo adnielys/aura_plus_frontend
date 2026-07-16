@@ -27,9 +27,9 @@ enum EmotionalState {
 
 /// Tiempo disponible al día. Contrato: `[minimal, short, medium]`.
 enum TimeSlot {
-  minimal('minimal', 'Casi nada (5 min)'),
-  short('short', '10–20 minutos'),
-  medium('medium', '30 minutos o más');
+  minimal('minimal', 'Almost none (5 min)'),
+  short('short', 'A little while (10–20 min)'),
+  medium('medium', 'Some time (30 min+)');
 
   const TimeSlot(this.wireValue, this.label);
 
@@ -42,10 +42,10 @@ enum TimeSlot {
 
 /// Momento preferido del día. Contrato: `[early_morning, morning, midday, night]`.
 enum PreferredMoment {
-  earlyMorning('early_morning', 'Temprano, antes de que despierten'),
-  morning('morning', 'Por la mañana'),
-  midday('midday', 'Al mediodía'),
-  night('night', 'De noche, cuando duermen');
+  earlyMorning('early_morning', 'Early, before they wake up'),
+  morning('morning', 'In the morning'),
+  midday('midday', 'At midday'),
+  night('night', 'At night, when they sleep');
 
   const PreferredMoment(this.wireValue, this.label);
 
@@ -58,11 +58,11 @@ enum PreferredMoment {
 
 /// Lo que más pesa hoy. Contrato: `[work, family, self, relationships, all]`.
 enum MainPain {
-  work('work', 'El trabajo'),
-  family('family', 'Mi familia y hogar'),
-  self('self', 'Yo misma'),
-  relationships('relationships', 'Mis relaciones'),
-  all('all', 'Todo a la vez');
+  work('work', 'Work'),
+  family('family', 'My family and home'),
+  self('self', 'Myself'),
+  relationships('relationships', 'My relationships'),
+  all('all', 'Everything at once');
 
   const MainPain(this.wireValue, this.label);
 
@@ -73,12 +73,73 @@ enum MainPain {
       values.firstWhere((e) => e.wireValue == value);
 }
 
+/// Sentimientos del onboarding (multi-selección, contrato `initial_feelings`).
+/// Dato de contexto: no alimenta motores. El backend descarta valores
+/// desconocidos con validación laxa.
+enum Feeling {
+  exhausted('exhausted', 'Exhausted'),
+  overwhelmed('overwhelmed', 'Overwhelmed'),
+  noTimeForMyself('no_time_for_myself', 'No time for myself'),
+  guilty('guilty', 'Guilty'),
+  anxious('anxious', 'Anxious'),
+  frustrated('frustrated', 'Frustrated'),
+  sad('sad', 'Sad'),
+  invisible('invisible', 'Invisible'),
+  impatient('impatient', 'Impatient'),
+  lonely('lonely', 'Lonely'),
+  hopeful('hopeful', 'Hopeful'),
+  calm('calm', 'Calm'),
+  grateful('grateful', 'Grateful'),
+  proud('proud', 'Proud'),
+  judged('judged', 'Judged');
+
+  const Feeling(this.wireValue, this.label);
+
+  final String wireValue;
+  final String label;
+
+  /// Ilustración del maquetado (aura_preview · sentimientos/).
+  String get imageAsset => 'assets/images/feelings/$wireValue.png';
+}
+
+/// Área de vida de un hábito. Contrato: `[self, family, relationships, work]`.
+enum HabitArea {
+  self('self', 'Yo'),
+  family('family', 'Familia'),
+  relationships('relationships', 'Relaciones'),
+  work('work', 'Trabajo');
+
+  const HabitArea(this.wireValue, this.label);
+
+  final String wireValue;
+  final String label;
+
+  static HabitArea fromWire(String value) =>
+      values.firstWhere((e) => e.wireValue == value);
+}
+
+/// Resultado de un hábito al cerrar el día. Contrato: `[done, partial,
+/// not_possible]`. "No fue posible" es una respuesta válida que también suma.
+enum HabitResult {
+  done('done', 'Lo hice'),
+  partial('partial', 'A medias'),
+  notPossible('not_possible', 'No fue posible');
+
+  const HabitResult(this.wireValue, this.label);
+
+  final String wireValue;
+  final String label;
+
+  static HabitResult fromWire(String value) =>
+      values.firstWhere((e) => e.wireValue == value);
+}
+
 /// Edades de los hijos (multi-selección). Contrato: `[baby, small, school, teen]`.
 enum ChildAge {
-  baby('baby', 'Bebé (0–2)'),
-  small('small', 'Pequeños (3–7)'),
-  school('school', 'Escolares (8–12)'),
-  teen('teen', 'Adolescentes');
+  baby('baby', 'Baby (0–2)'),
+  small('small', 'Little ones (3–7)'),
+  school('school', 'School age (8–12)'),
+  teen('teen', 'Teens');
 
   const ChildAge(this.wireValue, this.label);
 

@@ -1,5 +1,5 @@
-import '../../../../shared/domain/enums.dart';
-import '../../../../shared/domain/user_profile.dart';
+import '../../domain/enums.dart';
+import '../../domain/user_profile.dart';
 
 /// DTO de [UserProfile]: conoce el JSON del contrato (`UserProfile` en
 /// openapi.yaml). Mapea los enums por su `wireValue`, nunca por `.name`.
@@ -13,6 +13,7 @@ class UserProfileModel extends UserProfile {
     required super.dailyTimeSlot,
     required super.preferredMoment,
     required super.onboardingCompleted,
+    super.age,
   });
 
   /// Construye desde el contenido de `data` ya desenvuelto del envelope.
@@ -23,6 +24,7 @@ class UserProfileModel extends UserProfile {
     return UserProfileModel(
       id: json['id'] as String,
       name: json['name'] as String,
+      age: json['age'] as int?,
       childrenCount: (json['children_count'] as int?) ?? 0,
       childrenAges: [
         for (final age in rawAges) ?ChildAge.tryFromWire(age as String),

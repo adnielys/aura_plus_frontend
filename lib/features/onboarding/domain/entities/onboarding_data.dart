@@ -10,7 +10,9 @@ class OnboardingData {
     required this.name,
     required this.dailyTimeSlot,
     required this.preferredMoment,
+    this.age,
     this.initialFeeling,
+    this.feelings = const [],
     this.childrenCount,
     this.childrenAges = const [],
     this.mainPain,
@@ -20,7 +22,13 @@ class OnboardingData {
   final TimeSlot dailyTimeSlot;
   final PreferredMoment preferredMoment;
 
+  /// Demográfico opcional (contrato: validación laxa en el backend; saltarlo
+  /// siempre está permitido).
+  final int? age;
   final EmotionalState? initialFeeling;
+
+  /// Sentimientos de hoy (multi-selección, contrato `initial_feelings`).
+  final List<Feeling> feelings;
   final int? childrenCount;
   final List<ChildAge> childrenAges;
   final MainPain? mainPain;

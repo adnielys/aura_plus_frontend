@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/api_envelope.dart';
+import '../../../../shared/data/models/user_profile_model.dart';
 import '../../domain/entities/onboarding_data.dart';
-import '../models/user_profile_model.dart';
 
 /// Fuente remota del onboarding: habla HTTP con el backend y desenvuelve el
 /// envelope. No conoce Failures (eso es del repositorio).
@@ -30,8 +30,11 @@ class OnboardingRemoteDataSource {
   /// cuando tienen valor, y traduce cada enum por su `wireValue`.
   Map<String, Object?> _toBody(OnboardingData data) => {
         'name': data.name,
+        if (data.age != null) 'age': data.age,
         if (data.initialFeeling != null)
           'initial_feeling': data.initialFeeling!.wireValue,
+        if (data.feelings.isNotEmpty)
+          'initial_feelings': [for (final f in data.feelings) f.wireValue],
         if (data.childrenCount != null) 'children_count': data.childrenCount,
         if (data.childrenAges.isNotEmpty)
           'children_ages': [for (final a in data.childrenAges) a.wireValue],
