@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../onboarding/presentation/providers/onboarding_controller.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_controller.dart';
 
 /// Splash animado (maquetado `aura_preview` · secuencia de 3.3 s sobre fondo
@@ -46,6 +47,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final isAuthenticated =
         ref.read(authControllerProvider).status == AuthStatus.authenticated;
     if (isAuthenticated) {
+      // ANTES de cualquier consulta del día: el servidor calcula "su hoy" con
+      // la timezone del dispositivo (si falla, no bloquea el arranque).
+      await syncDeviceTimezone(ref);
+      if (!mounted) return;
       await ref.read(onboardingStatusProvider.notifier).refresh();
     }
   }

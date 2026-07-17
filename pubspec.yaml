@@ -49,6 +49,7 @@ dependencies:
 
   # Preferencias no sensibles (flags de onboarding, etc.).
   shared_preferences: ^2.3.2
+  flutter_timezone: ^5.1.0
 
   # Notificaciones (Fase 6 del backend). Pendiente: requiere config nativa
   # (google-services.json). Se habilita al llegar a esa fase.

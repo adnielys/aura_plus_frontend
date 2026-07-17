@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../../../core/network/api_envelope.dart';
 import '../../../../core/network/dio_client.dart';
@@ -12,6 +13,22 @@ final profileProvider = FutureProvider<UserProfile>((ref) async {
   final body = unwrapEnvelope(response.data) as Map;
   return UserProfileModel.fromJson(body);
 });
+
+/// Sincroniza la timezone del DISPOSITIVO con el servidor (una vez por
+/// arranque, tras autenticar). El backend calcula "su hoy" con ella: sin esto,
+/// pasada la medianoche UTC el check-in de la tarde "desaparecería" y el
+/// cierre fallaría con checkin_required. Nunca bloquea la app si falla.
+Future<void> syncDeviceTimezone(WidgetRef ref) async {
+  try {
+    final timezone = await FlutterTimezone.getLocalTimezone();
+    await ref.read(dioProvider).patch<Object?>(
+      '/notification-settings',
+      data: {'timezone': timezone.identifier},
+    );
+  } catch (_) {
+    // Sin red o sin plugin: se reintenta en el próximo arranque.
+  }
+}
 
 /// Actualiza los ajustes (`PATCH /notification-settings`) y refresca
 /// [notificationSettingsProvider]. `preferredTime` en formato 'HH:mm'.

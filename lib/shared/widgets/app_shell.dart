@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../features/profile/presentation/providers/profile_provider.dart';
 
 /// Shell con la barra inferior del maquetado: Inicio · Constelación · [FAB
 /// check-in] · Ciclo · Perfil. El FAB estrella lleva al check-in a pantalla
 /// completa (fuera del shell).
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
+
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  @override
+  void initState() {
+    super.initState();
+    // El día de la usuaria se calcula en SU timezone: se sincroniza con el
+    // servidor una vez por arranque, ya autenticada (fire-and-forget).
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => syncDeviceTimezone(ref),
+    );
+  }
+
+  Widget get child => widget.child;
 
   static const _tabs = [
     (route: AppRoutes.home, icon: Icons.home_outlined, label: 'Inicio'),
