@@ -27,6 +27,7 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/session/presentation/providers/session_controller.dart';
 import '../../features/session/presentation/providers/session_draft_provider.dart';
 import '../../features/session/presentation/screens/celebrate_screen.dart';
+import '../../shared/domain/enums.dart';
 import '../../shared/widgets/app_shell.dart';
 
 /// Rutas de la app como constantes (sin strings sueltos).
@@ -169,7 +170,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.habits,
-            builder: (_, _) => const HabitsCatalogScreen(),
+            builder: (_, state) =>
+                HabitsCatalogScreen(initialArea: state.extra as HabitArea?),
           ),
           GoRoute(
             path: AppRoutes.history,

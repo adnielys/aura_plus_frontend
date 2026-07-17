@@ -9,7 +9,9 @@ import '../../../constellation/presentation/providers/constellation_provider.dar
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../session/presentation/providers/session_controller.dart';
 import '../../domain/entities/check_in_result.dart';
+import '../providers/areas_presence_provider.dart';
 import '../providers/daily_flow_controller.dart';
+import '../widgets/areas_presence_card.dart';
 import '../widgets/energy_visuals.dart';
 import '../widgets/habit_card.dart';
 import '../widgets/swap_habit_sheet.dart';
@@ -44,6 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(sessionDraftProvider.notifier).clear();
       ref.invalidate(currentConstellationProvider);
       ref.invalidate(todaySessionProvider);
+      ref.invalidate(areasPresenceProvider); // el cierre puede encender áreas
       context.go(AppRoutes.dayClose);
     } else {
       ScaffoldMessenger.of(context)
@@ -82,6 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onRefresh: () async {
             await ref.read(dailyFlowProvider.notifier).refresh();
             ref.invalidate(currentConstellationProvider);
+            ref.invalidate(areasPresenceProvider);
           },
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -146,6 +150,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 22),
+              // "Tu cuidado, por áreas": presencia encendida del ciclo
+              // (mockup aprobado — sin %, sin metas, sin reproches).
+              const AreasPresenceCard(),
               const SizedBox(height: 22),
               if (daily.isLoading)
                 const Center(

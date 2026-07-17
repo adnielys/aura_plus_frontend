@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../data/datasources/onboarding_remote_data_source.dart';
 import '../../data/repositories/onboarding_repository_impl.dart';
 import '../../domain/entities/onboarding_data.dart';
@@ -213,10 +214,19 @@ class OnboardingStatusController extends Notifier<OnboardingStatus> {
 
   /// Consulta `GET /onboarding/status`. Ante fallo deja `unknown` para que el
   /// splash muestre reintento (nunca asumir incompleto: reharía el onboarding).
+  /// Excepción: 401 = la sesión guardada ya no vale (p. ej. cuenta eliminada
+  /// en el servidor) — se limpia y el router vuelve al login, en vez de dejar
+  /// el splash esperando para siempre.
   Future<void> refresh() async {
     try {
       final completed = await ref.read(onboardingRepositoryProvider).isCompleted();
       state = completed ? OnboardingStatus.complete : OnboardingStatus.incomplete;
+    } on ApiFailure catch (failure) {
+      if (failure.httpStatus == 401) {
+        await ref.read(authControllerProvider.notifier).logout();
+      } else {
+        state = OnboardingStatus.unknown;
+      }
     } on Failure {
       state = OnboardingStatus.unknown;
     }

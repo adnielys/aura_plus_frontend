@@ -52,13 +52,32 @@ const Map<HabitArea, _AreaStyle> _areaStyle = {
 
 /// Catálogo completo de microhábitos (fila "All microhabits" del perfil).
 /// Solo lectura y sin marcar nada: la recomendación diaria sigue siendo del
-/// motor; aquí ella solo hojea qué gestos existen.
-class HabitsCatalogScreen extends ConsumerWidget {
-  const HabitsCatalogScreen({super.key});
+/// motor; aquí ella solo hojea qué gestos existen. [initialArea] filtra a un
+/// área (invitación desde "Tu cuidado, por áreas" del Home).
+class HabitsCatalogScreen extends ConsumerStatefulWidget {
+  const HabitsCatalogScreen({super.key, this.initialArea});
+
+  final HabitArea? initialArea;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HabitsCatalogScreen> createState() =>
+      _HabitsCatalogScreenState();
+}
+
+class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
+  HabitArea? _filter;
+
+  @override
+  void initState() {
+    super.initState();
+    _filter = widget.initialArea;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final catalog = ref.watch(habitsCatalogProvider);
+    final areas =
+        _filter == null ? HabitArea.values : <HabitArea>[_filter!];
 
     return Scaffold(
       body: catalog.when(
@@ -75,12 +94,28 @@ class HabitsCatalogScreen extends ConsumerWidget {
             const Text('ALL MICROHABITS', style: AppTypography.sectionLabel),
             const SizedBox(height: 4),
             Text(
-              '${habits.length} small gestures · Aura picks for you each day',
+              _filter == null
+                  ? '${habits.length} small gestures · Aura picks for you each day'
+                  : 'Gestos de ${_areaStyle[_filter]!.name} · Aura picks for you each day',
               style: const TextStyle(
                   fontSize: 12, color: AppColors.textSecondary),
             ),
+            if (_filter != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () => setState(() => _filter = null),
+                  child: const Text(
+                    'Ver todas las áreas',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
-            for (final area in HabitArea.values) ...[
+            for (final area in areas) ...[
               _AreaHeader(style: _areaStyle[area]!),
               const SizedBox(height: 8),
               for (final habit in habits.where((h) => h.area == area))
