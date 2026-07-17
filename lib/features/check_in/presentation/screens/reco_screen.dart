@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/domain/enums.dart';
-import '../../../../shared/widgets/habit_icons.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../session/presentation/providers/session_controller.dart';
 import '../../../session/presentation/providers/session_draft_provider.dart';
 import '../../domain/entities/check_in_result.dart';
 import '../providers/daily_flow_controller.dart';
 import '../widgets/energy_visuals.dart';
+import '../widgets/habit_card.dart';
 import '../widgets/swap_habit_sheet.dart';
 
 /// Recomendación del día (maquetado · pantalla "reco"): título, hero e
@@ -157,7 +157,7 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                   _AuraMessage(text: result.messages.recommendation),
                   const SizedBox(height: 14),
                   for (final (index, habit) in habits.indexed) ...[
-                    _HabitCard(
+                    HabitCard(
                       habit: habit,
                       result: draft[habit.id],
                       // ⇄ del maquetado: solo sin marcar (sustituye, nunca añade).
@@ -322,204 +322,6 @@ class _AuraMessage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Tarjeta de hábito del maquetado: icono en cápsula del área, título, minutos,
-/// pill del área a la derecha y la franja de confirmación Done | Not today.
-class _HabitCard extends StatelessWidget {
-  const _HabitCard({
-    required this.habit,
-    required this.result,
-    required this.onMark,
-    this.onSwap,
-  });
-
-  final Habit habit;
-  final HabitResult? result;
-  final ValueChanged<HabitResult> onMark;
-
-  /// Abre el banco en modo sustitución (null = tarjeta ya marcada).
-  final VoidCallback? onSwap;
-
-  /// Colores por área (AREA del maquetado). El icono es del HÁBITO
-  /// ([habitIconData]); el área solo pone el color, como en el maquetado.
-  static const _areaStyle = {
-    HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), Color(0xFFFFF0F4)),
-    HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), Color(0xFFFFF6EE)),
-    HabitArea.relationships: (Color(0xFFECE1FB), Color(0xFF9B6FD4),
-        Color(0xFFF6F0FF)),
-    HabitArea.work: (Color(0xFFDCE9F6), Color(0xFF3F7CB0), Color(0xFFEEF5FC)),
-  };
-
-  /// Etiqueta EN del área (zona reco del maquetado).
-  static const _areaLabel = {
-    HabitArea.self: 'Me',
-    HabitArea.family: 'Family',
-    HabitArea.relationships: 'Relationships',
-    HabitArea.work: 'Work',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final (tagBg, tagFg, iconBg) = _areaStyle[habit.area]!;
-    final icon = habitIconData(habit.icon, habit.area);
-    final isDone = result == HabitResult.done;
-    final marked = result != null;
-
-    // Métrica exacta del maquetado (micro-card): borde --border 1px, radio 18,
-    // icono 38/r12, título 14 w700, meta 11. Al marcar: la franja desaparece,
-    // el meta registra la elección y "Done" atenúa la tarjeta con tachado.
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
-      opacity: isDone ? 0.55 : 1,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(15, 14, 15, 11),
-              child: Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: iconBg,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(icon, size: 20, color: tagFg),
-                  ),
-                  const SizedBox(width: 11),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          habit.title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            decoration: isDone
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          marked
-                              ? (isDone ? 'Completed' : 'Not today · logged')
-                              : '${habit.durationMinutes} min',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight:
-                                marked ? FontWeight.w600 : FontWeight.w400,
-                            color: marked && !isDone
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: tagBg,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Text(
-                      _areaLabel[habit.area]!,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: tagFg,
-                      ),
-                    ),
-                  ),
-                  if (onSwap != null) ...[
-                    const SizedBox(width: 8),
-                    // ⇄ del maquetado: cambiarlo por otro del banco.
-                    InkWell(
-                      borderRadius: BorderRadius.circular(15),
-                      onTap: onSwap,
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: const Icon(Icons.swap_horiz,
-                            size: 16, color: AppColors.textSecondary),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            // Franja de confirmación (confirm-strip): desaparece al marcar.
-            if (!marked)
-              Container(
-                decoration: const BoxDecoration(
-                  border:
-                      Border(top: BorderSide(color: AppColors.surfaceTint)),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(18)),
-                        onTap: () => onMark(HabitResult.done),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Done',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                        width: 1, height: 42, color: AppColors.surfaceTint),
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: const BorderRadius.only(
-                            bottomRight: Radius.circular(18)),
-                        onTap: () => onMark(HabitResult.notPossible),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Not today',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -12,6 +11,7 @@ import '../../../session/presentation/providers/session_controller.dart';
 import '../../domain/entities/check_in_result.dart';
 import '../providers/daily_flow_controller.dart';
 import '../widgets/energy_visuals.dart';
+import '../widgets/habit_card.dart';
 import '../widgets/swap_habit_sheet.dart';
 import '../../../session/presentation/providers/session_draft_provider.dart';
 
@@ -169,10 +169,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 10),
                 for (final (index, habit)
                     in result.recommendation.habits.indexed) ...[
-                  _RoutineCard(
+                  HabitCard(
                     habit: habit,
                     result: ref.watch(sessionDraftProvider)[habit.id],
-                    enabled: !closed,
                     // Día cerrado: la opción elegida se pinta TACHADA
                     // (todaySession null = día abierto -> null).
                     closedResult: index == 0
@@ -194,7 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   .firstOrNull,
                               state: result.checkIn.emotionalState,
                             ),
-                    onChanged: (value) => ref
+                    onMark: (value) => ref
                         .read(sessionDraftProvider.notifier)
                         .setResult(habit.id, value),
                   ),
@@ -261,142 +260,6 @@ class _CheckInInvite extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SoftPrimaryButton(label: 'Hacer mi check-in', onPressed: onTap),
-        ],
-      ),
-    );
-  }
-}
-
-/// Tarjeta de rutina: hábito + selector del resultado. "No fue posible" es una
-/// respuesta válida que también suma.
-class _RoutineCard extends StatelessWidget {
-  const _RoutineCard({
-    required this.habit,
-    required this.result,
-    required this.enabled,
-    required this.onChanged,
-    this.closedResult,
-    this.onSwap,
-  });
-
-  final Habit habit;
-  final HabitResult? result;
-  final bool enabled;
-  final ValueChanged<HabitResult> onChanged;
-
-  /// Resultado registrado en el cierre (del servidor): se pinta TACHADO.
-  final HabitResult? closedResult;
-
-  /// Abre el banco en modo sustitución (null = día cerrado o ya marcada).
-  final VoidCallback? onSwap;
-
-  @override
-  Widget build(BuildContext context) {
-    final closed = closedResult != null;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border, width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  habit.title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary
-                        .withValues(alpha: closed ? 0.75 : 1),
-                  ),
-                ),
-              ),
-              Text(
-                '${habit.area.label} · ${habit.durationMinutes} min'
-                '${closed ? ' · Registrado' : ''}',
-                style: const TextStyle(
-                    fontSize: 11, color: AppColors.textSecondary),
-              ),
-              if (onSwap != null) ...[
-                const SizedBox(width: 8),
-                // ⇄ del maquetado: cambiarlo por otro del banco.
-                InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: onSwap,
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: const Icon(Icons.swap_horiz,
-                        size: 16, color: AppColors.textSecondary),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (closed)
-            // Día cerrado: lo elegido queda tachado (gesto registrado ✓);
-            // "No fue posible" también — registrar ya es el logro.
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final option in HabitResult.values)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: option == closedResult
-                          ? const Color(0xFFFCE3EC)
-                          : AppColors.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: option == closedResult
-                            ? Colors.transparent
-                            : AppColors.border,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Text(
-                      option.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: option == closedResult
-                            ? AppColors.primary
-                            : const Color(0xFFC9C2CE),
-                        decoration: option == closedResult
-                            ? TextDecoration.lineThrough
-                            : null,
-                        decorationColor: AppColors.primary,
-                        decorationThickness: 2,
-                      ),
-                    ),
-                  ),
-              ],
-            )
-          else
-            Wrap(
-              spacing: 6,
-              children: [
-                for (final option in HabitResult.values)
-                  ChoiceChip(
-                    label: Text(option.label,
-                        style: const TextStyle(fontSize: 12)),
-                    selected: result == option,
-                    selectedColor: const Color(0xFFFFF0F4),
-                    onSelected: enabled ? (_) => onChanged(option) : null,
-                  ),
-              ],
-            ),
         ],
       ),
     );
