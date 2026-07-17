@@ -182,13 +182,18 @@ class OnboardingController extends Notifier<OnboardingState> {
           mainPain: state.mainPain,
         ),
       );
+      // Éxito: se muestra el contrato emocional (SPEC V2 §3.2). NO se marca
+      // completo aún — eso lo dispara la usuaria con "Entrar a mi espacio".
       state = state.copyWith(isSubmitting: false, completed: true);
-      // El router redirige a Home al marcar el onboarding como completo.
-      ref.read(onboardingStatusProvider.notifier).markComplete();
     } on Failure catch (failure) {
       state = state.copyWith(isSubmitting: false, errorMessage: failure.message);
     }
   }
+
+  /// Cierra el contrato emocional: marca el onboarding completo y el router
+  /// redirige a Home ("Empezamos cuando quieras").
+  void enterSpace() =>
+      ref.read(onboardingStatusProvider.notifier).markComplete();
 }
 
 /// Estado de onboarding que gobierna el ruteo (junto con [AuthStatus]).

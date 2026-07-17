@@ -109,7 +109,15 @@ void main() {
       expect(repo.received!.dailyTimeSlot, TimeSlot.short);
       expect(repo.received!.preferredMoment, PreferredMoment.night);
       expect(repo.received!.childrenAges, [ChildAge.small]);
+      // Éxito: se muestra el contrato emocional, pero el onboarding NO se marca
+      // completo hasta que la usuaria pulsa "Entrar a mi espacio" (SPEC V2 §3.2).
       expect(container.read(onboardingControllerProvider).completed, isTrue);
+      expect(
+        container.read(onboardingStatusProvider),
+        isNot(OnboardingStatus.complete),
+      );
+
+      container.read(onboardingControllerProvider.notifier).enterSpace();
       expect(
         container.read(onboardingStatusProvider),
         OnboardingStatus.complete,

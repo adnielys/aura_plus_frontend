@@ -32,6 +32,14 @@ class OnboardingScreen extends ConsumerWidget {
       },
     );
 
+    // Tras enviar con éxito: contrato emocional (SPEC V2 §3.2), no más pasos.
+    if (state.completed) {
+      return _EmotionalContract(
+        name: state.name.trim(),
+        onEnter: controller.enterSpace,
+      );
+    }
+
     return Scaffold(
       // Zona de entrada del maquetado: fondo blanco puro.
       backgroundColor: Colors.white,
@@ -1429,4 +1437,70 @@ String? _joinFeelings(List<Feeling> feelings) {
   final labels = [for (final f in feelings) f.label.toLowerCase()];
   if (labels.length == 1) return labels.single;
   return '${labels.sublist(0, labels.length - 1).join(', ')} and ${labels.last}';
+}
+
+/// Contrato emocional (SPEC_CONTENIDO_EMOCIONAL_V2 §3.2): estado de éxito del
+/// onboarding. Sin metas ni presión — cierra el arco de entrada. La usuaria
+/// decide cuándo entrar, con un único botón.
+class _EmotionalContract extends StatelessWidget {
+  const _EmotionalContract({required this.name, required this.onEnter});
+
+  final String name;
+  final VoidCallback onEnter;
+
+  @override
+  Widget build(BuildContext context) {
+    final serif = Theme.of(context).textTheme.displaySmall!;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(30, 24, 30, 28),
+          child: Column(
+            children: [
+              const Spacer(),
+              const Text('✦',
+                  style: TextStyle(fontSize: 30, color: AppColors.entryAccent)),
+              const SizedBox(height: 22),
+              // Frase-contrato: el nombre en carmesí, el resto en tinta suave.
+              Text.rich(
+                TextSpan(children: [
+                  TextSpan(
+                    text: 'Eso es todo lo que necesito, ',
+                    style: serif.copyWith(color: AppColors.entryInk, height: 1.35),
+                  ),
+                  TextSpan(
+                    text: name,
+                    style: serif.copyWith(
+                        color: AppColors.entryAccent, height: 1.35),
+                  ),
+                  TextSpan(
+                    text: '.',
+                    style: serif.copyWith(color: AppColors.entryInk, height: 1.35),
+                  ),
+                ]),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Aquí no hay metas que cumplir ni nada que demostrar.\n'
+                'Empezamos cuando quieras.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.6,
+                  color: AppColors.entryMuted,
+                ),
+              ),
+              const Spacer(),
+              SoftPrimaryButton(
+                label: 'Entrar a mi espacio',
+                onPressed: onEnter,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
