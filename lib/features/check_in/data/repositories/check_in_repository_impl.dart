@@ -18,6 +18,10 @@ class CheckInRepositoryImpl implements CheckInRepository {
       _guard(() => _remote.submit(state));
 
   @override
+  Future<CheckInResult> swapHabit({required int slot, required String habitId}) =>
+      _guard(() => _remote.swapHabit(slot: slot, habitId: habitId));
+
+  @override
   Future<CheckInResult?> today() async {
     try {
       return await _guard(_remote.todayResult);

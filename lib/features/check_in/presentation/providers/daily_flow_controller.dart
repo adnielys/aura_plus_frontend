@@ -44,4 +44,18 @@ class DailyFlowController extends AsyncNotifier<CheckInResult?> {
   Future<void> refresh() async {
     state = await AsyncValue.guard(_repository.today);
   }
+
+  /// Sustituye el hábito del `slot` por otro del banco (cambia CUÁL, nunca
+  /// CUÁNTOS). Devuelve null si quedó aplicado; si no, el mensaje sin culpa
+  /// del servidor para el snackbar.
+  Future<String?> swapHabit({required int slot, required String habitId}) async {
+    try {
+      final result =
+          await _repository.swapHabit(slot: slot, habitId: habitId);
+      state = AsyncData(result);
+      return null;
+    } on Failure catch (failure) {
+      return failure.message;
+    }
+  }
 }

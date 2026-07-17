@@ -12,6 +12,7 @@ import '../../../session/presentation/providers/session_draft_provider.dart';
 import '../../domain/entities/check_in_result.dart';
 import '../providers/daily_flow_controller.dart';
 import '../widgets/energy_visuals.dart';
+import '../widgets/swap_habit_sheet.dart';
 
 /// Recomendación del día (maquetado · pantalla "reco"): título, hero e
 /// indicaciones según la ENERGÍA elegida; tarjetas de hábito con Done /
@@ -155,10 +156,22 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                   const SizedBox(height: 14),
                   _AuraMessage(text: result.messages.recommendation),
                   const SizedBox(height: 14),
-                  for (final habit in habits) ...[
+                  for (final (index, habit) in habits.indexed) ...[
                     _HabitCard(
                       habit: habit,
                       result: draft[habit.id],
+                      // ⇄ del maquetado: solo sin marcar (sustituye, nunca añade).
+                      onSwap: draft.containsKey(habit.id)
+                          ? null
+                          : () => showSwapHabitSheet(
+                                context,
+                                slot: index + 1,
+                                current: habit,
+                                other: habits
+                                    .where((h) => h.id != habit.id)
+                                    .firstOrNull,
+                                state: result.checkIn.emotionalState,
+                              ),
                       onMark: (value) => ref
                           .read(sessionDraftProvider.notifier)
                           .setResult(habit.id, value),
@@ -321,11 +334,15 @@ class _HabitCard extends StatelessWidget {
     required this.habit,
     required this.result,
     required this.onMark,
+    this.onSwap,
   });
 
   final Habit habit;
   final HabitResult? result;
   final ValueChanged<HabitResult> onMark;
+
+  /// Abre el banco en modo sustitución (null = tarjeta ya marcada).
+  final VoidCallback? onSwap;
 
   /// Colores por área (AREA del maquetado). El icono es del HÁBITO
   /// ([habitIconData]); el área solo pone el color, como en el maquetado.
@@ -428,6 +445,24 @@ class _HabitCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (onSwap != null) ...[
+                    const SizedBox(width: 8),
+                    // ⇄ del maquetado: cambiarlo por otro del banco.
+                    InkWell(
+                      borderRadius: BorderRadius.circular(15),
+                      onTap: onSwap,
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Icon(Icons.swap_horiz,
+                            size: 16, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

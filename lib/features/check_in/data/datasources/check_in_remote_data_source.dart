@@ -24,4 +24,18 @@ class CheckInRemoteDataSource {
     final body = unwrapEnvelope(response.data) as Map;
     return CheckInResultModel.fromJson(body);
   }
+
+  /// Sustituye UN hábito de hoy (`PATCH /recommendation/today`). El servidor
+  /// valida energía, balance de áreas y presupuesto de tiempo.
+  Future<CheckInResultModel> swapHabit({
+    required int slot,
+    required String habitId,
+  }) async {
+    final response = await _dio.patch<Object?>(
+      '/recommendation/today',
+      data: {'slot': slot, 'habit_id': habitId},
+    );
+    final body = unwrapEnvelope(response.data) as Map;
+    return CheckInResultModel.fromJson(body);
+  }
 }
