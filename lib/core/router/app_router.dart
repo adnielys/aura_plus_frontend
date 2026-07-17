@@ -10,14 +10,22 @@ import '../../features/check_in/presentation/screens/check_in_screen.dart';
 import '../../features/check_in/presentation/screens/cycle_screen.dart';
 import '../../features/check_in/presentation/screens/home_screen.dart';
 import '../../features/check_in/presentation/screens/reco_screen.dart';
+import '../../features/constellation/presentation/providers/cycle_closing_provider.dart';
 import '../../features/constellation/presentation/screens/constellation_screen.dart';
+import '../../features/constellation/presentation/screens/cycle_close_screen.dart';
 import '../../features/constellation/presentation/screens/galaxy_screen.dart';
+import '../../features/check_in/presentation/providers/daily_flow_controller.dart';
+import '../../features/constellation/presentation/providers/constellation_provider.dart';
 import '../../features/onboarding/presentation/providers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/profile/presentation/providers/history_provider.dart';
+import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
 import '../../features/profile/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/notification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/session/presentation/providers/session_controller.dart';
+import '../../features/session/presentation/providers/session_draft_provider.dart';
 import '../../features/session/presentation/screens/celebrate_screen.dart';
 import '../../shared/widgets/app_shell.dart';
 
@@ -44,6 +52,7 @@ abstract final class AppRoutes {
   static const String checkIn = '/check-in';
   static const String checkInResult = '/check-in/result';
   static const String dayClose = '/day-close';
+  static const String cycleClose = '/cycle-close';
 }
 
 /// Router gobernado por [AuthStatus] + [OnboardingStatus].
@@ -63,6 +72,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       // (quizá de otra usuaria) debe reconsultar su estado, no heredar el previo.
       if (next == AuthStatus.unauthenticated) {
         ref.read(onboardingStatusProvider.notifier).reset();
+      }
+      // En CUALQUIER cambio de sesión (salir o entrar) se vacía todo lo
+      // user-scoped: otra usuaria jamás debe ver datos cacheados de la
+      // sesión anterior. Invalidar también al ENTRAR cubre la carrera del
+      // logout (un refetch disparado con los tokens viejos aún válidos).
+      if (next != AuthStatus.unknown) {
+        ref.invalidate(profileProvider);
+        ref.invalidate(notificationSettingsProvider);
+        ref.invalidate(historyProvider);
+        ref.invalidate(dailyFlowProvider);
+        ref.invalidate(sessionControllerProvider);
+        ref.invalidate(todaySessionProvider);
+        ref.invalidate(sessionDraftProvider);
+        ref.invalidate(currentConstellationProvider);
+        ref.invalidate(allConstellationsProvider);
+        ref.invalidate(cycleClosingProvider);
+        ref.invalidate(cycleClosePostponedProvider);
       }
     },
     fireImmediately: true,
@@ -111,6 +137,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.dayClose,
         builder: (_, _) => const CelebrateScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cycleClose,
+        builder: (_, state) =>
+            CycleCloseScreen(closing: state.extra! as CycleClosing),
       ),
       // Tabs bajo el shell con la barra del maquetado.
       ShellRoute(

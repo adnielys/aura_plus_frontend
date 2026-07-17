@@ -7,17 +7,38 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/constellation.dart';
 import '../providers/constellation_provider.dart';
+import '../providers/cycle_closing_provider.dart';
 import '../widgets/constellation_visuals.dart';
 
 /// Constelación del ciclo (maquetado · tab "constelacion"): cielo ROSADO
 /// claro con la ilustración, pill con el nombre en serif itálica, tarjeta
 /// "This cycle" con tiles de estadísticas y acceso a "My galaxy".
 /// GUARD_TONE_04: solo cuánto llevas — jamás cuánto falta ni comparaciones.
-class ConstellationScreen extends ConsumerWidget {
+/// Al entrar dispara la ceremonia de cierre si hay una pendiente (SPEC V2 §1).
+class ConstellationScreen extends ConsumerStatefulWidget {
   const ConstellationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConstellationScreen> createState() =>
+      _ConstellationScreenState();
+}
+
+class _ConstellationScreenState extends ConsumerState<ConstellationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Disparo de la ceremonia: nunca bloqueante y en silencio ante error.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final closing = await ref.read(cycleClosingProvider.future);
+      if (!mounted || closing == null) return;
+      if (ref.read(cycleClosePostponedProvider)) return; // "Ahora no" (sesión)
+      if (!mounted) return;
+      context.push(AppRoutes.cycleClose, extra: closing);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final constellation = ref.watch(currentConstellationProvider);
 
     return Scaffold(
