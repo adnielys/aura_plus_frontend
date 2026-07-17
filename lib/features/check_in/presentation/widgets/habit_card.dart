@@ -107,9 +107,7 @@ class HabitCard extends StatelessWidget {
                           closed
                               ? '${habit.durationMinutes} min · Registrado'
                               : marked
-                                  ? (isDone
-                                      ? 'Completed'
-                                      : 'Not today · logged')
+                                  ? 'Elegido: ${result!.label}'
                                   : '${habit.durationMinutes} min · pending',
                           style: TextStyle(
                             fontSize: 11,
@@ -208,6 +206,8 @@ class HabitCard extends StatelessWidget {
               )
             else if (!marked)
               // Franja de confirmación (confirm-strip): desaparece al marcar.
+              // Las MISMAS 3 opciones que pinta el cierre, para que antes y
+              // después coincidan ("A medias" también suma, filosofía).
               Container(
                 decoration: const BoxDecoration(
                   border:
@@ -215,46 +215,43 @@ class HabitCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(18)),
-                        onTap: () => onMark(HabitResult.done),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Done',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                    for (final (index, option)
+                        in HabitResult.values.indexed) ...[
+                      if (index > 0)
+                        Container(
+                            width: 1,
+                            height: 42,
+                            color: AppColors.surfaceTint),
+                      Expanded(
+                        child: InkWell(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: index == 0
+                                ? const Radius.circular(18)
+                                : Radius.zero,
+                            bottomRight:
+                                index == HabitResult.values.length - 1
+                                    ? const Radius.circular(18)
+                                    : Radius.zero,
+                          ),
+                          onTap: () => onMark(option),
+                          child: Container(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 12),
+                            alignment: Alignment.center,
+                            child: Text(
+                              option.label,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: option == HabitResult.done
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                        width: 1, height: 42, color: AppColors.surfaceTint),
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: const BorderRadius.only(
-                            bottomRight: Radius.circular(18)),
-                        onTap: () => onMark(HabitResult.notPossible),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Not today',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
