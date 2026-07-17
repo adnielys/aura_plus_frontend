@@ -144,6 +144,13 @@ class _CelebrateScreenState extends ConsumerState<CelebrateScreen> {
                         color: AppColors.star,
                       ),
                     ),
+                    // Puente de apoyo (SPEC V2 §2): acompaña el cierre cuando
+                    // "al límite" se repite. Nunca sustituye la celebración;
+                    // sin botones, es un mensaje, no un flujo.
+                    if (result.supportBridge != null) ...[
+                      const SizedBox(height: 18),
+                      _SupportBridgeCard(text: result.supportBridge!),
+                    ],
                     const SizedBox(height: 22),
                     SizedBox(
                       height: 52,
@@ -200,6 +207,44 @@ class _CelebrateScreenState extends ConsumerState<CelebrateScreen> {
 }
 
 /// El doble destello de Aura del maquetado (dos estrellas de 4 puntas).
+/// Tarjeta del puente de apoyo (SPEC V2 §2): fondo rosa sereno, icono suave
+/// (nunca alerta), el texto del servidor tal cual. Sin botones — es un
+/// mensaje, no un flujo (en el MVP no hay directorio de ayuda).
+class _SupportBridgeCard extends StatelessWidget {
+  const _SupportBridgeCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.star.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.star.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.favorite_border, size: 20, color: AppColors.star),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.55,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _AuraSparks extends StatelessWidget {
   const _AuraSparks();
 

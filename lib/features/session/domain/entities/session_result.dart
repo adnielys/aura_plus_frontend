@@ -28,8 +28,16 @@ class DailySession {
 /// Resultado del cierre (reconciliación #3): sesión + constelación actualizada,
 /// sin GETs extra.
 class SessionResult {
-  const SessionResult({required this.session, required this.constellation});
+  const SessionResult({
+    required this.session,
+    required this.constellation,
+    this.supportBridge,
+  });
 
   final DailySession session;
   final Constellation constellation;
+
+  /// Puente de apoyo (SPEC V2 §2): texto del servidor que ACOMPAÑA el cierre
+  /// —nunca lo sustituye— cuando "al límite" se repite. null lo habitual.
+  final String? supportBridge;
 }

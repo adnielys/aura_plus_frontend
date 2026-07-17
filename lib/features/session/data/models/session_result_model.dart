@@ -29,12 +29,17 @@ class DailySessionModel extends DailySession {
 }
 
 class SessionResultModel extends SessionResult {
-  const SessionResultModel({required super.session, required super.constellation});
+  const SessionResultModel({
+    required super.session,
+    required super.constellation,
+    super.supportBridge,
+  });
 
   factory SessionResultModel.fromJson(Map<dynamic, dynamic> json) =>
       SessionResultModel(
         session: DailySessionModel.fromJson(json['session'] as Map),
         constellation:
             ConstellationModel.fromJson(json['constellation'] as Map),
+        supportBridge: json['support_bridge'] as String?,
       );
 }
