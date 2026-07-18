@@ -126,37 +126,42 @@ class _Body extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _StatTile(
-                            value: '$stars',
-                            label: 'stars gathered',
+                    // IntrinsicHeight + stretch: las tres tiles miden lo
+                    // mismo aunque una etiqueta ocupe dos líneas.
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: _StatTile(
+                              value: '$stars',
+                              label: 'stars gathered',
+                            ),
                           ),
-                        ),
-                        // Presencia: días con check-in, solo acumula
-                        // (GUARD_TONE_03/04: jamás cuántos faltan).
-                        if (constellation.daysPresent != null) ...[
+                          // Presencia: días con check-in, solo acumula
+                          // (GUARD_TONE_03/04: jamás cuántos faltan).
+                          if (constellation.daysPresent != null) ...[
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _StatTile(
+                                value: '${constellation.daysPresent}',
+                                label: constellation.daysPresent == 1
+                                    ? 'day of presence'
+                                    : 'days of presence',
+                              ),
+                            ),
+                          ],
                           const SizedBox(width: 12),
                           Expanded(
                             child: _StatTile(
-                              value: '${constellation.daysPresent}',
-                              label: constellation.daysPresent == 1
-                                  ? 'day of presence'
-                                  : 'days of presence',
+                              value: '${constellation.cycleNumber}',
+                              label: constellation.cycleNumber == 1
+                                  ? 'first cycle'
+                                  : 'cycles walked',
                             ),
                           ),
                         ],
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatTile(
-                            value: '${constellation.cycleNumber}',
-                            label: constellation.cycleNumber == 1
-                                ? 'first cycle'
-                                : 'cycles walked',
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 14),
                     const Text(
@@ -327,12 +332,13 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
       decoration: BoxDecoration(
         color: AppColors.surfaceTint,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             value,
@@ -346,8 +352,9 @@ class _StatTile extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: const TextStyle(
-                fontSize: 12, color: AppColors.textSecondary),
+                fontSize: 12, height: 1.25, color: AppColors.textSecondary),
           ),
         ],
       ),
