@@ -34,7 +34,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final habit1 = draft[recommendation.habit1.id];
     if (habit1 == null || _closing) return;
     setState(() => _closing = true);
-    final ok = await ref.read(sessionControllerProvider.notifier).closeDay(
+    final ok = await ref
+        .read(sessionControllerProvider.notifier)
+        .closeDay(
           habit1Result: habit1,
           habit2Result: recommendation.habit2 == null
               ? null
@@ -51,9 +53,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
-          content: Text('No pudimos cerrar el día. Inténtalo en un momento.'),
-        ));
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('No pudimos cerrar el día. Inténtalo en un momento.'),
+          ),
+        );
     }
   }
 
@@ -71,7 +75,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final constellation = ref.watch(currentConstellationProvider);
     // El cierre de hoy según el SERVIDOR (sobrevive reinicios) o el de esta
     // sesión de app: con él se pinta la opción elegida tachada.
-    final todaySession = ref.watch(todaySessionProvider).valueOrNull ??
+    final todaySession =
+        ref.watch(todaySessionProvider).valueOrNull ??
         ref.watch(sessionControllerProvider).valueOrNull?.session;
     final closed = todaySession != null;
     final serif = Theme.of(context).textTheme.headlineMedium!;
@@ -93,18 +98,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 '$_greeting, ${profile.valueOrNull?.name ?? '…'}',
                 style: const TextStyle(
-                    fontSize: 13, color: AppColors.textSecondary),
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 4),
               if (result != null)
                 Text.rich(
-                  TextSpan(children: [
-                    TextSpan(text: 'Hoy estás ', style: serif),
-                    TextSpan(
-                      text: result.checkIn.emotionalState.label.toLowerCase(),
-                      style: serif.copyWith(color: AppColors.secondary),
-                    ),
-                  ]),
+                  TextSpan(
+                    children: [
+                      TextSpan(text: 'Hoy estás ', style: serif),
+                      TextSpan(
+                        text: result.checkIn.emotionalState.label.toLowerCase(),
+                        style: serif.copyWith(color: AppColors.secondary),
+                      ),
+                    ],
+                  ),
                 )
               else
                 Text('Tu día empieza contigo', style: serif),
@@ -130,8 +139,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
               Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF5F0FA),
                     borderRadius: BorderRadius.circular(50),
@@ -139,8 +150,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Text(
                     switch (constellation.valueOrNull) {
                       null => 'Tu cielo se abre con tu primer día',
-                      final c => 'Constelación ${c.name} · ${c.starsEarned} '
-                          '${c.starsEarned == 1 ? 'estrella' : 'estrellas'}',
+                      final c =>
+                        'Constelación ${c.name} · ${c.starsEarned} '
+                            '${c.starsEarned == 1 ? 'estrella' : 'estrellas'}',
                     },
                     style: const TextStyle(
                       fontSize: 12,
@@ -196,20 +208,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         : todaySession?.habit2Result,
                     // ⇄ solo con el día abierto y la tarjeta sin marcar:
                     // sustituye, nunca añade (el número lo fijó el motor).
-                    onSwap: closed ||
+                    onSwap:
+                        closed ||
                             ref
                                 .watch(sessionDraftProvider)
                                 .containsKey(habit.id)
                         ? null
                         : () => showSwapHabitSheet(
-                              context,
-                              slot: index + 1,
-                              current: habit,
-                              other: result.recommendation.habits
-                                  .where((h) => h.id != habit.id)
-                                  .firstOrNull,
-                              state: result.checkIn.emotionalState,
-                            ),
+                            context,
+                            slot: index + 1,
+                            current: habit,
+                            other: result.recommendation.habits
+                                .where((h) => h.id != habit.id)
+                                .firstOrNull,
+                            state: result.checkIn.emotionalState,
+                          ),
                     onMark: (value) => ref
                         .read(sessionDraftProvider.notifier)
                         .setResult(habit.id, value),
@@ -221,7 +234,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   SoftPrimaryButton(
                     label: 'Cerrar mi día',
                     isLoading: _closing,
-                    onPressed: ref
+                    onPressed:
+                        ref
                             .watch(sessionDraftProvider)
                             .containsKey(result.recommendation.habit1.id)
                         ? () => _closeDay(result.recommendation)
@@ -313,72 +327,81 @@ class _DayClosedCard extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
-            child: Column(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
-                  ),
-                  child: const Center(
-                    child: Text('✦',
-                        style: TextStyle(fontSize: 20, color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'You closed your day',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Rest now — see you tomorrow.',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '+$stars ${stars == 1 ? 'star' : 'stars'}'
-                  '${constellationName.isEmpty ? '' : ' · $constellationName constellation'}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(50),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(50),
-                    onTap: () => context.go(AppRoutes.constellation),
-                    child: const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          // Ancho completo: sin esto la Column se encoge al texto más ancho
+          // y el bloque queda descentrado cuando el nombre es corto.
+          SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+              child: Column(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.18),
+                    ),
+                    child: const Center(
                       child: Text(
-                        'See my constellation →',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                        '✦',
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'You closed your day',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Rest now — see you tomorrow.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '+$stars ${stars == 1 ? 'star' : 'stars'}'
+                    '${constellationName.isEmpty ? '' : ' · $constellationName constellation'}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(50),
+                      onTap: () => context.go(AppRoutes.constellation),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        child: Text(
+                          'See my constellation →',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
