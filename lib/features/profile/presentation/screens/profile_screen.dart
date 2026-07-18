@@ -7,6 +7,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
+import '../../../care/presentation/providers/care_providers.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../onboarding/presentation/providers/onboarding_controller.dart';
 import '../providers/profile_provider.dart';
@@ -16,11 +17,26 @@ import '../providers/profile_provider.dart';
 /// Adaptación de filosofía: el maquetado decía "days of continuous presence"
 /// (una racha) — aquí se muestra la presencia ACUMULADA del cielo, que nunca
 /// se rompe ni castiga el silencio.
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Polling suave de care (GUARD_CARE_09: jamás push): al entrar al perfil
+    // se reconsulta el puente — así el "aceptó ✦" aparece aquí, y solo aquí.
+    Future.microtask(() {
+      if (mounted) ref.invalidate(careCurrentReferralProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider);
     final constellation = ref.watch(currentConstellationProvider);
     final notification = ref.watch(notificationSettingsProvider);
@@ -120,6 +136,13 @@ class ProfileScreen extends ConsumerWidget {
                   subtitle: 'Browse the full list',
                   onTap: () => context.go(AppRoutes.habits),
                 ),
+                const SizedBox(height: 18),
+                // CUIDADO (Carril B): la ÚNICA superficie de care fuera de su
+                // flujo. Discreta, sin badges ni contadores; el "aceptó" vive
+                // aquí dentro — jamás en push (GUARD_CARE_09).
+                const Text('CUIDADO', style: AppTypography.sectionLabel),
+                const SizedBox(height: 10),
+                _CareRow(),
                 const SizedBox(height: 18),
                 const Text('PLAN', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
@@ -224,6 +247,38 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
+/// A1 · Fila CUIDADO: subtítulo según el momento del puente humano.
+/// Verde sereno (no carmesí): el apoyo no es una tarea del día.
+class _CareRow extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final referral = ref.watch(careCurrentReferralProvider).valueOrNull;
+    final name = referral?.providerName == null
+        ? ''
+        : shortProviderName(referral!.providerName!);
+    final subtitle = switch (resolveCareView(referral)) {
+      CareView.directory => 'Personas que pueden acompañarte',
+      CareView.sent => 'Petición enviada${name.isEmpty ? '' : ' a $name'}',
+      CareView.responseAccepted =>
+        '${name.isEmpty ? 'Aceptó' : '$name aceptó'} ✦',
+      CareView.responseDeclined => 'Tienes una respuesta',
+      CareView.episode =>
+        'Tu episodio${name.isEmpty ? '' : ' con $name'} · en curso',
+    };
+    final highlighted = referral != null && referral.providerResponse == 'accepted';
+
+    return _Row(
+      icon: Icons.volunteer_activism_outlined,
+      title: 'Apoyo de una persona',
+      subtitle: subtitle,
+      iconColor: AppColors.careAccent,
+      iconBackground: AppColors.careSurface,
+      subtitleColor: highlighted ? AppColors.careAccent : null,
+      onTap: () => context.go(AppRoutes.care),
+    );
+  }
+}
+
 /// Fila de ajuste del maquetado: icono CARMESÍ en cápsula rosa + título +
 /// subtítulo + chevron.
 class _Row extends StatelessWidget {
@@ -233,6 +288,9 @@ class _Row extends StatelessWidget {
     required this.subtitle,
     this.titleBadge,
     this.onTap,
+    this.iconColor,
+    this.iconBackground,
+    this.subtitleColor,
   });
 
   final IconData icon;
@@ -240,6 +298,9 @@ class _Row extends StatelessWidget {
   final String subtitle;
   final String? titleBadge;
   final VoidCallback? onTap;
+  final Color? iconColor;
+  final Color? iconBackground;
+  final Color? subtitleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -260,10 +321,10 @@ class _Row extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF0F4),
+                color: iconBackground ?? const Color(0xFFFFF0F4),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, size: 20, color: AppColors.primary),
+              child: Icon(icon, size: 20, color: iconColor ?? AppColors.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -303,8 +364,13 @@ class _Row extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: subtitleColor ?? AppColors.textSecondary,
+                      fontWeight: subtitleColor == null
+                          ? FontWeight.w400
+                          : FontWeight.w700,
+                    ),
                   ),
                 ],
               ),

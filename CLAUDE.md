@@ -93,8 +93,18 @@ enums en snake_case con mapeo explícito; base URL por plataforma.
 Local prod-parity: `docker compose up --build -d` en `C:\dev\auraplus-backend`
 → `http://localhost:8000`, Swagger en `/docs`, `/health` da 200. Auth Bearer JWT.
 
+## Care (Pilar 3 · Carril B · Etapa 1) — YA EN LA APP
+`features/care/`: fila CUIDADO en el perfil (A1) + directorio (A2) + consentir
+y pedir (A3) + petición enviada (A4) + respuesta recibida (A5/A5b) + episodio
+y cierre B-3 (A6). Verde sereno #3E7C7B (AppColors.careAccent), clínico lila.
+Reglas: provider_response es PARALELO (jamás mueve su status); el contacto del
+profesional solo llega con accepted; polling suave al entrar (initState
+invalida careCurrentReferralProvider) — care JAMÁS llega por push
+(GUARD_CARE_09). Vista única gobernada por resolveCareView (testeada).
+
 ## Fuera del MVP de frontend
-`/care/*` (no hay pantallas de cuidado en esta spec). Pilar 2 y 3 Carril A: futuro.
+Pilar 2 y 3 Carril A: futuro. Carril B Etapa 2 (mensajería async): requiere
+revisión legal + redefinir GUARD_CARE_09 — ver diagrama_carril_b_flujo.html.
 
 ## Comandos
 - Análisis: `flutter analyze`

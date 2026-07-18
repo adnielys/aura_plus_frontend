@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/providers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/care/presentation/providers/care_providers.dart';
+import '../../features/care/presentation/screens/care_consent_screen.dart';
+import '../../features/care/presentation/screens/care_request_screen.dart';
+import '../../features/care/presentation/screens/care_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
@@ -48,6 +52,9 @@ abstract final class AppRoutes {
   static const String habits = '/habits';
   static const String history = '/history';
   static const String notification = '/notification';
+  static const String care = '/care';
+  static const String careConsent = '/care/consent';
+  static const String careRequest = '/care/request';
 
   // Pantallas a pantalla completa (sin barra).
   static const String checkIn = '/check-in';
@@ -90,6 +97,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         ref.invalidate(allConstellationsProvider);
         ref.invalidate(cycleClosingProvider);
         ref.invalidate(cycleClosePostponedProvider);
+        ref.invalidate(careCurrentReferralProvider);
+        ref.invalidate(careDirectoryProvider);
       }
     },
     fireImmediately: true,
@@ -180,6 +189,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.notification,
             builder: (_, _) => const NotificationScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.care,
+            builder: (_, _) => const CareScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.careConsent,
+            builder: (_, state) => CareConsentScreen(
+                provider: state.extra! as CareProviderInfo),
+          ),
+          GoRoute(
+            path: AppRoutes.careRequest,
+            builder: (_, _) => const CareRequestScreen(),
           ),
         ],
       ),

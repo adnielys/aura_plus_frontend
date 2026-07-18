@@ -61,6 +61,16 @@ abstract final class AppColors {
   static const LinearGradient entryGradient = LinearGradient(
     colors: [entryAccent, entryAccentDark],
   );
+
+  // ── Zona care (Pilar 3 · Carril B, specs mockups_pilar3) ───────────────────
+  /// Verde sereno del apoyo humano: nunca el carmesí de la acción diaria.
+  static const Color careAccent = Color(0xFF3E7C7B);
+  static const Color careSurface = Color(0xFFEAF5F4);
+  static const Color careBorder = Color(0xFFCDE6E4);
+
+  /// Lila del nivel clínico del directorio.
+  static const Color clinicalAccent = Color(0xFF6A3FA0);
+  static const Color clinicalSurface = Color(0xFFEFEAF7);
 }
 
 /// Colores por estado emocional (spec · EmotionalOptionCard).
