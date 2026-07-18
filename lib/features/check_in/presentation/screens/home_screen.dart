@@ -175,6 +175,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
+                // Día cerrado: tarjeta del maquetado (home-closed-card) con
+                // las estrellas de hoy y el CTA a la constelación.
+                if (closed) ...[
+                  _DayClosedCard(
+                    stars: todaySession.starsEarned,
+                    constellationName: constellation.valueOrNull?.name ?? '',
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 for (final (index, habit)
                     in result.recommendation.habits.indexed) ...[
                   HabitCard(
@@ -208,15 +217,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 8),
-                if (closed)
-                  const Center(
-                    child: Text(
-                      'Tu día quedó guardado. El cielo lo conserva.',
-                      style: TextStyle(
-                          fontSize: 13, color: AppColors.textSecondary),
-                    ),
-                  )
-                else
+                if (!closed)
                   SoftPrimaryButton(
                     label: 'Cerrar mi día',
                     isLoading: _closing,
@@ -268,6 +269,118 @@ class _CheckInInvite extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SoftPrimaryButton(label: 'Hacer mi check-in', onPressed: onTap),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta del día cerrado (home-closed-card del maquetado): degradado
+/// carmesí sobre la imagen del Home, estrella en círculo translúcido, las
+/// estrellas de HOY y el CTA a la constelación. Solo dice cuánto sumó —
+/// jamás evalúa el día (GUARD_TONE).
+class _DayClosedCard extends StatelessWidget {
+  const _DayClosedCard({required this.stars, required this.constellationName});
+
+  final int stars;
+  final String constellationName;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/home.png',
+              fit: BoxFit.cover,
+              alignment: const Alignment(0, -0.4),
+            ),
+          ),
+          // Velo del maquetado: linear-gradient(160deg, C01448 .82, 961042 .92).
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFFC01448).withValues(alpha: 0.82),
+                    const Color(0xFF961042).withValues(alpha: 0.92),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+            child: Column(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
+                  child: const Center(
+                    child: Text('✦',
+                        style: TextStyle(fontSize: 20, color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'You closed your day',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Rest now — see you tomorrow.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '+$stars ${stars == 1 ? 'star' : 'stars'}'
+                  '${constellationName.isEmpty ? '' : ' · $constellationName constellation'}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(50),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(50),
+                    onTap: () => context.go(AppRoutes.constellation),
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Text(
+                        'See my constellation →',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
