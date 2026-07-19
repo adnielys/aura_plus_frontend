@@ -102,6 +102,15 @@ profesional solo llega con accepted; polling suave al entrar (initState
 invalida careCurrentReferralProvider) — care JAMÁS llega por push
 (GUARD_CARE_09). Vista única gobernada por resolveCareView (testeada).
 
+## Hábitos v2 — YA EN LA APP
+Catálogo con buscador (texto + chips de área, `filterCatalog` testeado) y
+badges "tuyo" / "tuyo · en revisión". Crear el propio: HabitCreateScreen
+(H2/H3) — privado o compartido al banco común (pending_review hasta que el
+admin publique; el rechazo NO existe como evento). Desde el ⇄: fila "Crear
+uno nuevo para este hueco" (área fija + duración ≤ presupuesto, sustituye
+directo vía HabitCreateArgs). El catálogo refetchea al entrar (initState
+invalida habitsCatalogProvider).
+
 ## Fuera del MVP de frontend
 Pilar 2 y 3 Carril A: futuro. Carril B Etapa 2 (mensajería async): requiere
 revisión legal + redefinir GUARD_CARE_09 — ver diagrama_carril_b_flujo.html.

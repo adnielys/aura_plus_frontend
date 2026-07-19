@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/habit_icons.dart';
 import '../../../profile/presentation/providers/habits_catalog_provider.dart';
+import '../../../profile/presentation/screens/habit_create_screen.dart';
 import '../../domain/entities/check_in_result.dart';
 import '../providers/daily_flow_controller.dart';
 
@@ -22,25 +25,30 @@ const Map<EmotionalState, int> _maxMinutesByState = {
 
 /// Colores por área (mismos tonos que las HabitCards).
 const Map<HabitArea, (Color bg, Color fg, Color iconBg, String name)>
-    _areaStyle = {
-  HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), Color(0xFFFFF0F4), 'Me'),
+_areaStyle = {
+  HabitArea.self: (
+    Color(0xFFFFE3EE),
+    Color(0xFFC01448),
+    Color(0xFFFFF0F4),
+    'Me',
+  ),
   HabitArea.family: (
     Color(0xFFFCE9D6),
     Color(0xFFE0894A),
     Color(0xFFFFF6EE),
-    'Family'
+    'Family',
   ),
   HabitArea.relationships: (
     Color(0xFFECE1FB),
     Color(0xFF9B6FD4),
     Color(0xFFF6F0FF),
-    'Relationships'
+    'Relationships',
   ),
   HabitArea.work: (
     Color(0xFFDCE9F6),
     Color(0xFF3F7CB0),
     Color(0xFFEEF5FC),
-    'Work'
+    'Work',
   ),
 };
 
@@ -62,7 +70,12 @@ Future<void> showSwapHabitSheet(
     ),
     builder: (_) => FractionallySizedBox(
       heightFactor: 0.92,
-      child: _SwapSheet(slot: slot, current: current, other: other, state: state),
+      child: _SwapSheet(
+        slot: slot,
+        current: current,
+        other: other,
+        state: state,
+      ),
     ),
   );
 }
@@ -130,23 +143,24 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
         const Text('YOUR MICROHABITS', style: AppTypography.eyebrow),
         const SizedBox(height: 2),
         Text.rich(
-          TextSpan(children: [
-            TextSpan(
-              text: 'Swap ',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium!
-                  .copyWith(fontSize: 24),
-            ),
-            TextSpan(
-              text: 'this one',
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontSize: 24,
-                    fontStyle: FontStyle.italic,
-                    color: AppColors.primary,
-                  ),
-            ),
-          ]),
+          TextSpan(
+            children: [
+              TextSpan(
+                text: 'Swap ',
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium!.copyWith(fontSize: 24),
+              ),
+              TextSpan(
+                text: 'this one',
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontSize: 24,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -164,22 +178,27 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
             borderRadius: BorderRadius.circular(14),
           ),
           child: Text.rich(
-            TextSpan(children: [
-              const TextSpan(
-                text: 'Sustituyendo: ',
-                style:
-                    TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              TextSpan(
-                text: '${widget.current.title} · '
-                    '${widget.current.durationMinutes} min',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+            TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Sustituyendo: ',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ]),
+                TextSpan(
+                  text:
+                      '${widget.current.title} · '
+                      '${widget.current.durationMinutes} min',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -193,23 +212,95 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                 child: const Text('Reintentar'),
               ),
             ),
-            data: (habits) => ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-              children: [
-                for (final area in HabitArea.values) ...[
-                  _AreaHeader(area: area),
-                  for (final habit in habits.where((h) => h.area == area))
-                    _PickRow(
-                      habit: habit,
-                      lockReason: _lockReason(habit),
-                      selected: _selectedId == habit.id,
-                      onTap: () => setState(() => _selectedId =
-                          _selectedId == habit.id ? null : habit.id),
+            data: (habits) {
+              // Los suyos SIEMPRE primero (Hábitos v2): lo que ella creó
+              // jamás queda enterrado entre 120 gestos de la casa.
+              final (mine: mineHabits, rest: bankHabits) = splitMine(habits);
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                children: [
+                  if (mineHabits.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8, bottom: 8),
+                      child: Text(
+                        'Míos',
+                        style: TextStyle(
+                          fontFamily: AppTypography.serif,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ),
-                  const SizedBox(height: 10),
+                    for (final habit in mineHabits)
+                      _PickRow(
+                        habit: habit,
+                        lockReason: _lockReason(habit),
+                        selected: _selectedId == habit.id,
+                        onTap: () => setState(
+                          () => _selectedId = _selectedId == habit.id
+                              ? null
+                              : habit.id,
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                  ],
+                  for (final area in HabitArea.values) ...[
+                    _AreaHeader(area: area),
+                    for (final habit in bankHabits.where((h) => h.area == area))
+                      _PickRow(
+                        habit: habit,
+                        lockReason: _lockReason(habit),
+                        selected: _selectedId == habit.id,
+                        onTap: () => setState(
+                          () => _selectedId = _selectedId == habit.id
+                              ? null
+                              : habit.id,
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                  ],
+                  // Hábitos v2 (H4): crear uno nuevo PARA ESTE HUECO — área
+                  // fija (la del gesto que sale) y duración limitada al
+                  // presupuesto de hoy. Al guardarlo, sustituye directo.
+                  InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      final HabitCreateArgs args = (
+                        fixedArea: widget.current.area,
+                        maxMinutes: _maxMinutesByState[widget.state]!,
+                        swapSlot: widget.slot,
+                      );
+                      Navigator.of(context).pop();
+                      context.go(AppRoutes.habitCreate, extra: args);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFBFD),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFFE2A9BF),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '＋ Crear uno nuevo para este hueco',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                 ],
-              ],
-            ),
+              );
+            },
           ),
         ),
         // Pie fijo: contador + CTA + regla.
@@ -237,10 +328,12 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                   decoration: BoxDecoration(
                     gradient: _selectedId == null
                         ? null
-                        : const LinearGradient(colors: [
-                            AppColors.entryAccent,
-                            AppColors.entryAccentDark,
-                          ]),
+                        : const LinearGradient(
+                            colors: [
+                              AppColors.entryAccent,
+                              AppColors.entryAccentDark,
+                            ],
+                          ),
                     color: _selectedId == null ? const Color(0xFFF2A9C4) : null,
                     borderRadius: BorderRadius.circular(28),
                   ),
@@ -257,12 +350,16 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
                               )
                             : const Text(
                                 'Replace habit   ✦',
                                 style: TextStyle(
-                                    fontSize: 15, color: Colors.white),
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                ),
                               ),
                       ),
                     ),
@@ -272,8 +369,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
               const SizedBox(height: 8),
               const Text(
                 'No añade un gesto más: sustituye este.',
-                style:
-                    TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -374,8 +470,11 @@ class _PickRow extends StatelessWidget {
                     color: iconBg,
                     borderRadius: BorderRadius.circular(9),
                   ),
-                  child: Icon(habitIconData(habit.icon, habit.area),
-                      size: 16, color: fg),
+                  child: Icon(
+                    habitIconData(habit.icon, habit.area),
+                    size: 16,
+                    color: fg,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -393,7 +492,9 @@ class _PickRow extends StatelessWidget {
                       Text(
                         '${habit.durationMinutes} min',
                         style: const TextStyle(
-                            fontSize: 11, color: AppColors.textSecondary),
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -406,9 +507,10 @@ class _PickRow extends StatelessWidget {
                       lockReason!,
                       textAlign: TextAlign.right,
                       style: const TextStyle(
-                          fontSize: 10,
-                          height: 1.3,
-                          color: AppColors.textSecondary),
+                        fontSize: 10,
+                        height: 1.3,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   )
                 else
@@ -418,8 +520,7 @@ class _PickRow extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color:
-                            selected ? AppColors.primary : AppColors.border,
+                        color: selected ? AppColors.primary : AppColors.border,
                         width: 2,
                       ),
                     ),

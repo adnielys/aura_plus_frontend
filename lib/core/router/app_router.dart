@@ -24,6 +24,7 @@ import '../../features/onboarding/presentation/providers/onboarding_controller.d
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/providers/history_provider.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
+import '../../features/profile/presentation/screens/habit_create_screen.dart';
 import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
 import '../../features/profile/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/notification_screen.dart';
@@ -50,6 +51,7 @@ abstract final class AppRoutes {
   static const String cycle = '/cycle';
   static const String profile = '/profile';
   static const String habits = '/habits';
+  static const String habitCreate = '/habits/create';
   static const String history = '/history';
   static const String notification = '/notification';
   static const String care = '/care';
@@ -181,6 +183,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.habits,
             builder: (_, state) =>
                 HabitsCatalogScreen(initialArea: state.extra as HabitArea?),
+          ),
+          GoRoute(
+            path: AppRoutes.habitCreate,
+            builder: (_, state) =>
+                HabitCreateScreen(args: state.extra as HabitCreateArgs?),
           ),
           GoRoute(
             path: AppRoutes.history,

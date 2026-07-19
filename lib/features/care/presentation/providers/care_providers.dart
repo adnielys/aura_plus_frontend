@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_envelope.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../shared/utils/text_search.dart';
 
 /// Profesional del directorio (`GET /care/providers`). Sin contacto: se revela
 /// dentro de la derivación cuando acepta.
@@ -86,15 +87,6 @@ String shortProviderName(String fullName) {
 }
 
 // ── búsqueda del directorio (D1/D2) ─────────────────────────────────────────
-const _accentFold = {
-  'á': 'a', 'à': 'a', 'ä': 'a', 'â': 'a',
-  'é': 'e', 'è': 'e', 'ë': 'e', 'ê': 'e',
-  'í': 'i', 'ì': 'i', 'ï': 'i', 'î': 'i',
-  'ó': 'o', 'ò': 'o', 'ö': 'o', 'ô': 'o',
-  'ú': 'u', 'ù': 'u', 'ü': 'u', 'û': 'u',
-  'ñ': 'n', 'ç': 'c',
-};
-
 // Sinónimos en español del rol interno (espejo del backend): ella escribe
 // "psicóloga", no "psychologist".
 const _roleSynonyms = {
@@ -104,16 +96,6 @@ const _roleSynonyms = {
   'psychologist': ['psicologa', 'psicologo', 'psicologia'],
   'psychiatrist': ['psiquiatra', 'psiquiatria'],
 };
-
-/// Minúsculas y sin acentos: 'Ríos' -> 'rios' (búsqueda amable).
-String foldSearch(String text) {
-  final buffer = StringBuffer();
-  for (final rune in text.toLowerCase().runes) {
-    final char = String.fromCharCode(rune);
-    buffer.write(_accentFold[char] ?? char);
-  }
-  return buffer.toString();
-}
 
 /// Filtro en vivo del directorio: [query] busca en nombre, rol (con sinónimos
 /// en español) y especialidades; [tier] restringe por nivel. Se combinan.
