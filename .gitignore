@@ -46,3 +46,4 @@ app.*.map.json
 
 # Design preview bundle — vive en su propio repo (github.com/adnielys/aura_preview)
 /aura_preview/
+android/build/
