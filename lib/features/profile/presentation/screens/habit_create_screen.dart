@@ -212,17 +212,22 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
       children: [
         InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: () => context.pop(),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
+          // Vuelta EXPLÍCITA (llegamos con go(), no hay pila que "pop"):
+          // desde el catálogo -> catálogo; desde el ⇄ -> Home (la hoja de
+          // sustitución ya se cerró al navegar aquí).
+          onTap: () => context.go(
+            fromSwap ? AppRoutes.home : AppRoutes.habits,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.arrow_back_ios_new,
+                const Icon(Icons.arrow_back_ios_new,
                     size: 14, color: AppColors.textSecondary),
-                SizedBox(width: 6),
-                Text('Back',
-                    style: TextStyle(
+                const SizedBox(width: 6),
+                Text(fromSwap ? 'Home' : 'Catalog',
+                    style: const TextStyle(
                         fontSize: 13, color: AppColors.textSecondary)),
               ],
             ),
