@@ -33,7 +33,7 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          '¿Retiro tu petición a $name?',
+          'Withdraw your request to $name?',
           style: const TextStyle(
             fontFamily: AppTypography.serif,
             fontSize: 19,
@@ -42,15 +42,15 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
           ),
         ),
         content: const Text(
-          'Podrás elegir a otra persona cuando quieras — '
-          'o a ella misma más adelante. Sin prisa.',
+          'You can choose someone else whenever you want — '
+          'or her again later. No rush.',
           style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text(
-              'Dejarla como está',
+              'Leave it as is',
               style: TextStyle(
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSecondary),
@@ -59,7 +59,7 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: const Text(
-              'Retirarla',
+              'Withdraw it',
               style: TextStyle(
                   fontWeight: FontWeight.w700, color: AppColors.careAccent),
             ),
@@ -82,7 +82,7 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('No se pudo retirar. Inténtalo de nuevo.')),
+              content: Text("Couldn't withdraw it. Try again.")),
         );
         setState(() => _withdrawing = false);
       }
@@ -123,13 +123,13 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
                 children: [
                   const CareBackRow(),
                   const SizedBox(height: 6),
-                  const Text('TU SOLICITUD', style: AppTypography.sectionLabel),
+                  const Text('YOUR REQUEST', style: AppTypography.sectionLabel),
                   const SizedBox(height: 10),
                   Text.rich(
                     TextSpan(children: [
-                      TextSpan(text: 'En manos de $name, ', style: serif),
+                      TextSpan(text: "In $name's hands, ", style: serif),
                       TextSpan(
-                        text: 'sin prisa.',
+                        text: 'no rush.',
                         style: serif.copyWith(
                           fontStyle: FontStyle.italic,
                           color: AppColors.primary,
@@ -148,8 +148,8 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
                     child: Column(
                       children: [
                         CareProviderCard(
-                          name: fullName.isEmpty ? 'Tu persona de apoyo' : fullName,
-                          meta: 'Petición en curso',
+                          name: fullName.isEmpty ? 'Your support person' : fullName,
+                          meta: 'Request in progress',
                           tier: 'support',
                         ),
                         const SizedBox(height: 12),
@@ -168,8 +168,8 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Suele responder en unos días. Yo te aviso aquí — '
-                    'tú no tienes que hacer nada, ni estar pendiente.',
+                    "She usually replies within a few days. I'll let you know here — "
+                    "you don't have to do anything, or keep checking.",
                     style: TextStyle(
                         fontSize: 12.5,
                         height: 1.6,
@@ -177,7 +177,7 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
                   ),
                   const SizedBox(height: 22),
                   CarePrimaryButton(
-                    label: 'Volver a mi espacio',
+                    label: 'Back to my space',
                     crimson: true,
                     onPressed: () => context.go(AppRoutes.home),
                   ),
@@ -188,7 +188,7 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
                           ? null
                           : () => _withdraw(referral, name),
                       child: Text(
-                        _withdrawing ? 'Retirando…' : 'Retirar mi petición',
+                        _withdrawing ? 'Withdrawing…' : 'Withdraw my request',
                         style: const TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w400,
@@ -207,11 +207,11 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
   /// serena: fecha (sin cuenta de días) y qué viajó en la petición.
   String _metaLine(CareReferral referral) {
     final sent = referral.createdAt == null
-        ? 'Enviada'
-        : 'Enviada el ${spanishDate(referral.createdAt!.toLocal())}';
+        ? 'Sent'
+        : 'Sent on ${prettyDate(referral.createdAt!.toLocal())}';
     final shared = (referral.sharedPayload?['name'] as String?) == null
-        ? 'no compartiste tus datos'
-        : 'compartiste solo tu nombre';
+        ? 'you shared none of your details'
+        : 'you shared only your name';
     return '$sent · $shared';
   }
 }
@@ -224,9 +224,9 @@ class _RequestSteps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      ('Enviada', true),
-      ('En sus manos', true),
-      ('Respuesta', false),
+      ('Sent', true),
+      ('In her hands', true),
+      ('Reply', false),
     ];
     return Row(
       children: [

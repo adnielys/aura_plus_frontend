@@ -26,10 +26,10 @@ final class ApiFailure extends Failure {
 
 /// No se pudo contactar al backend (sin red, timeout, host caído).
 final class NetworkFailure extends Failure {
-  const NetworkFailure([super.message = 'No pudimos conectar. Inténtalo en un momento.']);
+  const NetworkFailure([super.message = "We couldn't connect. Try again in a moment."]);
 }
 
 /// Cualquier otra cosa inesperada.
 final class UnknownFailure extends Failure {
-  const UnknownFailure([super.message = 'Algo no salió como esperábamos.']);
+  const UnknownFailure([super.message = "Something didn't go as expected."]);
 }

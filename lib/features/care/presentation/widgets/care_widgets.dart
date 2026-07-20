@@ -25,7 +25,7 @@ class CareBackRow extends StatelessWidget {
             Icon(Icons.arrow_back_ios_new,
                 size: 14, color: AppColors.textSecondary),
             SizedBox(width: 6),
-            Text('Perfil',
+            Text('Profile',
                 style:
                     TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           ],
@@ -53,7 +53,7 @@ class CareTierLabel extends StatelessWidget {
           borderRadius: BorderRadius.circular(50),
         ),
         child: Text(
-          clinical ? 'CLÍNICO' : 'APOYO',
+          clinical ? 'CLINICAL' : 'SUPPORT',
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
@@ -71,7 +71,7 @@ String providerMetaLine(CareProviderInfo provider) {
   final parts = [
     if (provider.specialties.isNotEmpty) provider.specialties.take(2).join(' · '),
     provider.languages.map((l) => l.toUpperCase()).join(' / '),
-    if (provider.licenseVerified) '✓ licencia verificada' else '✓ verificada',
+    if (provider.licenseVerified) '✓ licensed & verified' else '✓ verified',
   ];
   return parts.join(' · ');
 }
@@ -102,7 +102,7 @@ class CareSearchField extends StatelessWidget {
         style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
         decoration: InputDecoration(
           isDense: true,
-          hintText: 'Busca por nombre o tipo — doula, psicóloga…',
+          hintText: 'Search by name or type — doula, psychologist…',
           hintStyle: const TextStyle(fontSize: 12.5, color: Color(0xFFB9AFC2)),
           prefixIcon: const Icon(Icons.search,
               size: 18, color: Color(0xFFB9AFC2)),
@@ -187,9 +187,9 @@ class CareTierChips extends StatelessWidget {
       opacity: enabled ? 1 : 0.5,
       child: Row(
         children: [
-          chip('Todas', null),
-          chip('Apoyo', 'support'),
-          chip('Clínico', 'clinical'),
+          chip('All', null),
+          chip('Support', 'support'),
+          chip('Clinical', 'clinical'),
         ],
       ),
     );
@@ -215,7 +215,7 @@ class CareSentBadge extends StatelessWidget {
           Icon(Icons.send_rounded, size: 12, color: AppColors.careAccent),
           SizedBox(width: 4),
           Text(
-            'enviada',
+            'sent',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
@@ -251,14 +251,14 @@ class CareLockBanner extends StatelessWidget {
             child: Text.rich(
               TextSpan(children: [
                 const TextSpan(
-                  text: 'Una persona a la vez. ',
+                  text: 'One person at a time. ',
                   style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary),
                 ),
                 TextSpan(
-                  text: 'Tu petición a $name sigue en sus manos — '
-                      'mientras esperas, el resto del directorio descansa.',
+                  text: 'Your request to $name is still in her hands — '
+                      'while you wait, the rest of the directory rests.',
                 ),
               ]),
               style: const TextStyle(
@@ -391,7 +391,7 @@ class CareContactCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            value == null ? '$icon Su contacto llegará aquí' : '$icon $value',
+            value == null ? '$icon Her contact will appear here' : '$icon $value',
             style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -418,10 +418,10 @@ class CareSteps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      ('Pedido', true),
-      ('Aceptó', true),
-      ('Conectadas', connected),
-      ('Cierre', false),
+      ('Request', true),
+      ('She said yes', true),
+      ('Connected', connected),
+      ('Closure', false),
     ];
     return Row(
       children: [

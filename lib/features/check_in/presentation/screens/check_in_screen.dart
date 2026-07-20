@@ -38,16 +38,16 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(const SnackBar(
-          content: Text('No pudimos guardarlo. Inténtalo en un momento.'),
+          content: Text("We couldn't save it. Try again in a moment."),
         ));
     }
   }
 
   String get _greeting {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Buenos días';
-    if (hour < 19) return 'Buenas tardes';
-    return 'Buenas noches';
+    if (hour < 12) return 'Good morning';
+    if (hour < 19) return 'Good afternoon';
+    return 'Good evening';
   }
 
   @override
@@ -71,17 +71,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                   const SizedBox(height: 6),
                   Text.rich(
                     TextSpan(children: [
-                      TextSpan(text: '¿Cuánta ', style: serif),
+                      TextSpan(text: 'How much ', style: serif),
                       TextSpan(
-                        text: 'energía',
+                        text: 'energy',
                         style: serif.copyWith(color: AppColors.primary),
                       ),
-                      TextSpan(text: ' hay hoy?', style: serif),
+                      TextSpan(text: ' is there today?', style: serif),
                     ]),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Aura da forma a tu día con ella',
+                    'Aura shapes your day around it',
                     style:
                         TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
@@ -100,7 +100,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 4, 24, 20),
               child: SoftPrimaryButton(
-                label: 'Continuar',
+                label: 'Continue',
                 onPressed: _selected == null ? null : _continue,
                 isLoading: _submitting,
               ),

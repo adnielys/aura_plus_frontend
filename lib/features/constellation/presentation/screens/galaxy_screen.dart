@@ -25,7 +25,7 @@ class GalaxyScreen extends ConsumerWidget {
         error: (_, _) => Center(
           child: TextButton(
             onPressed: () => ref.invalidate(allConstellationsProvider),
-            child: const Text('Reintentar'),
+            child: const Text('Try again'),
           ),
         ),
         data: (all) => ListView(

@@ -121,8 +121,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 _Row(
                   icon: Icons.track_changes,
-                  title: 'Mis áreas',
-                  subtitle: 'Yo · Familia · Relaciones · Trabajo',
+                  title: 'My life areas',
+                  subtitle: 'Me · Family · Relationships · Work',
                   onTap: () => context.go(AppRoutes.areas),
                 ),
                 _Row(
@@ -141,7 +141,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // CUIDADO (Carril B): la ÚNICA superficie de care fuera de su
                 // flujo. Discreta, sin badges ni contadores; el "aceptó" vive
                 // aquí dentro — jamás en push (GUARD_CARE_09).
-                const Text('CUIDADO', style: AppTypography.sectionLabel),
+                const Text('CARE', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
                 _CareRow(),
                 const SizedBox(height: 18),
@@ -258,19 +258,19 @@ class _CareRow extends ConsumerWidget {
         ? ''
         : shortProviderName(referral!.providerName!);
     final subtitle = switch (resolveCareView(referral)) {
-      CareView.directory => 'Personas que pueden acompañarte',
-      CareView.sent => 'Petición enviada${name.isEmpty ? '' : ' a $name'}',
+      CareView.directory => 'People who can walk with you',
+      CareView.sent => 'Request sent${name.isEmpty ? '' : ' to $name'}',
       CareView.responseAccepted =>
-        '${name.isEmpty ? 'Aceptó' : '$name aceptó'} ✦',
-      CareView.responseDeclined => 'Tienes una respuesta',
+        '${name.isEmpty ? 'She said yes' : '$name said yes'} ✦',
+      CareView.responseDeclined => 'You have a reply',
       CareView.episode =>
-        'Tu episodio${name.isEmpty ? '' : ' con $name'} · en curso',
+        'Your episode${name.isEmpty ? '' : ' with $name'} · ongoing',
     };
     final highlighted = referral != null && referral.providerResponse == 'accepted';
 
     return _Row(
       icon: Icons.volunteer_activism_outlined,
-      title: 'Apoyo de una persona',
+      title: 'Support from one person',
       subtitle: subtitle,
       iconColor: AppColors.careAccent,
       iconBackground: AppColors.careSurface,

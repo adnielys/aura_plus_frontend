@@ -8,7 +8,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
 import '../providers/history_provider.dart';
 
-const _weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /// Colores por estado emocional (los tonos que ya existen — "Al límite" en
 /// azul profundo, jamás rojo de error, UX_09).
@@ -55,7 +55,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         error: (_, _) => Center(
           child: TextButton(
             onPressed: () => ref.invalidate(historyProvider),
-            child: const Text('Reintentar'),
+            child: const Text('Try again'),
           ),
         ),
         data: (days) {
@@ -64,14 +64,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
             children: [
-              const Text('TU HISTORIA · ÚLTIMOS 28 DÍAS',
+              const Text('YOUR STORY · LAST 28 DAYS',
                   style: AppTypography.sectionLabel),
               const SizedBox(height: 10),
               Text.rich(
                 TextSpan(children: [
-                  TextSpan(text: 'Lo que construiste, ', style: serif),
+                  TextSpan(text: 'What you built, ', style: serif),
                   TextSpan(
-                    text: 'día a día.',
+                    text: 'day by day.',
                     style: serif.copyWith(
                         fontStyle: FontStyle.italic,
                         color: AppColors.primary),
@@ -81,27 +81,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               const SizedBox(height: 4),
               Text(
                 days.isEmpty
-                    ? 'Tu historia empieza con tu primer check-in.'
-                    : '${days.length} ${days.length == 1 ? 'día' : 'días'} de '
-                        'presencia · el silencio nunca resta.',
+                    ? 'Your story starts with your first check-in.'
+                    : '${days.length} ${days.length == 1 ? 'day' : 'days'} of '
+                        'presence · silence never counts against you.',
                 style: const TextStyle(
                     fontSize: 12, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 14),
               if (thisWeek.isNotEmpty) ...[
-                const _WeekLabel('ESTA SEMANA'),
+                const _WeekLabel('THIS WEEK'),
                 for (final day in thisWeek) _DayRow(day: day),
               ],
               if (earlier.isNotEmpty) ...[
                 const SizedBox(height: 6),
-                const _WeekLabel('ANTES'),
+                const _WeekLabel('EARLIER'),
                 for (final day in earlier) _DayRow(day: day),
               ],
               if (days.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 const Center(
                   child: Text(
-                    'Cada día guarda su historia completa —\ntócalo para volver a él.',
+                    'Each day keeps its full story —\ntap it to go back to it.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 11.5,
@@ -115,7 +115,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 child: TextButton(
                   onPressed: () => context.go(AppRoutes.profile),
                   child: const Text(
-                    '← Volver',
+                    '← Back',
                     style: TextStyle(
                       fontWeight: FontWeight.w400,
                       color: AppColors.textSecondary,
@@ -222,7 +222,7 @@ class _DayRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      day.state?.label ?? 'Presente',
+                      day.state?.label ?? 'Present',
                       style: TextStyle(
                         fontFamily: AppTypography.serif,
                         fontStyle: FontStyle.italic,
@@ -234,8 +234,8 @@ class _DayRow extends StatelessWidget {
                     Text(
                       day.hadSession
                           ? '${day.gesturesCount} '
-                              '${day.gesturesCount == 1 ? 'gesto registrado' : 'gestos registrados'}'
-                          : 'check-in · el registro ya fue el logro',
+                              '${day.gesturesCount == 1 ? 'gesture logged' : 'gestures logged'}'
+                          : 'check-in · logging it was already the win',
                       style: const TextStyle(
                           fontSize: 10.5, color: AppColors.textSecondary),
                     ),

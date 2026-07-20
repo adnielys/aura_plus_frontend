@@ -31,7 +31,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No pudimos guardar el cambio.')),
+          const SnackBar(content: Text("We couldn't save the change.")),
         );
       }
     } finally {
@@ -62,7 +62,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         error: (_, _) => Center(
           child: TextButton(
             onPressed: () => ref.invalidate(notificationSettingsProvider),
-            child: const Text('Reintentar'),
+            child: const Text('Try again'),
           ),
         ),
         data: (value) => ListView(

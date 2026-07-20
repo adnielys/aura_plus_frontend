@@ -49,12 +49,12 @@ class _ConstellationScreenState extends ConsumerState<ConstellationScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'No pudimos abrir tu cielo.',
+                "We couldn't open your sky.",
                 style: TextStyle(color: AppColors.textSecondary),
               ),
               TextButton(
                 onPressed: () => ref.invalidate(currentConstellationProvider),
-                child: const Text('Reintentar'),
+                child: const Text('Try again'),
               ),
             ],
           ),
@@ -62,7 +62,7 @@ class _ConstellationScreenState extends ConsumerState<ConstellationScreen> {
         data: (value) => value == null
             ? const Center(
                 child: Text(
-                  'Tu cielo se abre con tu primer día.',
+                  'Your sky begins with your first day.',
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
               )

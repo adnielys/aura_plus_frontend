@@ -32,14 +32,14 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget get child => widget.child;
 
   static const _tabs = [
-    (route: AppRoutes.home, icon: Icons.home_outlined, label: 'Inicio'),
+    (route: AppRoutes.home, icon: Icons.home_outlined, label: 'Home'),
     (
       route: AppRoutes.constellation,
       icon: Icons.auto_awesome_outlined,
-      label: 'Constelación',
+      label: 'Constellation',
     ),
-    (route: AppRoutes.cycle, icon: Icons.nightlight_outlined, label: 'Ciclo'),
-    (route: AppRoutes.profile, icon: Icons.person_outline, label: 'Perfil'),
+    (route: AppRoutes.cycle, icon: Icons.nightlight_outlined, label: 'Cycle'),
+    (route: AppRoutes.profile, icon: Icons.person_outline, label: 'Profile'),
   ];
 
   @override

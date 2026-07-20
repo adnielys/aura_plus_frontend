@@ -28,9 +28,9 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
   bool _acking = false;
 
   static const _anchors = [
-    ('self_moments', 'Los momentos para mí'),
-    ('my_people', 'Mi gente'),
-    ('small_daily', 'Lo pequeño de cada día'),
+    ('self_moments', 'My moments for me'),
+    ('my_people', 'My people'),
+    ('small_daily', 'The small things of each day'),
   ];
 
   @override
@@ -150,11 +150,11 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
             ),
           ),
           const Spacer(),
-          _whiteCta('Seguir', _next),
+          _whiteCta('Continue', _next),
           TextButton(
             onPressed: _postpone,
             child: Text(
-              'Ahora no',
+              'Not now',
               style: TextStyle(
                 fontWeight: FontWeight.w400,
                 color: Colors.white.withValues(alpha: 0.55),
@@ -185,7 +185,7 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
           ),
           const Spacer(),
           Text(
-            '¿Qué fue lo que más te sostuvo este ciclo?',
+            'What sustained you most this cycle?',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
@@ -200,7 +200,7 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
             children: [
               for (final (anchor, label) in _anchors)
                 _reflectChip(label, () => _reflect(anchor)),
-              _reflectChip('Prefiero solo cerrar', () => _reflect(null)),
+              _reflectChip("I'd rather just close", () => _reflect(null)),
             ],
           ),
           const SizedBox(height: 26),
@@ -230,7 +230,7 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
           ),
           const Spacer(),
           _whiteCta(
-            'Abrir mi nuevo cielo',
+            'Open my new sky',
             _acking ? null : _openNewSky,
             loading: _acking,
           ),

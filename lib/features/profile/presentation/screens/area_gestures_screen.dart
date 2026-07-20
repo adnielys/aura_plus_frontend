@@ -12,10 +12,10 @@ import '../providers/area_gestures_provider.dart';
 
 /// Colores por área (mismos tonos que las HabitCards) + nombre en español.
 const Map<HabitArea, (Color bg, Color fg, String name)> _areaStyle = {
-  HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), 'Yo'),
-  HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), 'Familia'),
-  HabitArea.relationships: (Color(0xFFECE1FB), Color(0xFF9B6FD4), 'Relaciones'),
-  HabitArea.work: (Color(0xFFDCE9F6), Color(0xFF3F7CB0), 'Trabajo'),
+  HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), 'Me'),
+  HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), 'Family'),
+  HabitArea.relationships: (Color(0xFFECE1FB), Color(0xFF9B6FD4), 'Relationships'),
+  HabitArea.work: (Color(0xFFDCE9F6), Color(0xFF3F7CB0), 'Work'),
 };
 
 /// M3 · "Lo que te has regalado en {área}": gestos REGISTRADOS de los últimos
@@ -66,7 +66,7 @@ class _AreaGesturesScreenState extends ConsumerState<AreaGesturesScreen> {
                     Icon(Icons.arrow_back_ios_new,
                         size: 14, color: AppColors.textSecondary),
                     SizedBox(width: 6),
-                    Text('Mis áreas',
+                    Text('My life areas',
                         style: TextStyle(
                             fontSize: 13, color: AppColors.textSecondary)),
                   ],
@@ -74,14 +74,14 @@ class _AreaGesturesScreenState extends ConsumerState<AreaGesturesScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            Text('${name.toUpperCase()} · TUS GESTOS',
+            Text('${name.toUpperCase()} · YOUR GESTURES',
                 style: AppTypography.sectionLabel),
             const SizedBox(height: 10),
             Text.rich(
               TextSpan(children: [
-                TextSpan(text: 'Lo que te has regalado ', style: serif),
+                TextSpan(text: "What you've given yourself ", style: serif),
                 TextSpan(
-                  text: 'en $name.',
+                  text: 'in $name.',
                   style: serif.copyWith(
                       fontStyle: FontStyle.italic, color: AppColors.primary),
                 ),
@@ -89,8 +89,8 @@ class _AreaGesturesScreenState extends ConsumerState<AreaGesturesScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Los últimos 28 días. Todo lo registrado vive aquí — también '
-              'lo que no fue posible: registrarlo ya fue cuidarte.',
+              'The last 28 days. Everything you logged lives here — even '
+              "what wasn't possible: logging it was already self-care.",
               style: TextStyle(
                   fontSize: 12, height: 1.55, color: AppColors.textSecondary),
             ),
@@ -109,7 +109,7 @@ class _AreaGesturesScreenState extends ConsumerState<AreaGesturesScreen> {
                   child: TextButton(
                     onPressed: () =>
                         ref.invalidate(areaGesturesProvider(widget.area)),
-                    child: const Text('Reintentar'),
+                    child: const Text('Try again'),
                   ),
                 ),
               ],
@@ -123,8 +123,8 @@ class _AreaGesturesScreenState extends ConsumerState<AreaGesturesScreen> {
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Text(
-                          'Aún en calma.\nCuando registres un gesto de $name, '
-                          'vivirá aquí.',
+                          'Still at rest.\nWhen you log a $name gesture, '
+                          'it will live here.',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               fontSize: 12.5,
@@ -145,7 +145,7 @@ class _AreaGesturesScreenState extends ConsumerState<AreaGesturesScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'Explorar el banco de $name ›',
+                  'Explore the $name bank ›',
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
@@ -215,7 +215,7 @@ class _GestureRow extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  relativeSpanishDate(gesture.date, DateTime.now()),
+                  relativeDate(gesture.date, DateTime.now()),
                   style: const TextStyle(
                       fontSize: 10.5, color: AppColors.textSecondary),
                 ),

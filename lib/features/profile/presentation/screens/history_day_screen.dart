@@ -41,7 +41,7 @@ class HistoryDayScreen extends ConsumerWidget {
           error: (_, _) => Center(
             child: TextButton(
               onPressed: () => ref.invalidate(historyDayProvider(date)),
-              child: const Text('Reintentar'),
+              child: const Text('Try again'),
             ),
           ),
           data: (day) => ListView(
@@ -58,7 +58,7 @@ class HistoryDayScreen extends ConsumerWidget {
                       Icon(Icons.arrow_back_ios_new,
                           size: 14, color: AppColors.textSecondary),
                       SizedBox(width: 6),
-                      Text('Tu historia',
+                      Text('Your story',
                           style: TextStyle(
                               fontSize: 13, color: AppColors.textSecondary)),
                     ],
@@ -67,7 +67,7 @@ class HistoryDayScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                '${spanishWeekday(day.date)} · ${spanishDate(day.date)}'
+                '${weekdayName(day.date)} · ${prettyDate(day.date)}'
                     .toUpperCase(),
                 style: AppTypography.sectionLabel,
               ),
@@ -75,7 +75,7 @@ class HistoryDayScreen extends ConsumerWidget {
               if (day.state != null) _StateHero(state: day.state!),
               if (day.gestures.isNotEmpty) ...[
                 const SizedBox(height: 14),
-                const Text('TUS GESTOS DE ESE DÍA',
+                const Text('YOUR GESTURES THAT DAY',
                     style: AppTypography.sectionLabel),
                 const SizedBox(height: 8),
                 for (final gesture in day.gestures)
@@ -83,8 +83,8 @@ class HistoryDayScreen extends ConsumerWidget {
               ] else ...[
                 const SizedBox(height: 14),
                 const Text(
-                  'Ese día llegaste y registraste cómo estabas — '
-                  'eso también fue presencia.',
+                  'That day you showed up and logged how you were — '
+                  'that was presence too.',
                   style: TextStyle(
                       fontSize: 12.5,
                       height: 1.6,
@@ -104,7 +104,7 @@ class HistoryDayScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('LO QUE AURA TE DIJO ESA NOCHE',
+                      const Text('WHAT AURA TOLD YOU THAT NIGHT',
                           style: AppTypography.sectionLabel),
                       const SizedBox(height: 6),
                       Text(
@@ -132,7 +132,7 @@ class HistoryDayScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('TU PALABRA DE ESA NOCHE',
+                      const Text('YOUR WORD THAT NIGHT',
                           style: AppTypography.sectionLabel),
                       const SizedBox(height: 4),
                       Text(
@@ -159,7 +159,7 @@ class HistoryDayScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Text(
-                      '+${day.starsEarned} ✦ ese día',
+                      '+${day.starsEarned} ✦ that day',
                       style: const TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w700,
@@ -207,7 +207,7 @@ class _StateHero extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            'Ese día llegaste así — y aun así, estuviste.',
+            'You arrived like this that day — and still, you showed up.',
             style: TextStyle(
               fontSize: 10.5,
               color: colors.accent.withValues(alpha: 0.75),

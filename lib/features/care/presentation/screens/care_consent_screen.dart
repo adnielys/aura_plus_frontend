@@ -39,7 +39,7 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('No se pudo enviar. Inténtalo de nuevo.')),
+              content: Text("Couldn't send it. Try again.")),
         );
         setState(() => _sending = false);
       }
@@ -74,7 +74,7 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
                     Icon(Icons.arrow_back_ios_new,
                         size: 14, color: AppColors.textSecondary),
                     SizedBox(width: 6),
-                    Text('Directorio',
+                    Text('Directory',
                         style: TextStyle(
                             fontSize: 13, color: AppColors.textSecondary)),
                   ],
@@ -90,9 +90,9 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
             const SizedBox(height: 16),
             Text.rich(
               TextSpan(children: [
-                TextSpan(text: 'Antes de pedirle conexión, ', style: serif),
+                TextSpan(text: 'Before asking to connect, ', style: serif),
                 TextSpan(
-                  text: 'tú decides qué se comparte.',
+                  text: 'you decide what is shared.',
                   style: serif.copyWith(
                     fontStyle: FontStyle.italic,
                     color: AppColors.primary,
@@ -112,7 +112,7 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'SE COMPARTIRÁ SOLO',
+                    'ONLY THIS IS SHARED',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -133,7 +133,7 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
                       const SizedBox(width: 4),
                       const Expanded(
                         child: Text(
-                          'Tu nombre y que pediste apoyo.',
+                          'Your name, and that you asked for support.',
                           style: TextStyle(
                               fontSize: 13, color: AppColors.textPrimary),
                         ),
@@ -148,8 +148,8 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Nada de tu diario, tus check-ins ni tus estrellas. '
-                          'Nunca.',
+                          'Nothing from your journal, your check-ins or your stars. '
+                          'Ever.',
                           style: TextStyle(
                               fontSize: 12,
                               height: 1.5,
@@ -163,8 +163,8 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Con el interruptor apagado, la petición llega igual — '
-              'sin compartir nada tuyo.',
+              'With the switch off, the request still goes through — '
+              'sharing nothing about you.',
               style: TextStyle(
                   fontSize: 11.5,
                   height: 1.5,
@@ -172,7 +172,7 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
             ),
             const SizedBox(height: 22),
             CarePrimaryButton(
-              label: 'Enviar petición a ${shortProviderName(provider.fullName)}',
+              label: 'Send request to ${shortProviderName(provider.fullName)}',
               busy: _sending,
               onPressed: _send,
             ),
@@ -181,7 +181,7 @@ class _CareConsentScreenState extends ConsumerState<CareConsentScreen> {
               child: TextButton(
                 onPressed: () => context.go(AppRoutes.care),
                 child: const Text(
-                  'Volver',
+                  'Back',
                   style: TextStyle(
                       fontWeight: FontWeight.w400,
                       color: AppColors.textSecondary),

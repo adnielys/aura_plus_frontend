@@ -128,6 +128,13 @@ HistoryDayScreen (V2): hero del estado, gestos con resultado en dignidad,
 "Lo que Aura te dijo esa noche" (texto EXACTO persistido) y "Tu palabra"
 (reflection) si existe. Nada editable: la memoria no se retoca.
 
+## Idioma de la UI — INGLÉS (unificado)
+Toda la copy visible de la app está en inglés (decisión de producto).
+Los COMENTARIOS del código siguen en español (convención del repo). Los
+MENSAJES EMOCIONALES del servidor (cierres, ceremonia, CARE_CLOSE — SPEC
+V2) siguen en español: traducirlos es tocar copy de producto aprobado y
+espera decisión aparte, igual que el email al profesional y las páginas P2.
+
 ## Fuera del MVP de frontend
 Pilar 2 y 3 Carril A: futuro. Carril B Etapa 2 (mensajería async): requiere
 revisión legal + redefinir GUARD_CARE_09 — ver diagrama_carril_b_flujo.html.

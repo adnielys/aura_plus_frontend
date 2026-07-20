@@ -15,29 +15,29 @@ typedef _AreaInfo = ({String name, String what, Color bg, Color fg, IconData ico
 
 const Map<HabitArea, _AreaInfo> _areaInfo = {
   HabitArea.self: (
-    name: 'Yo',
-    what: 'Descanso, cuerpo, mente, tiempo personal.',
+    name: 'Me',
+    what: 'Rest, body, mind, personal time.',
     bg: Color(0xFFFFE3EE),
     fg: Color(0xFFC01448),
     icon: Icons.self_improvement,
   ),
   HabitArea.family: (
-    name: 'Familia',
-    what: 'Hijos, hogar, pareja, presencia.',
+    name: 'Family',
+    what: 'Kids, home, partner, presence.',
     bg: Color(0xFFFCE9D6),
     fg: Color(0xFFE0894A),
     icon: Icons.auto_stories,
   ),
   HabitArea.relationships: (
-    name: 'Relaciones',
-    what: 'Amistades, vínculos, comunidad.',
+    name: 'Relationships',
+    what: 'Friendships, bonds, community.',
     bg: Color(0xFFECE1FB),
     fg: Color(0xFF9B6FD4),
     icon: Icons.favorite_border,
   ),
   HabitArea.work: (
-    name: 'Trabajo',
-    what: 'Carrera, proyectos, aprendizaje.',
+    name: 'Work',
+    what: 'Career, projects, learning.',
     bg: Color(0xFFDCE9F6),
     fg: Color(0xFF3F7CB0),
     icon: Icons.work_outline,
@@ -46,11 +46,11 @@ const Map<HabitArea, _AreaInfo> _areaInfo = {
 
 /// "Lo que más te pesa" (M2): valores del onboarding, en su idioma.
 const List<(MainPain, String)> _painOptions = [
-  (MainPain.self, 'Yo'),
-  (MainPain.family, 'Mi familia y mi hogar'),
-  (MainPain.relationships, 'Mis relaciones'),
-  (MainPain.work, 'Trabajo'),
-  (MainPain.all, 'Todo a la vez'),
+  (MainPain.self, 'Me'),
+  (MainPain.family, 'My family and home'),
+  (MainPain.relationships, 'My relationships'),
+  (MainPain.work, 'Work'),
+  (MainPain.all, 'Everything at once'),
 ];
 
 /// Mis áreas (M1+M2): pantalla CONTEMPLATIVA — qué es cada área, dónde hubo
@@ -84,7 +84,7 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo guardar. Inténtalo de nuevo.')),
+          const SnackBar(content: Text("Couldn't save it. Try again.")),
         );
       }
     } finally {
@@ -119,7 +119,7 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
                     Icon(Icons.arrow_back_ios_new,
                         size: 14, color: AppColors.textSecondary),
                     SizedBox(width: 6),
-                    Text('Perfil',
+                    Text('Profile',
                         style: TextStyle(
                             fontSize: 13, color: AppColors.textSecondary)),
                   ],
@@ -127,13 +127,13 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            const Text('MIS ÁREAS DE VIDA', style: AppTypography.sectionLabel),
+            const Text('MY LIFE AREAS', style: AppTypography.sectionLabel),
             const SizedBox(height: 10),
             Text.rich(
               TextSpan(children: [
-                TextSpan(text: 'El mapa de tu vida, ', style: serif),
+                TextSpan(text: 'The map of your life, ', style: serif),
                 TextSpan(
-                  text: 'sin metas.',
+                  text: 'no goals.',
                   style: serif.copyWith(
                       fontStyle: FontStyle.italic, color: AppColors.primary),
                 ),
@@ -141,8 +141,8 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Tu día reparte su luz entre estas cuatro. Aura las equilibra '
-              'por ti — tú no tienes que calcular nada.',
+              'Your day spreads its light across these four. Aura balances '
+              "them for you — you don't have to keep score.",
               style: TextStyle(
                   fontSize: 12.5, height: 1.55, color: AppColors.textSecondary),
             ),
@@ -165,12 +165,12 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('LO QUE MÁS TE PESA AHORA',
+                  const Text('WHAT WEIGHS ON YOU MOST NOW',
                       style: AppTypography.sectionLabel),
                   const SizedBox(height: 4),
                   const Text(
-                    'Me lo contaste al llegar. Si cambió, cámbialo — '
-                    'sin preguntas, sin por qués.',
+                    'You told me when you arrived. If it changed, change it — '
+                    'no questions, no whys.',
                     style: TextStyle(
                         fontSize: 12,
                         height: 1.5,
@@ -213,8 +213,8 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Esto solo me ayuda a acompañarte mejor. No cambia tus '
-              'estrellas ni te pide nada.',
+              "This only helps me walk with you better. It doesn't change "
+              'your stars or ask anything of you.',
               style: TextStyle(
                   fontSize: 10.5, height: 1.5, color: Color(0xFFA79FAD)),
             ),
@@ -282,7 +282,7 @@ class _AreaCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Text(
-                      lit ? '✦ encendida este ciclo' : 'aún en calma',
+                      lit ? '✦ lit this cycle' : 'still at rest',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: lit ? FontWeight.w700 : FontWeight.w400,
@@ -304,7 +304,7 @@ class _AreaCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Lo que te has regalado aquí ›',
+                "What you've given yourself here ›",
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,

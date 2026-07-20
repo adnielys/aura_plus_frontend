@@ -18,10 +18,10 @@ class AreasPresenceCard extends ConsumerWidget {
   const AreasPresenceCard({super.key});
 
   static const _style = {
-    HabitArea.self: (Color(0xFFC01448), Color(0xFFFFF0F4), 'Yo'),
-    HabitArea.family: (Color(0xFFE0894A), Color(0xFFFFF6EE), 'Familia'),
-    HabitArea.relationships: (Color(0xFF9B6FD4), Color(0xFFF6F0FF), 'Relaciones'),
-    HabitArea.work: (Color(0xFF3F7CB0), Color(0xFFEEF5FC), 'Trabajo'),
+    HabitArea.self: (Color(0xFFC01448), Color(0xFFFFF0F4), 'Me'),
+    HabitArea.family: (Color(0xFFE0894A), Color(0xFFFFF6EE), 'Family'),
+    HabitArea.relationships: (Color(0xFF9B6FD4), Color(0xFFF6F0FF), 'Relationships'),
+    HabitArea.work: (Color(0xFF3F7CB0), Color(0xFFEEF5FC), 'Work'),
   };
 
   @override
@@ -41,7 +41,7 @@ class AreasPresenceCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'TU CUIDADO, POR ÁREAS',
+          'YOUR CARE, BY AREA',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -62,23 +62,23 @@ class AreasPresenceCard extends ConsumerWidget {
         Center(
           // La frase solo ACUMULA; jamás dice cuál falta (GUARD_TONE_03/04).
           child: lit.isEmpty
-              ? Text('Tus áreas se encienden con tu primer gesto ✦',
+              ? Text('Your areas light up with your first gesture ✦',
                   textAlign: TextAlign.center, style: serif)
               : Text.rich(
                   TextSpan(children: [
                     TextSpan(
-                        text: 'Este ciclo te has dado momentos en ',
+                        text: 'This cycle you gave yourself moments in ',
                         style: serif),
                     TextSpan(
                       text:
-                          '${lit.length} ${lit.length == 1 ? 'área' : 'áreas'}',
+                          '${lit.length} ${lit.length == 1 ? 'area' : 'areas'}',
                       style: serif.copyWith(
                         color: AppColors.primary,
                         fontStyle: FontStyle.normal,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    TextSpan(text: ' de tu vida.', style: serif),
+                    TextSpan(text: ' of your life.', style: serif),
                   ]),
                   textAlign: TextAlign.center,
                 ),

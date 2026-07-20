@@ -1466,7 +1466,7 @@ class _EmotionalContract extends StatelessWidget {
               Text.rich(
                 TextSpan(children: [
                   TextSpan(
-                    text: 'Eso es todo lo que necesito, ',
+                    text: "That's all I need, ",
                     style: serif.copyWith(color: AppColors.entryInk, height: 1.35),
                   ),
                   TextSpan(
@@ -1483,8 +1483,8 @@ class _EmotionalContract extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               Text(
-                'Aquí no hay metas que cumplir ni nada que demostrar.\n'
-                'Empezamos cuando quieras.',
+                'There are no goals to meet here, nothing to prove.\n'
+                'We start whenever you want.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -1494,7 +1494,7 @@ class _EmotionalContract extends StatelessWidget {
               ),
               const Spacer(),
               SoftPrimaryButton(
-                label: 'Entrar a mi espacio',
+                label: 'Enter my space',
                 onPressed: onEnter,
               ),
             ],

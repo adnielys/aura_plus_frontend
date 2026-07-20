@@ -59,7 +59,7 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(const SnackBar(
-          content: Text('No pudimos cerrar el día. Inténtalo en un momento.'),
+          content: Text("We couldn't close your day. Try again in a moment."),
         ));
     }
   }

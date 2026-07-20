@@ -1,28 +1,28 @@
-/// Fechas en español, cercanas — nunca formato de expediente.
+/// Fechas cercanas para la UI (en inglés) — nunca formato de expediente.
 library;
 
-const _spanishMonths = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
-  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+const _months = [
+  'January', 'February', 'March', 'April', 'May', 'June', 'July',
+  'August', 'September', 'October', 'November', 'December',
 ];
 
-/// "18 de julio" — sin año: cercanía, no expediente.
-String spanishDate(DateTime date) =>
-    '${date.day} de ${_spanishMonths[date.month - 1]}';
-
-const _spanishWeekdays = [
-  'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo',
+const _weekdays = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
+  'Saturday', 'Sunday',
 ];
 
-/// "jueves" — día de la semana en español (DateTime.weekday: 1 = lunes).
-String spanishWeekday(DateTime date) => _spanishWeekdays[date.weekday - 1];
+/// "July 18" — sin año: cercanía, no expediente.
+String prettyDate(DateTime date) => '${_months[date.month - 1]} ${date.day}';
 
-/// "hoy" / "ayer" / "18 de julio" — para listas de presencia (Mis áreas M3).
-String relativeSpanishDate(DateTime date, DateTime today) {
+/// "Thursday" — día de la semana (DateTime.weekday: 1 = lunes).
+String weekdayName(DateTime date) => _weekdays[date.weekday - 1];
+
+/// "today" / "yesterday" / "July 18" — para listas de presencia.
+String relativeDate(DateTime date, DateTime today) {
   final day = DateTime(date.year, date.month, date.day);
   final base = DateTime(today.year, today.month, today.day);
   final difference = base.difference(day).inDays;
-  if (difference == 0) return 'hoy';
-  if (difference == 1) return 'ayer';
-  return spanishDate(date);
+  if (difference == 0) return 'today';
+  if (difference == 1) return 'yesterday';
+  return prettyDate(date);
 }

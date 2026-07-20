@@ -105,9 +105,9 @@ class HabitCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           closed
-                              ? '${habit.durationMinutes} min · Registrado'
+                              ? '${habit.durationMinutes} min · Logged'
                               : marked
-                                  ? 'Elegido: ${result!.label}'
+                                  ? 'Chosen: ${result!.label}'
                                   : '${habit.durationMinutes} min · pending',
                           style: TextStyle(
                             fontSize: 11,

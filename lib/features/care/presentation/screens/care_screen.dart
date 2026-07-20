@@ -90,7 +90,7 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         content: Text(
-          'Una persona a la vez: tu petición a $name sigue en sus manos.',
+          'One person at a time: your request to $name is still in her hands.',
         ),
       ));
   }
@@ -104,7 +104,7 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
       children: [
         const CareBackRow(),
         const SizedBox(height: 6),
-        const Text('PERSONAS QUE PUEDEN ACOMPAÑARTE',
+        const Text('PEOPLE WHO CAN WALK WITH YOU',
             style: AppTypography.sectionLabel),
         const SizedBox(height: 10),
         if (_locked) ...[
@@ -118,11 +118,11 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
           Text.rich(
             TextSpan(children: [
               TextSpan(
-                text: 'Elige con quién dar ',
+                text: 'Choose who to take ',
                 style: _serif(context),
               ),
               TextSpan(
-                text: 'el primer paso.',
+                text: 'the first step with.',
                 style: _serifAccent(context),
               ),
             ]),
@@ -162,14 +162,14 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
         const SizedBox(height: 20),
         if (_locked)
           CarePrimaryButton(
-            label: 'Ver mi solicitud',
+            label: 'View my request',
             crimson: true,
             onPressed: () => context.go(AppRoutes.careRequest),
           )
         else
           const Center(
             child: Text(
-              'Sigo aquí contigo — esto solo añade\nuna persona más a tu lado.',
+              "I'm still here with you — this only adds\none more person by your side.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
             ),
@@ -208,8 +208,8 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
             border: Border.all(color: AppColors.border),
           ),
           child: const Text(
-            'No encontré a nadie así.\n'
-            'Prueba con menos letras — o borra la búsqueda y mira por nivel.',
+            "I couldn't find anyone like that.\n"
+            'Try fewer letters — or clear the search and browse by level.',
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 12.5, height: 1.6, color: AppColors.textSecondary),
@@ -219,7 +219,7 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 18),
           child: Text(
-            'El directorio se está formando. Vuelve pronto — sin prisa.',
+            'The directory is taking shape. Come back soon — no rush.',
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ),
@@ -287,7 +287,7 @@ class _ResponseAcceptedViewState extends ConsumerState<_ResponseAcceptedView> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo guardar. Inténtalo de nuevo.')),
+          const SnackBar(content: Text("Couldn't save it. Try again.")),
         );
       }
     } finally {
@@ -298,27 +298,27 @@ class _ResponseAcceptedViewState extends ConsumerState<_ResponseAcceptedView> {
   @override
   Widget build(BuildContext context) {
     final referral = widget.referral;
-    final fullName = referral.providerName ?? 'Tu persona de apoyo';
+    final fullName = referral.providerName ?? 'Your support person';
     final name = shortProviderName(fullName);
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
       children: [
         const CareBackRow(),
         const SizedBox(height: 6),
-        const Text('TU EPISODIO DE APOYO', style: AppTypography.sectionLabel),
+        const Text('YOUR SUPPORT EPISODE', style: AppTypography.sectionLabel),
         const SizedBox(height: 10),
         CareProviderCard(
           name: fullName,
-          meta: 'Aceptó tu petición ✦',
+          meta: 'She accepted your request ✦',
           metaColor: AppColors.careAccent,
           tier: 'support',
         ),
         const SizedBox(height: 16),
         Text.rich(
           TextSpan(children: [
-            TextSpan(text: '$name dijo que sí. ', style: _serif(context)),
+            TextSpan(text: '$name said yes. ', style: _serif(context)),
             TextSpan(
-              text: 'Cuando tú quieras.',
+              text: "Whenever you're ready.",
               style: _serifAccent(context),
             ),
           ]),
@@ -326,12 +326,12 @@ class _ResponseAcceptedViewState extends ConsumerState<_ResponseAcceptedView> {
         const SizedBox(height: 14),
         CareContactCard(
           contact: referral.providerContact,
-          note: 'Escríbele cuando te venga bien. '
-              'Sin prisa: el primer paso ya lo diste.',
+          note: 'Write to her whenever it suits you. '
+              'No rush: you already took the first step.',
         ),
         const SizedBox(height: 14),
         CarePrimaryButton(
-          label: 'Ya me puse en contacto',
+          label: 'I got in touch',
           outlined: true,
           busy: _saving,
           onPressed: _markContacted,
@@ -341,7 +341,7 @@ class _ResponseAcceptedViewState extends ConsumerState<_ResponseAcceptedView> {
           child: TextButton(
             onPressed: () => context.go(AppRoutes.home),
             child: const Text(
-              'Volver a mi espacio',
+              'Back to my space',
               style: TextStyle(
                   fontWeight: FontWeight.w400, color: AppColors.textSecondary),
             ),
@@ -376,7 +376,7 @@ class _ResponseDeclinedViewState extends ConsumerState<_ResponseDeclinedView> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo guardar. Inténtalo de nuevo.')),
+          const SnackBar(content: Text("Couldn't save it. Try again.")),
         );
       }
     } finally {
@@ -405,10 +405,10 @@ class _ResponseDeclinedViewState extends ConsumerState<_ResponseDeclinedView> {
           Text.rich(
             TextSpan(children: [
               TextSpan(
-                  text: '$name no puede acompañarte\nen este momento. ',
+                  text: "$name can't walk with you\nright now. ",
                   style: _serif(context)),
               TextSpan(
-                text: 'No dice nada de ti.',
+                text: 'It says nothing about you.',
                 style: _serifAccent(context),
               ),
             ]),
@@ -416,15 +416,15 @@ class _ResponseDeclinedViewState extends ConsumerState<_ResponseDeclinedView> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Hay más personas en el directorio, cuando quieras. '
-            'Sin prisa — tu espacio sigue aquí.',
+            'There are more people in the directory, whenever you want. '
+            'No rush — your space is still here.',
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 13.5, height: 1.55, color: AppColors.textSecondary),
           ),
           const Spacer(),
           CarePrimaryButton(
-            label: 'Ver otras personas',
+            label: 'See other people',
             busy: _saving,
             onPressed: _backToDirectory,
           ),
@@ -433,7 +433,7 @@ class _ResponseDeclinedViewState extends ConsumerState<_ResponseDeclinedView> {
             child: TextButton(
               onPressed: () => context.go(AppRoutes.home),
               child: const Text(
-                'Volver a mi espacio',
+                'Back to my space',
                 style: TextStyle(
                     fontWeight: FontWeight.w400,
                     color: AppColors.textSecondary),
@@ -478,7 +478,7 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo cerrar. Inténtalo de nuevo.')),
+          const SnackBar(content: Text("Couldn't close it. Try again.")),
         );
       }
       if (mounted) setState(() => _saving = false);
@@ -516,7 +516,7 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   child: const Text(
-                    'Gracias',
+                    'Thank you',
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: AppColors.careAccent),
@@ -534,7 +534,7 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
   @override
   Widget build(BuildContext context) {
     final referral = widget.referral;
-    final name = referral.providerName ?? 'Tu persona de apoyo';
+    final name = referral.providerName ?? 'Your support person';
     final connected = referral.status == 'connected';
 
     return ListView(
@@ -542,11 +542,11 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
       children: [
         const CareBackRow(),
         const SizedBox(height: 6),
-        const Text('TU EPISODIO DE APOYO', style: AppTypography.sectionLabel),
+        const Text('YOUR SUPPORT EPISODE', style: AppTypography.sectionLabel),
         const SizedBox(height: 10),
         CareProviderCard(
           name: name,
-          meta: connected ? 'Conectadas' : 'A tu lado',
+          meta: connected ? 'Connected' : 'By your side',
           tier: 'support',
         ),
         const SizedBox(height: 12),
@@ -555,15 +555,15 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
         const SizedBox(height: 12),
         CareContactCard(
           contact: referral.providerContact,
-          note: 'Su contacto sigue aquí, siempre a mano.',
+          note: 'Her contact stays here, always at hand.',
         ),
         const SizedBox(height: 26),
-        Text('¿Quieres cerrar este capítulo?',
+        Text('Do you want to close this chapter?',
             style: _serif(context).copyWith(fontSize: 18)),
         const SizedBox(height: 6),
         const Text(
-          'Solo si tú lo decides. Puedes contarme cómo fue — o no. '
-          'Las dos cosas están bien.',
+          'Only if you decide so. You can tell me how it went — or not. '
+          'Both are okay.',
           style: TextStyle(
               fontSize: 12.5, height: 1.5, color: AppColors.textSecondary),
         ),
@@ -573,9 +573,9 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
           runSpacing: 8,
           children: [
             for (final (value, label) in const [
-              ('helped', 'Me ayudó'),
-              ('not_for_me', 'No era para mí'),
-              ('prefer_not_say', 'Prefiero no decir'),
+              ('helped', 'It helped me'),
+              ('not_for_me', "It wasn't for me"),
+              ('prefer_not_say', "I'd rather not say"),
             ])
               ChoiceChip(
                 label: Text(label),
@@ -603,7 +603,7 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
         ),
         const SizedBox(height: 14),
         CarePrimaryButton(
-          label: 'Cerrar este capítulo',
+          label: 'Close this chapter',
           crimson: true,
           busy: _saving,
           onPressed: _closeChapter,
@@ -642,13 +642,13 @@ class _ErrorRetry extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'No se pudo cargar. Sin prisa.',
+            "Couldn't load. No rush.",
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: onRetry,
-            child: const Text('Reintentar',
+            child: const Text('Try again',
                 style: TextStyle(color: AppColors.careAccent)),
           ),
         ],

@@ -78,7 +78,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('No se pudo guardar. Inténtalo de nuevo.')),
+              content: Text("Couldn't save it. Try again.")),
         );
         setState(() => _saving = false);
       }
@@ -99,7 +99,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(
-              content: Text('Tu gesto quedó guardado, pero: $error')));
+              content: Text('Your gesture was saved, but: $error')));
         router.go(AppRoutes.home);
       }
       return;
@@ -144,9 +144,9 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
           const SizedBox(height: 10),
           Text.rich(
             TextSpan(children: [
-              TextSpan(text: 'Ya está en tu lista.\n', style: serif),
+              TextSpan(text: "It's already on your list.\n", style: serif),
               TextSpan(
-                text: 'Tuyo desde este momento.',
+                text: 'Yours from this moment.',
                 style: serif.copyWith(
                     fontStyle: FontStyle.italic, color: AppColors.primary),
               ),
@@ -155,7 +155,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Puedes elegirlo hoy mismo al cambiar un hábito con ⇄.',
+            'You can pick it today when swapping a habit with ⇄.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
           ),
@@ -169,9 +169,9 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                 border: Border.all(color: AppColors.border),
               ),
               child: const Text(
-                'Como pediste compartirlo: lo revisamos con calma y, si suena '
-                'positivo, aparecerá en el banco común para otras mamás. '
-                'Si no se publica, no pasa nada: sigue siendo tuyo, intacto.',
+                'Since you asked to share it: we review it calmly and, if it '
+                'sounds positive, it will appear in the shared bank for other moms. '
+                "If it isn't published, nothing happens: it stays yours, intact.",
                 style: TextStyle(
                     fontSize: 11.5,
                     height: 1.6,
@@ -188,7 +188,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(26)),
             ),
-            child: const Text('Volver al catálogo',
+            child: const Text('Back to the catalog',
                 style: TextStyle(fontWeight: FontWeight.w700)),
           ),
           const SizedBox(height: 24),
@@ -221,7 +221,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                 Icon(Icons.arrow_back_ios_new,
                     size: 14, color: AppColors.textSecondary),
                 SizedBox(width: 6),
-                Text('Volver',
+                Text('Back',
                     style: TextStyle(
                         fontSize: 13, color: AppColors.textSecondary)),
               ],
@@ -229,13 +229,13 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
           ),
         ),
         const SizedBox(height: 6),
-        const Text('TU MICROHÁBITO', style: AppTypography.sectionLabel),
+        const Text('YOUR MICROHABIT', style: AppTypography.sectionLabel),
         const SizedBox(height: 10),
         Text.rich(
           TextSpan(children: [
-            TextSpan(text: 'Un momento pequeño ', style: serif),
+            TextSpan(text: 'A small moment ', style: serif),
             TextSpan(
-              text: 'que sea tuyo.',
+              text: "that's yours.",
               style: serif.copyWith(
                   fontStyle: FontStyle.italic, color: AppColors.primary),
             ),
@@ -244,14 +244,14 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
         if (fromSwap) ...[
           const SizedBox(height: 6),
           Text(
-            'Para el hueco de hoy: área ${_area.label} · hasta $_maxMinutes min.',
+            "For today's slot: ${_area.label} area · up to $_maxMinutes min.",
             style: const TextStyle(
                 fontSize: 11.5, color: AppColors.textSecondary),
           ),
         ],
         const SizedBox(height: 14),
         _fieldShell(
-          label: 'QUÉ VAS A REGALARTE',
+          label: 'WHAT WILL YOU GIVE YOURSELF',
           child: TextField(
             controller: _titleController,
             maxLength: 80,
@@ -263,18 +263,18 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
               isDense: true,
               counterText: '',
               border: InputBorder.none,
-              hintText: 'Escuchar una canción que me guste entera…',
+              hintText: 'Listen to a song I love, start to finish…',
               hintStyle:
                   TextStyle(fontSize: 13, color: Color(0xFFB9AFC2)),
             ),
             onChanged: (_) => setState(() {}),
           ),
-          hint: 'Escríbelo en positivo y pequeño: algo que SÍ haces, '
-              'no algo que dejas de hacer.',
+          hint: 'Write it positive and small: something you DO, '
+              'not something you stop doing.',
         ),
         const SizedBox(height: 10),
         _fieldShell(
-          label: 'ÁREA',
+          label: 'AREA',
           child: Wrap(
             spacing: 7,
             children: [
@@ -308,7 +308,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
         ),
         const SizedBox(height: 10),
         _fieldShell(
-          label: 'CUÁNTO TE TOMA',
+          label: 'HOW LONG IT TAKES',
           child: Wrap(
             spacing: 7,
             children: [
@@ -362,7 +362,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Compartirlo con otras mamás',
+                      'Share it with other moms',
                       style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -372,12 +372,12 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                     Text.rich(
                       const TextSpan(children: [
                         TextSpan(
-                          text: 'Irá al banco común cuando pase una revisión '
-                              '(validamos que suene en positivo). ',
+                          text: 'It goes to the shared bank after a review '
+                              '(we check it sounds positive). ',
                         ),
                         TextSpan(
-                          text: 'Para ti queda disponible desde YA, '
-                              'pase lo que pase.',
+                          text: 'For you it is available RIGHT NOW, '
+                              'no matter what.',
                           style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary),
@@ -413,7 +413,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                       strokeWidth: 2, color: Colors.white),
                 )
               : Text(
-                  fromSwap ? 'Guardar y usarlo hoy' : 'Guardar mi microhábito',
+                  fromSwap ? 'Save and use it today' : 'Save my microhabit',
                   style: const TextStyle(
                       fontWeight: FontWeight.w700, color: Colors.white),
                 ),

@@ -2,32 +2,32 @@ import 'package:aura_plus/shared/utils/dates.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('spanishDate', () {
+  group('prettyDate', () {
     test('formatea sin año: cercanía, no expediente', () {
-      expect(spanishDate(DateTime(2026, 7, 18)), '18 de julio');
-      expect(spanishDate(DateTime(2026, 1, 2)), '2 de enero');
+      expect(prettyDate(DateTime(2026, 7, 18)), 'July 18');
+      expect(prettyDate(DateTime(2026, 1, 2)), 'January 2');
     });
   });
 
-  group('spanishWeekday', () {
+  group('weekdayName', () {
     test('lunes = 1 … domingo = 7', () {
-      expect(spanishWeekday(DateTime(2026, 7, 20)), 'lunes');
-      expect(spanishWeekday(DateTime(2026, 7, 16)), 'jueves');
-      expect(spanishWeekday(DateTime(2026, 7, 19)), 'domingo');
+      expect(weekdayName(DateTime(2026, 7, 20)), 'Monday');
+      expect(weekdayName(DateTime(2026, 7, 16)), 'Thursday');
+      expect(weekdayName(DateTime(2026, 7, 19)), 'Sunday');
     });
   });
 
-  group('relativeSpanishDate (fechas cercanas, no expediente)', () {
+  group('relativeDate (fechas cercanas, no expediente)', () {
     final today = DateTime(2026, 7, 19);
 
     test('hoy y ayer', () {
-      expect(relativeSpanishDate(DateTime(2026, 7, 19), today), 'hoy');
-      expect(relativeSpanishDate(DateTime(2026, 7, 18), today), 'ayer');
+      expect(relativeDate(DateTime(2026, 7, 19), today), 'today');
+      expect(relativeDate(DateTime(2026, 7, 18), today), 'yesterday');
     });
 
-    test('más atrás: "N de mes", sin año', () {
-      expect(relativeSpanishDate(DateTime(2026, 7, 12), today), '12 de julio');
-      expect(relativeSpanishDate(DateTime(2026, 6, 30), today), '30 de junio');
+    test('más atrás: "Mes N", sin año', () {
+      expect(relativeDate(DateTime(2026, 7, 12), today), 'July 12');
+      expect(relativeDate(DateTime(2026, 6, 30), today), 'June 30');
     });
   });
 }

@@ -55,7 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('No pudimos cerrar el día. Inténtalo en un momento.'),
+            content: Text("We couldn't close your day. Try again in a moment."),
           ),
         );
     }
@@ -63,9 +63,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   String get _greeting {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Buenos días';
-    if (hour < 19) return 'Buenas tardes';
-    return 'Buenas noches';
+    if (hour < 12) return 'Good morning';
+    if (hour < 19) return 'Good afternoon';
+    return 'Good evening';
   }
 
   @override
@@ -107,7 +107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Text.rich(
                   TextSpan(
                     children: [
-                      TextSpan(text: 'Hoy estás ', style: serif),
+                      TextSpan(text: 'Today you are ', style: serif),
                       TextSpan(
                         text: result.checkIn.emotionalState.label.toLowerCase(),
                         style: serif.copyWith(color: AppColors.secondary),
@@ -116,7 +116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 )
               else
-                Text('Tu día empieza contigo', style: serif),
+                Text('Your day starts with you', style: serif),
               const SizedBox(height: 14),
               // Hero del maquetado: tras el check-in cambia a la ilustración
               // del estado elegido; antes, la imagen genérica del Home.
@@ -149,10 +149,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   child: Text(
                     switch (constellation.valueOrNull) {
-                      null => 'Tu cielo se abre con tu primer día',
+                      null => 'Your sky begins with your first day',
                       final c =>
-                        'Constelación ${c.name} · ${c.starsEarned} '
-                            '${c.starsEarned == 1 ? 'estrella' : 'estrellas'}',
+                        '${c.name} constellation · ${c.starsEarned} '
+                            '${c.starsEarned == 1 ? 'star' : 'stars'}',
                     },
                     style: const TextStyle(
                       fontSize: 12,
@@ -178,7 +178,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _CheckInInvite(onTap: () => context.go(AppRoutes.checkIn))
               else ...[
                 const Text(
-                  'TU DÍA EN 3 MINUTOS',
+                  'YOUR DAY IN 3 MINUTES',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -232,7 +232,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 8),
                 if (!closed)
                   SoftPrimaryButton(
-                    label: 'Cerrar mi día',
+                    label: 'Close my day',
                     isLoading: _closing,
                     onPressed:
                         ref
@@ -269,7 +269,7 @@ class _CheckInInvite extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '¿Cuánta energía hay hoy?',
+            'How much energy is there today?',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -278,11 +278,11 @@ class _CheckInInvite extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Cuéntale a Aura y ella da forma a tu día.',
+            'Tell Aura and she shapes your day.',
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 14),
-          SoftPrimaryButton(label: 'Hacer mi check-in', onPressed: onTap),
+          SoftPrimaryButton(label: 'Do my check-in', onPressed: onTap),
         ],
       ),
     );

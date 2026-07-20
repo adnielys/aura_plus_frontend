@@ -97,7 +97,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
         error: (_, _) => Center(
           child: TextButton(
             onPressed: () => ref.invalidate(habitsCatalogProvider),
-            child: const Text('Reintentar'),
+            child: const Text('Try again'),
           ),
         ),
         data: (habits) {
@@ -120,7 +120,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
               const SizedBox(height: 4),
               Text(
                 '${habits.length} small gestures'
-                '${mineTotal > 0 ? ' · $mineTotal ${mineTotal == 1 ? 'mío' : 'míos'}' : ''}'
+                '${mineTotal > 0 ? ' · $mineTotal mine' : ''}'
                 ' · Aura picks for you each day',
                 style: const TextStyle(
                   fontSize: 12,
@@ -137,7 +137,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                 ),
                 decoration: InputDecoration(
                   isDense: true,
-                  hintText: 'Busca — agua, respirar, pareja…',
+                  hintText: 'Search — water, breathe, partner…',
                   hintStyle: const TextStyle(
                     fontSize: 12.5,
                     color: Color(0xFFB9AFC2),
@@ -183,15 +183,18 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _areaChip(null, 'Todas'),
-                    for (final area in HabitArea.values)
-                      _areaChip(area, area.label),
+              // F1 (mockup aprobado): cápsulas estilo Home — las 5 opciones
+              // SIEMPRE visibles en una fila, sin scroll ni cortes.
+              Row(
+                children: [
+                  Expanded(child: _filterCapsule(null)),
+                  const SizedBox(width: 7),
+                  for (final area in HabitArea.values) ...[
+                    Expanded(child: _filterCapsule(area)),
+                    if (area != HabitArea.values.last)
+                      const SizedBox(width: 7),
                   ],
-                ),
+                ],
               ),
               const SizedBox(height: 12),
               // Crear el tuyo, siempre a mano (H1).
@@ -210,7 +213,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                   ),
                   child: const Center(
                     child: Text(
-                      '＋ Crear tu microhábito',
+                      '＋ Create your microhabit',
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
@@ -231,8 +234,8 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                     border: Border.all(color: AppColors.border),
                   ),
                   child: const Text(
-                    'No encontré ninguno así.\n¿Lo creas tú? '
-                    'El botón de arriba te espera.',
+                    "I couldn't find one like that.\nWill you create it? "
+                    'The button above is waiting for you.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12.5,
@@ -261,7 +264,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      'Míos',
+                      'Mine',
                       style: TextStyle(
                         fontFamily: AppTypography.serif,
                         fontStyle: FontStyle.italic,
@@ -303,25 +306,70 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
     );
   }
 
-  Widget _areaChip(HabitArea? area, String label) {
+  /// F1: cápsula de filtro con el lenguaje visual de "Your care, by area".
+  /// Seleccionada = rellena con el tono del área; el resto, en reposo con su
+  /// icono ya coloreado (se reconoce el mapa de un vistazo).
+  Widget _filterCapsule(HabitArea? area) {
     final on = _filter == area;
-    return Padding(
-      padding: const EdgeInsets.only(right: 7),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: on,
-        onSelected: (_) => setState(() => _filter = area),
-        showCheckmark: false,
-        selectedColor: const Color(0xFFFCE3EC),
-        backgroundColor: AppColors.surface,
-        labelStyle: TextStyle(
-          fontSize: 11.5,
-          fontWeight: on ? FontWeight.w700 : FontWeight.w400,
-          color: on ? AppColors.primary : AppColors.textSecondary,
+    final style = area == null ? null : _areaStyle[area]!;
+    final accent = style?.fg ?? AppColors.primary;
+    final fillBg = area == null ? const Color(0xFFFCE3EC) : style!.bg;
+    // "Relationships" no cabe en cápsula estrecha: en el FILTRO se abrevia.
+    final label = switch (area) {
+      null => 'All',
+      HabitArea.relationships => 'Bonds',
+      _ => style!.name,
+    };
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => setState(() => _filter = area),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: on ? fillBg : AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: on ? Colors.transparent : AppColors.border,
+            width: 1.5,
+          ),
+          boxShadow: on
+              ? [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.16),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
-        side: BorderSide(
-          color: on ? const Color(0xFFF0C3D3) : AppColors.border,
-          width: 1.5,
+        child: Column(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: on
+                    ? AppColors.surface
+                    : (area == null ? AppColors.surfaceTint : style!.iconBg),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: area == null
+                  ? Icon(Icons.auto_awesome,
+                      size: 15,
+                      color: on ? accent : const Color(0xFFB9AFC2))
+                  : Icon(style!.icon, size: 15, color: style.fg),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: on ? FontWeight.w700 : FontWeight.w400,
+                color: on ? accent : AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -454,8 +502,8 @@ class _HabitRow extends StatelessWidget {
                   ),
                   child: Text(
                     habit.visibility == 'pending_review'
-                        ? 'mío · en revisión'
-                        : 'mío',
+                        ? 'mine · in review'
+                        : 'mine',
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w700,

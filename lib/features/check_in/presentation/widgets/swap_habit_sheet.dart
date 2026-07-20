@@ -103,13 +103,13 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
 
   /// Motivo del bloqueo (null = elegible). Sin culpa: dice por qué, no "no".
   String? _lockReason(CatalogHabit habit) {
-    if (habit.id == widget.current.id) return 'tu gesto actual';
+    if (habit.id == widget.current.id) return 'your current gesture';
     if (widget.other != null && habit.area == widget.other!.area) {
       final name = _areaStyle[habit.area]!.$4;
-      return 'tu otro gesto ya es de $name — cuidamos tu balance';
+      return 'your other gesture is already $name — we protect your balance';
     }
     final cap = _maxMinutesByState[widget.state]!;
-    if (habit.durationMinutes > cap) return 'no cabe en el tiempo de hoy';
+    if (habit.durationMinutes > cap) return "doesn't fit today's time";
     return null;
   }
 
@@ -164,8 +164,8 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Tu día mantiene $gestures ${gestures == 1 ? 'gesto' : 'gestos'} · '
-          'eliges 1 sustituto',
+          'Your day keeps $gestures ${gestures == 1 ? 'gesture' : 'gestures'} · '
+          'you choose 1 substitute',
           style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 12),
@@ -181,7 +181,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
             TextSpan(
               children: [
                 const TextSpan(
-                  text: 'Sustituyendo: ',
+                  text: 'Replacing: ',
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -209,7 +209,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
             error: (_, _) => Center(
               child: TextButton(
                 onPressed: () => ref.invalidate(habitsCatalogProvider),
-                child: const Text('Reintentar'),
+                child: const Text('Try again'),
               ),
             ),
             data: (habits) {
@@ -223,7 +223,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                     const Padding(
                       padding: EdgeInsets.only(top: 8, bottom: 8),
                       child: Text(
-                        'Míos',
+                        'Mine',
                         style: TextStyle(
                           fontFamily: AppTypography.serif,
                           fontStyle: FontStyle.italic,
@@ -287,7 +287,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                       ),
                       child: const Center(
                         child: Text(
-                          '＋ Crear uno nuevo para este hueco',
+                          '＋ Create a new one for this slot',
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
@@ -368,7 +368,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'No añade un gesto más: sustituye este.',
+                "It doesn't add one more gesture: it replaces this one.",
                 style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
               ),
             ],

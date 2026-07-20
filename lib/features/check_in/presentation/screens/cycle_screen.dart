@@ -28,7 +28,7 @@ class CycleScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: const Text(
-                  'PRÓXIMAMENTE',
+                  'COMING SOON',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -41,8 +41,8 @@ class CycleScreen extends StatelessWidget {
               Text('Mi ciclo', style: serif),
               const SizedBox(height: 8),
               const Text(
-                'Pronto Aura podrá adaptar tus microhábitos al momento de tu '
-                'ciclo, si tú quieres. Sin presión: llegará cuando esté listo.',
+                'Soon Aura will be able to adapt your microhabits to the moment '
+                "of your cycle, if you want. No pressure: it'll arrive when it's ready.",
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,

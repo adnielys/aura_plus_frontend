@@ -39,6 +39,6 @@ extension EnergyVisuals on EmotionalState {
         EmotionalState.tranquil => 'En modo sostenido',
         EmotionalState.scattered => 'La mente va en mil direcciones',
         EmotionalState.exhausted => 'Pide pausa',
-        EmotionalState.hard => 'Hoy pesa más',
+        EmotionalState.hard => 'Weighs most today',
       };
 }

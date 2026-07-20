@@ -10,11 +10,11 @@ library;
 /// Estado emocional del check-in y del sentimiento inicial del onboarding.
 /// Contrato: `[energy, tranquil, scattered, exhausted, hard]`.
 enum EmotionalState {
-  energy('energy', 'Con energía'),
-  tranquil('tranquil', 'Tranquila'),
-  scattered('scattered', 'Dispersa'),
-  exhausted('exhausted', 'Agotada'),
-  hard('hard', 'Al límite');
+  energy('energy', 'Energized'),
+  tranquil('tranquil', 'Calm'),
+  scattered('scattered', 'Scattered'),
+  exhausted('exhausted', 'Exhausted'),
+  hard('hard', 'At the limit');
 
   const EmotionalState(this.wireValue, this.label);
 
@@ -104,10 +104,10 @@ enum Feeling {
 
 /// Área de vida de un hábito. Contrato: `[self, family, relationships, work]`.
 enum HabitArea {
-  self('self', 'Yo'),
-  family('family', 'Familia'),
-  relationships('relationships', 'Relaciones'),
-  work('work', 'Trabajo');
+  self('self', 'Me'),
+  family('family', 'Family'),
+  relationships('relationships', 'Relationships'),
+  work('work', 'Work');
 
   const HabitArea(this.wireValue, this.label);
 
@@ -121,9 +121,9 @@ enum HabitArea {
 /// Resultado de un hábito al cerrar el día. Contrato: `[done, partial,
 /// not_possible]`. "No fue posible" es una respuesta válida que también suma.
 enum HabitResult {
-  done('done', 'Lo hice'),
-  partial('partial', 'A medias'),
-  notPossible('not_possible', 'No fue posible');
+  done('done', 'I did it'),
+  partial('partial', 'Halfway'),
+  notPossible('not_possible', 'Not possible');
 
   const HabitResult(this.wireValue, this.label);
 

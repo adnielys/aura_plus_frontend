@@ -16,7 +16,7 @@ void main() {
       expect(gesture.date, DateTime(2026, 7, 18));
       expect(gesture.area, HabitArea.family);
       expect(gesture.result, HabitResult.partial);
-      expect(gesture.result.label, 'A medias');
+      expect(gesture.result.label, 'Halfway');
     });
 
     test('"no fue posible" viaja con la misma dignidad (parse normal)', () {
