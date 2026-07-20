@@ -120,15 +120,6 @@ List<CareProviderInfo> filterProviders(
   ];
 }
 
-const _spanishMonths = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
-  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-];
-
-/// "18 de julio" — para la línea meta de D4 (sin año: cercanía, no expediente).
-String spanishDate(DateTime date) =>
-    '${date.day} de ${_spanishMonths[date.month - 1]}';
-
 /// Qué vista del flujo care corresponde al estado actual (A2/A4/A5/A6).
 enum CareView { directory, sent, responseAccepted, responseDeclined, episode }
 

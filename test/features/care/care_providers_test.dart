@@ -84,12 +84,6 @@ void main() {
     });
   });
 
-  group('spanishDate (línea meta de D4)', () {
-    test('formatea sin año: cercanía, no expediente', () {
-      expect(spanishDate(DateTime(2026, 7, 18)), '18 de julio');
-      expect(spanishDate(DateTime(2026, 1, 2)), '2 de enero');
-    });
-  });
 
   group('shortProviderName (copys cercanos: "en manos de Ana")', () {
     test('quita etiquetas entre corchetes y títulos de rol', () {

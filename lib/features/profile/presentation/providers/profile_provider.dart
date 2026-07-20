@@ -4,6 +4,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import '../../../../core/network/api_envelope.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../shared/data/models/user_profile_model.dart';
+import '../../../../shared/domain/enums.dart';
 import '../../../../shared/domain/user_profile.dart';
 
 /// Perfil de la usuaria (`GET /profile`).
@@ -28,6 +29,16 @@ Future<void> syncDeviceTimezone(WidgetRef ref) async {
   } catch (_) {
     // Sin red o sin plugin: se reintenta en el próximo arranque.
   }
+}
+
+/// "Lo que más te pesa ahora" (Mis áreas M2): un tap = PATCH /profile.
+/// Sin diálogo, sin preguntas, sin culpa — y no cambia estrellas ni exige nada.
+Future<void> updateMainPain(WidgetRef ref, MainPain pain) async {
+  await ref.read(dioProvider).patch<Object?>(
+    '/profile',
+    data: {'main_pain': pain.wireValue},
+  );
+  ref.invalidate(profileProvider);
 }
 
 /// Actualiza los ajustes (`PATCH /notification-settings`) y refresca

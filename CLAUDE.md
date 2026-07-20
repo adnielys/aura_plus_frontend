@@ -111,6 +111,15 @@ uno nuevo para este hueco" (área fija + duración ≤ presupuesto, sustituye
 directo vía HabitCreateArgs). El catálogo refetchea al entrar (initState
 invalida habitsCatalogProvider).
 
+## Mis áreas — YA EN LA APP
+Fila "Mis áreas" del perfil → AreasScreen (contemplativa, JAMÁS dashboard:
+sin %, sin metas, sin "te falta"): 4 tarjetas con las definiciones EXACTAS
+del Documento Maestro §06 + presencia del ciclo (misma luz del Home) +
+"Lo que más te pesa ahora" (main_pain editable, un tap = PATCH /profile).
+Tocar un área → AreaGesturesScreen (M3): gestos REGISTRADOS de 28 días con
+resultado en dignidad (Lo hice/A medias/No fue posible) y salida secundaria
+al banco filtrado. Fechas cercanas via shared/utils/dates.dart (hoy/ayer/N de mes).
+
 ## Fuera del MVP de frontend
 Pilar 2 y 3 Carril A: futuro. Carril B Etapa 2 (mensajería async): requiere
 revisión legal + redefinir GUARD_CARE_09 — ver diagrama_carril_b_flujo.html.

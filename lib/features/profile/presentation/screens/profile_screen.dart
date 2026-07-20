@@ -119,10 +119,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   },
                   onTap: () => context.go(AppRoutes.notification),
                 ),
-                const _Row(
+                _Row(
                   icon: Icons.track_changes,
-                  title: 'My life areas',
-                  subtitle: 'Me · Family · Relationships · Work',
+                  title: 'Mis áreas',
+                  subtitle: 'Yo · Familia · Relaciones · Trabajo',
+                  onTap: () => context.go(AppRoutes.areas),
                 ),
                 _Row(
                   icon: Icons.calendar_today_outlined,
