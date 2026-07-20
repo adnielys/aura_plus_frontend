@@ -120,6 +120,14 @@ Tocar un área → AreaGesturesScreen (M3): gestos REGISTRADOS de 28 días con
 resultado en dignidad (Lo hice/A medias/No fue posible) y salida secundaria
 al banco filtrado. Fechas cercanas via shared/utils/dates.dart (hoy/ayer/N de mes).
 
+## Historia v2 — YA EN LA APP
+Lista viva (V1): color del estado por día (barrita interna — OJO: un borde
+izquierdo grueso NO convive con borderRadius en Flutter), nº de gestos,
+grupos Esta semana / Antes (groupHistory, testeado), español. Tocar un día →
+HistoryDayScreen (V2): hero del estado, gestos con resultado en dignidad,
+"Lo que Aura te dijo esa noche" (texto EXACTO persistido) y "Tu palabra"
+(reflection) si existe. Nada editable: la memoria no se retoca.
+
 ## Fuera del MVP de frontend
 Pilar 2 y 3 Carril A: futuro. Carril B Etapa 2 (mensajería async): requiere
 revisión legal + redefinir GUARD_CARE_09 — ver diagrama_carril_b_flujo.html.

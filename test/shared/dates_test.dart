@@ -9,6 +9,14 @@ void main() {
     });
   });
 
+  group('spanishWeekday', () {
+    test('lunes = 1 … domingo = 7', () {
+      expect(spanishWeekday(DateTime(2026, 7, 20)), 'lunes');
+      expect(spanishWeekday(DateTime(2026, 7, 16)), 'jueves');
+      expect(spanishWeekday(DateTime(2026, 7, 19)), 'domingo');
+    });
+  });
+
   group('relativeSpanishDate (fechas cercanas, no expediente)', () {
     final today = DateTime(2026, 7, 19);
 

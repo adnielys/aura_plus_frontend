@@ -10,6 +10,13 @@ const _spanishMonths = [
 String spanishDate(DateTime date) =>
     '${date.day} de ${_spanishMonths[date.month - 1]}';
 
+const _spanishWeekdays = [
+  'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo',
+];
+
+/// "jueves" — día de la semana en español (DateTime.weekday: 1 = lunes).
+String spanishWeekday(DateTime date) => _spanishWeekdays[date.weekday - 1];
+
 /// "hoy" / "ayer" / "18 de julio" — para listas de presencia (Mis áreas M3).
 String relativeSpanishDate(DateTime date, DateTime today) {
   final day = DateTime(date.year, date.month, date.day);

@@ -28,6 +28,7 @@ import '../../features/profile/presentation/screens/area_gestures_screen.dart';
 import '../../features/profile/presentation/screens/areas_screen.dart';
 import '../../features/profile/presentation/screens/habit_create_screen.dart';
 import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
+import '../../features/profile/presentation/screens/history_day_screen.dart';
 import '../../features/profile/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/notification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -57,6 +58,7 @@ abstract final class AppRoutes {
   static const String areas = '/areas';
   static const String areaGestures = '/areas/gestures';
   static const String history = '/history';
+  static const String historyDay = '/history/day';
   static const String notification = '/notification';
   static const String care = '/care';
   static const String careConsent = '/care/consent';
@@ -205,6 +207,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.history,
             builder: (_, _) => const HistoryScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.historyDay,
+            builder: (_, state) =>
+                HistoryDayScreen(date: state.extra! as DateTime),
           ),
           GoRoute(
             path: AppRoutes.notification,
