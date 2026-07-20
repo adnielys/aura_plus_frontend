@@ -4,6 +4,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase (FCM): el plugin de google-services SOLO se aplica si el archivo
+// existe. Así el proyecto compila sin él, y al soltar google-services.json
+// en android/app/ todo se activa sin tocar código.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.example.aura_plus"
     compileSdk = flutter.compileSdkVersion

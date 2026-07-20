@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/notifications/push_registrar.dart';
 import '../../../onboarding/presentation/providers/onboarding_controller.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_controller.dart';
@@ -50,6 +51,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       // ANTES de cualquier consulta del día: el servidor calcula "su hoy" con
       // la timezone del dispositivo (si falla, no bloquea el arranque).
       await syncDeviceTimezone(ref);
+      if (!mounted) return;
+      // Push (FCM): registra el token para LA notificación diaria. No-op sin
+      // google-services.json; jamás bloquea el arranque.
+      await registerPushToken(ref);
       if (!mounted) return;
       await ref.read(onboardingStatusProvider.notifier).refresh();
     }
