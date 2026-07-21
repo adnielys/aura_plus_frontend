@@ -3,8 +3,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- La diaria LOCAL sobrevive reinicios del teléfono. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- A su hora DE VERDAD cuando el sistema lo permite; si no, se cae con
+         gracia a alarma inexacta (ventana de batch del SO). -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <application
-        android:label="aura_plus"
+        android:label="Aura+"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

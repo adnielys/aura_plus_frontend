@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Destello ✦ de Aura+ (icono pequeño de la notificación diaria).
+     Blanco sobre transparente: Android lo tiñe con el color indicado. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,1.5 Q13.2,9.3 22.5,12 Q13.2,14.7 12,22.5 Q10.8,14.7 1.5,12 Q10.8,9.3 12,1.5 Z" />
+</vector>

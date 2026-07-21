@@ -7,6 +7,8 @@
 /// abrir la app y también a reinicios del teléfono (BootReceiver).
 library;
 
+import 'dart:ui' show Color;
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
@@ -51,7 +53,8 @@ Future<void> _ensureReady() async {
   }
   await _plugin.initialize(
     settings: const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      // Destello ✦ de la marca (blanco: Android lo tiñe de carmesí).
+      android: AndroidInitializationSettings('@drawable/ic_stat_aura'),
     ),
   );
   _ready = true;
@@ -86,6 +89,14 @@ Future<void> scheduleDailyNotifications({
     final granted = await android?.requestNotificationsPermission() ?? true;
     if (!granted) return;
 
+    // Exacta si el sistema lo permite (a su hora, de verdad); si no,
+    // inexacta (el SO puede desplazarla dentro de su ventana de batch).
+    final exactAllowed =
+        await android?.canScheduleExactNotifications() ?? false;
+    final mode = exactAllowed
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
     final parts = preferredTime.split(':');
     final hour = int.tryParse(parts[0]) ?? 21;
     final minute = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
@@ -99,7 +110,9 @@ Future<void> scheduleDailyNotifications({
       final when = slot.add(Duration(days: i));
       await _plugin.zonedSchedule(
         id: _idBase + i,
-        title: 'Aura+',
+        // Sin título: la cabecera ya dice "Aura+" (label de la app); el
+        // mensaje va solo, en una línea serena — sin negritas que griten.
+        title: null,
         body: messageForDay(when),
         scheduledDate: when,
         notificationDetails: const NotificationDetails(
@@ -109,9 +122,11 @@ Future<void> scheduleDailyNotifications({
             channelDescription: _channelDescription,
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
+            // Carmesí de marca en icono y acentos del sistema.
+            color: Color(0xFFC01448),
           ),
         ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: mode,
       );
     }
   } catch (_) {
