@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../notifications/local_daily_notifications.dart';
 import '../../features/auth/presentation/providers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/care/presentation/providers/care_providers.dart';
@@ -88,6 +89,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // (quizá de otra usuaria) debe reconsultar su estado, no heredar el previo.
       if (next == AuthStatus.unauthenticated) {
         ref.read(onboardingStatusProvider.notifier).reset();
+        // La diaria LOCAL de una sesión cerrada no debe sonar.
+        cancelDailyNotifications();
       }
       // En CUALQUIER cambio de sesión (salir o entrar) se vacía todo lo
       // user-scoped: otra usuaria jamás debe ver datos cacheados de la

@@ -52,6 +52,8 @@ dependencies:
   flutter_timezone: ^5.1.0
   firebase_core: ^4.12.1
   firebase_messaging: ^16.4.3
+  flutter_local_notifications: ^22.1.0
+  timezone: ^0.11.1
 
   # Notificaciones (Fase 6 del backend). Pendiente: requiere config nativa
   # (google-services.json). Se habilita al llegar a esa fase.

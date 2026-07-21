@@ -3,6 +3,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../../../core/network/api_envelope.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/notifications/local_daily_notifications.dart';
 import '../../../../shared/data/models/user_profile_model.dart';
 import '../../../../shared/domain/enums.dart';
 import '../../../../shared/domain/user_profile.dart';
@@ -54,6 +55,16 @@ Future<void> updateNotificationSettings(
     if (preferredTime != null) 'preferred_time': '$preferredTime:00',
   });
   ref.invalidate(notificationSettingsProvider);
+  // La diaria es LOCAL (sin Google): reprogramar con los valores frescos.
+  try {
+    final settings = await ref.read(notificationSettingsProvider.future);
+    await scheduleDailyNotifications(
+      enabled: settings.isEnabled,
+      preferredTime: settings.preferredTime,
+    );
+  } catch (_) {
+    // Sin red o sin permiso: el próximo arranque reprograma.
+  }
 }
 
 /// Ajustes de notificación (`GET /notification-settings`): hora real de la

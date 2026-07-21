@@ -128,6 +128,15 @@ HistoryDayScreen (V2): hero del estado, gestos con resultado en dignidad,
 "Lo que Aura te dijo esa noche" (texto EXACTO persistido) y "Tu palabra"
 (reflection) si existe. Nada editable: la memoria no se retoca.
 
+## Notificación diaria — LOCAL (sin Google)
+La cuenta Google del proyecto está restringida por territorio: FCM queda
+DORMIDO (integración tolerante: se activa sola al soltar google-services.json
+en android/app/ y el service account en el backend). La diaria del MVP va por
+flutter_local_notifications: ventana de 14 días a preferred_time, copy
+rotatorio sereno (core/notifications/local_daily_notifications.dart), se
+reprograma en cada arranque y cambio de ajustes, se cancela al logout.
+Alarmas INEXACTAS (sin permiso especial); sobrevive reinicios (BootReceiver).
+
 ## Idioma de la UI — INGLÉS (unificado)
 Toda la copy visible de la app está en inglés (decisión de producto).
 Los COMENTARIOS del código siguen en español (convención del repo). Los

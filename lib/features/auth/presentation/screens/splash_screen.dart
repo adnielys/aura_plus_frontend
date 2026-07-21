@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/notifications/local_daily_notifications.dart';
 import '../../../../core/notifications/push_registrar.dart';
 import '../../../onboarding/presentation/providers/onboarding_controller.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -57,6 +58,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       await registerPushToken(ref);
       if (!mounted) return;
       await ref.read(onboardingStatusProvider.notifier).refresh();
+      if (!mounted) return;
+      // La diaria LOCAL: refresca la ventana de 14 días en cada arranque
+      // (sin onboarding aún no hay ajustes: el catch lo deja pasar).
+      try {
+        final settings = await ref.read(notificationSettingsProvider.future);
+        await scheduleDailyNotifications(
+          enabled: settings.isEnabled,
+          preferredTime: settings.preferredTime,
+        );
+      } catch (_) {}
     }
   }
 
