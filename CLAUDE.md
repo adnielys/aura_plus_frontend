@@ -150,6 +150,16 @@ SETTINGS. Q2 retrospectiva: paso 2.5 del CycleCloseFlow ("YOUR CYCLE, AS A
 STORY", renglones con emoji por key presence/area/hard_days/stars + cierre);
 tolerante: sin bloque `retrospective` del servidor, el paso no existe.
 
+## Mi ciclo (Bloque 3) — YA EN LA APP · GRATIS
+features/cycle/: tab Cycle real (sustituyó el COMING SOON). C1 invitación
+opt-in (3 puertas; posparto/lactancia = primera ciudadana; nota 🔒) → C1b
+mínimos (fecha con "Not sure" + regularidad — irregular/not_sure son
+respuestas completas) → C2 estación interior (winter=hecho, resto "may" +
+"An estimate, never a verdict") con "My period started today" → C4 ajustes
+(chip toggle, pausar, "Erase all my cycle data" con confirmación = hard
+delete). C3: chip discreto en Home (_SeasonChip) solo si tracking + señal +
+show_chip. El dato JAMÁS va en push ni compartido (guards en el servidor).
+
 ## Idioma de la UI — INGLÉS (unificado)
 Toda la copy visible de la app está en inglés (decisión de producto).
 Los COMENTARIOS del código siguen en español (convención del repo). Los

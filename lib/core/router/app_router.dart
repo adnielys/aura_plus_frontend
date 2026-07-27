@@ -12,7 +12,7 @@ import '../../features/care/presentation/screens/care_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
-import '../../features/check_in/presentation/screens/cycle_screen.dart';
+import '../../features/cycle/presentation/screens/cycle_screen.dart';
 import '../../features/check_in/presentation/screens/home_screen.dart';
 import '../../features/check_in/presentation/screens/reco_screen.dart';
 import '../../features/constellation/presentation/providers/cycle_closing_provider.dart';

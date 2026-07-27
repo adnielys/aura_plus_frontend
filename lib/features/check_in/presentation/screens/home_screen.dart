@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
+import '../../../cycle/presentation/providers/cycle_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../session/presentation/providers/session_controller.dart';
 import '../../domain/entities/check_in_result.dart';
@@ -162,6 +163,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
+              // C3 (Bloque 3): chip discreto de la estación interior — solo
+              // si ella comparte su ciclo, hay señal y no lo ocultó. Cero
+              // pantallas nuevas en el flujo diario.
+              const _SeasonChip(),
               const SizedBox(height: 22),
               // "Tu cuidado, por áreas": presencia encendida del ciclo
               // (mockup aprobado — sin %, sin metas, sin reproches).
@@ -405,6 +410,53 @@ class _DayClosedCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Chip C3 (Bloque 3): la estación interior en el Home, discreta. Solo si
+/// mode=tracking, show_chip y hay señal. Winter es hecho; el resto "may"
+/// (GUARD_MENS_04). Ante error de red: nada (el chip jamás molesta).
+class _SeasonChip extends ConsumerWidget {
+  const _SeasonChip();
+
+  static const _labels = {
+    'winter': '🌑  winter inside',
+    'spring': '🌱  it may be spring inside',
+    'summer': '☀️  it may be summer inside',
+    'autumn': '🍂  it may be autumn inside',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(cycleProvider).valueOrNull;
+    if (view == null ||
+        view.mode != 'tracking' ||
+        !view.showChip ||
+        view.season == null) {
+      return const SizedBox.shrink();
+    }
+    final label = _labels[view.season!.key];
+    if (label == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F0FA),
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }
