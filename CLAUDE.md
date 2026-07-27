@@ -160,6 +160,15 @@ respuestas completas) → C2 estación interior (winter=hecho, resto "may" +
 delete). C3: chip discreto en Home (_SeasonChip) solo si tracking + señal +
 show_chip. El dato JAMÁS va en push ni compartido (guards en el servidor).
 
+## Círculo de Apoyo (Bloque 4) — YA EN LA APP · GRATIS
+features/circle/: fila "My circle" en CARE del perfil → una pantalla con 3
+caras (S1 intro con "They would see"/"never see" usando el ESPEJO real, S2
+invitar con consentimiento informado, S3 gestión: miembros, Remove
+inmediato y silencioso, espejo semanal, pausa D3 de un toque). El miembro
+ve una página WEB en inglés (sin app): resumen agregado semanal — jamás
+palabras ni día a día; revocado/vencido/pausado = la misma página neutra.
+Antivigilancia inversa: la app jamás muestra si abrieron el enlace.
+
 ## Idioma de la UI — INGLÉS (unificado)
 Toda la copy visible de la app está en inglés (decisión de producto).
 Los COMENTARIOS del código siguen en español (convención del repo). Los

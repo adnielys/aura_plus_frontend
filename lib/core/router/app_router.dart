@@ -12,6 +12,7 @@ import '../../features/care/presentation/screens/care_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
+import '../../features/circle/presentation/screens/circle_screen.dart';
 import '../../features/cycle/presentation/screens/cycle_screen.dart';
 import '../../features/check_in/presentation/screens/home_screen.dart';
 import '../../features/check_in/presentation/screens/reco_screen.dart';
@@ -63,6 +64,7 @@ abstract final class AppRoutes {
   static const String historyDay = '/history/day';
   static const String notification = '/notification';
   static const String messageStyle = '/message-style';
+  static const String supportCircle = '/my-circle';
   static const String care = '/care';
   static const String careConsent = '/care/consent';
   static const String careRequest = '/care/request';
@@ -225,6 +227,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.messageStyle,
             builder: (_, _) => const MessageStyleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.supportCircle,
+            builder: (_, _) => const CircleScreen(),
           ),
           GoRoute(
             path: AppRoutes.care,

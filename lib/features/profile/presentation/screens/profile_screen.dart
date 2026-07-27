@@ -150,6 +150,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const Text('CARE', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
                 _CareRow(),
+                // Círculo de Apoyo (Bloque 4): resumen semanal agregado a
+                // hasta 3 personas de confianza — jamás palabras ni día a día.
+                _Row(
+                  icon: Icons.workspaces_outline,
+                  title: 'My circle',
+                  subtitle: 'Share your light — only if you want',
+                  onTap: () => context.go(AppRoutes.supportCircle),
+                ),
                 const SizedBox(height: 18),
                 // Premium quedó EXCLUIDO del producto (decisión jul 2026):
                 // todo lo construido es para todas — sin fila "Go Premium".
