@@ -7,76 +7,88 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/constellation.dart';
 import '../providers/constellation_provider.dart';
-import '../widgets/constellation_visuals.dart';
 
-/// Mi galaxia (maquetado · tab "galaxia"): cabecera nocturna + galería de
-/// las constelaciones guardadas. Cada una es permanente: el cielo conserva
-/// lo que ella construyó (GUARD_TONE: nunca se pierde progreso).
-class GalaxyScreen extends ConsumerWidget {
+/// My sky (Bloque 2 · Q1): todos sus ciclos como cielos nocturnos apilados.
+/// Solo lectura sobre `/constellation/all`. Cada ciclo muestra SU luz —
+/// jamás se comparan ciclos entre sí (GUARD_TONE_03/04).
+class GalaxyScreen extends ConsumerStatefulWidget {
   const GalaxyScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GalaxyScreen> createState() => _GalaxyScreenState();
+}
+
+class _GalaxyScreenState extends ConsumerState<GalaxyScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Polling suave: al entrar refetchea (mismo patrón que el resto de tabs).
+    Future.microtask(() {
+      if (mounted) ref.invalidate(allConstellationsProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final constellations = ref.watch(allConstellationsProvider);
 
     return Scaffold(
-      body: constellations.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: TextButton(
-            onPressed: () => ref.invalidate(allConstellationsProvider),
-            child: const Text('Try again'),
-          ),
-        ),
-        data: (all) => ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            // Cabecera nocturna (sky compacto del maquetado).
-            Container(
-              padding: const EdgeInsets.fromLTRB(24, 36, 24, 22),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2A0E3A), AppColors.closingBackground],
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'My galaxy',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium!
-                        .copyWith(color: Colors.white, fontSize: 22),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${all.length} ${all.length == 1 ? 'constellation' : 'constellations'} saved · Premium',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
+      body: SafeArea(
+        child: constellations.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => Center(
+            child: TextButton(
+              onPressed: () => ref.invalidate(allConstellationsProvider),
+              child: const Text('Try again'),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  for (final constellation in all) ...[
-                    _ConstCard(constellation: constellation),
-                    const SizedBox(height: 14),
-                  ],
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Every constellation is permanent. The sky keeps what you built.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 11, color: AppColors.textSecondary),
+          ),
+          data: (all) {
+            // La actual primero; después las cerradas, de la más reciente atrás.
+            final sorted = [...all]
+              ..sort((a, b) {
+                if (a.isCurrent != b.isCurrent) return a.isCurrent ? -1 : 1;
+                return b.cycleNumber.compareTo(a.cycleNumber);
+              });
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+              children: [
+                const SizedBox(height: 36),
+                const Text(
+                  'MY SKY',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    color: AppColors.textSecondary,
                   ),
-                  TextButton(
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Every cycle you lived is still shining.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    fontSize: 19,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                for (final constellation in sorted) ...[
+                  _SkyCard(constellation: constellation),
+                  const SizedBox(height: 12),
+                ],
+                const SizedBox(height: 6),
+                const Text(
+                  'Nothing here fades. The sky keeps what you built.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Center(
+                  child: TextButton(
                     onPressed: () => context.go(AppRoutes.constellation),
                     child: const Text(
                       '← Back',
@@ -86,69 +98,196 @@ class GalaxyScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-/// Tarjeta de la galería (const-card light del maquetado).
-class _ConstCard extends StatelessWidget {
-  const _ConstCard({required this.constellation});
+const _monthsShort = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+String _shortDate(DateTime d) => '${_monthsShort[d.month - 1]} ${d.day}';
+
+const _anchorLabels = {
+  'self_moments': 'my moments for me',
+  'my_people': 'my people',
+  'small_daily': 'the small things of each day',
+};
+
+/// Tarjeta de cielo nocturno de UN ciclo (mockup Q1).
+class _SkyCard extends StatelessWidget {
+  const _SkyCard({required this.constellation});
 
   final Constellation constellation;
 
   @override
   Widget build(BuildContext context) {
+    final c = constellation;
+    final range = (c.startDate != null && c.endDate != null)
+        ? '${_shortDate(c.startDate!)} — ${_shortDate(c.endDate!)}'
+        : null;
+    final meta = [
+      ?range,
+      if (c.isCurrent)
+        'in progress'
+      else if (c.daysPresent != null)
+        '${c.daysPresent} ${c.daysPresent == 1 ? 'day' : 'days'} present',
+    ].join(' · ');
+    final anchor = _anchorLabels[c.reflectionAnchor];
+
     return Container(
-      clipBehavior: Clip.antiAlias,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF221833), Color(0xFF2E2144)],
+        ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        border: c.isCurrent
+            ? Border.all(color: const Color(0x66F5D9A8), width: 1)
+            : null,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            color: const Color(0xFFFBEAF0),
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            width: double.infinity,
-            child: Image.asset(
-              constellation.imageAsset,
-              height: 190,
-              fit: BoxFit.contain,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
-              children: [
-                Text(
-                  '${constellation.name} Constellation',
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (c.isCurrent) ...[
+                      Text(
+                        'NOW · CYCLE ${c.cycleNumber}',
+                        style: const TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.4,
+                          color: Color(0xFFF5D9A8),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                    Text(
+                      c.name,
+                      style: const TextStyle(
+                        fontFamily: AppTypography.serif,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 16,
+                        color: Color(0xFFF3EAF8),
+                      ),
+                    ),
+                    if (meta.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        meta,
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          color: Color(0xFFB9A8CC),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0x26F5D9A8),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Text(
+                  '${c.starsEarned} ✦',
                   style: const TextStyle(
-                    fontFamily: AppTypography.serif,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFF5D9A8),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'Cycle ${constellation.cycleNumber} · '
-                  '${constellation.starsEarned} '
-                  '${constellation.starsEarned == 1 ? 'star' : 'stars'} · By Aura Plus',
-                  style: const TextStyle(
-                      fontSize: 11, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+          if (anchor != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              '“What stays with me: $anchor.”',
+              style: const TextStyle(
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+                color: Color(0xFFD8C7E8),
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          _DotsRow(lit: c.litStars, total: c.starsMax),
         ],
+      ),
+    );
+  }
+}
+
+/// Fila de estrellas del dibujo: encendidas = lo ganado (tope visual), el
+/// resto en penumbra. Offsets verticales deterministas (índice), sin azar.
+class _DotsRow extends StatelessWidget {
+  const _DotsRow({required this.lit, required this.total});
+
+  final int lit;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 30,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final step = constraints.maxWidth / (total + 1);
+          return Stack(
+            children: [
+              for (var i = 0; i < total; i++)
+                Positioned(
+                  left: step * (i + 1),
+                  top: (i.isEven ? 6 : 18) + (i % 3 == 0 ? 4 : 0),
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i < lit
+                          ? const Color(0xFFF5D9A8)
+                          : const Color(0xFF4A3B60),
+                      boxShadow: i < lit
+                          ? const [
+                              BoxShadow(
+                                color: Color(0xCCF5D9A8),
+                                blurRadius: 6,
+                              ),
+                            ]
+                          : null,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

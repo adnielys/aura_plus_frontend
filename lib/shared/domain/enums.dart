@@ -73,6 +73,41 @@ enum MainPain {
       values.firstWhere((e) => e.wireValue == value);
 }
 
+/// Cómo le habla Aura (Bloque 2 · Q4, contrato `message_style`). Solo sesga la
+/// rotación del catálogo del servidor — mismas plantillas, mismos guards.
+enum MessageStyle {
+  warm(
+    'warm',
+    'Warm & close',
+    'Full messages, with all their tenderness.',
+    '“You showed up today. That alone already changed the shape of your day.”',
+  ),
+  brief(
+    'brief',
+    'Soft & brief',
+    'The same care, in fewer words. For days when reading is too much.',
+    '“You\'re here. That counts.”',
+  ),
+  why(
+    'why',
+    'With a why',
+    'Prefers the messages that explain the small science behind each gesture.',
+    '“Small and steady soothes more than big and halfway.”',
+  );
+
+  const MessageStyle(this.wireValue, this.label, this.description, this.example);
+
+  final String wireValue;
+  final String label;
+  final String description;
+  final String example;
+
+  static MessageStyle fromWire(String value) => values.firstWhere(
+        (e) => e.wireValue == value,
+        orElse: () => MessageStyle.warm, // tolerante: un valor nuevo no rompe
+      );
+}
+
 /// Sentimientos del onboarding (multi-selección, contrato `initial_feelings`).
 /// Dato de contexto: no alimenta motores. El backend descarta valores
 /// desconocidos con validación laxa.

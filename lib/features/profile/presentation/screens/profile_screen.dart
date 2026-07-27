@@ -126,9 +126,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => context.go(AppRoutes.areas),
                 ),
                 _Row(
+                  icon: Icons.record_voice_over_outlined,
+                  title: 'How Aura speaks to you',
+                  subtitle: 'Same warmth, your volume',
+                  onTap: () => context.go(AppRoutes.messageStyle),
+                ),
+                _Row(
                   icon: Icons.calendar_today_outlined,
                   title: 'History',
-                  subtitle: 'Last 28 days',
+                  subtitle: 'Your whole story',
                   onTap: () => context.go(AppRoutes.history),
                 ),
                 _Row(
@@ -145,13 +151,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 10),
                 _CareRow(),
                 const SizedBox(height: 18),
-                const Text('PLAN', style: AppTypography.sectionLabel),
+                // Premium quedó EXCLUIDO del producto (decisión jul 2026):
+                // todo lo construido es para todas — sin fila "Go Premium".
+                const Text('COMING SOON', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
-                const _Row(
-                  icon: Icons.diamond_outlined,
-                  title: 'Go Premium',
-                  subtitle: 'Galaxy · cycle · Aura tells you · wearables',
-                ),
                 _Row(
                   icon: Icons.nightlight_outlined,
                   title: 'My cycle',

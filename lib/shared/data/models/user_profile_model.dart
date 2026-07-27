@@ -13,6 +13,7 @@ class UserProfileModel extends UserProfile {
     required super.dailyTimeSlot,
     required super.preferredMoment,
     required super.onboardingCompleted,
+    super.messageStyle,
     super.age,
   });
 
@@ -33,6 +34,8 @@ class UserProfileModel extends UserProfile {
       dailyTimeSlot: TimeSlot.fromWire(json['daily_time_slot'] as String),
       preferredMoment:
           PreferredMoment.fromWire(json['preferred_moment'] as String),
+      messageStyle:
+          MessageStyle.fromWire((json['message_style'] as String?) ?? 'warm'),
       onboardingCompleted: (json['onboarding_completed'] as bool?) ?? true,
     );
   }

@@ -174,7 +174,7 @@ class _Body extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              // Acceso a la galaxia (maquetado · row "My galaxy · Premium").
+              // Acceso al cielo completo (Bloque 2 · Q1 — sin premium: para todas).
               InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () => context.go(AppRoutes.galaxy),
@@ -202,37 +202,16 @@ class _Body extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  'My galaxy',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFCE3EC),
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  child: const Text(
-                                    'Premium',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            const Text(
+                              'View my sky ✦',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                             const Text(
-                              'Your past constellations',
+                              'Every cycle you lived, still shining',
                               style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary),

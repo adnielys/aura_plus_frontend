@@ -32,4 +32,35 @@ void main() {
       expect(earlier, isEmpty);
     });
   });
+
+  group('groupHistoryMonths (historia total Q3)', () {
+    final today = DateTime(2026, 7, 20);
+
+    test('THIS WEEK primero y después una sección por mes, en orden', () {
+      final days = [
+        _day(DateTime(2026, 7, 20)),
+        _day(DateTime(2026, 7, 13)), // hace 7 días: ya no es "esta semana"
+        _day(DateTime(2026, 6, 28)),
+        _day(DateTime(2026, 6, 2)),
+        _day(DateTime(2025, 12, 24)), // año anterior: lleva el año
+      ];
+      final sections = groupHistoryMonths(days, today);
+      expect(sections.map((s) => s.label),
+          ['THIS WEEK', 'JULY', 'JUNE', 'DECEMBER 2025']);
+      expect(sections[0].days.map((d) => d.date.day), [20]);
+      expect(sections[1].days.map((d) => d.date.day), [13]);
+      expect(sections[2].days.map((d) => d.date.day), [28, 2]);
+      expect(sections[3].days.map((d) => d.date.day), [24]);
+    });
+
+    test('sin presencia esta semana no se inventa la sección', () {
+      final sections =
+          groupHistoryMonths([_day(DateTime(2026, 5, 9))], today);
+      expect(sections.map((s) => s.label), ['MAY']);
+    });
+
+    test('sin días: sin secciones', () {
+      expect(groupHistoryMonths([], today), isEmpty);
+    });
+  });
 }

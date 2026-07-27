@@ -100,6 +100,11 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
             children: [
               _momentOne(serif, closing),
               _momentTwo(serif, closing),
+              // Q2 — el ciclo como relato. Tolerante: sin datos del servidor,
+              // el paso no existe (el flujo de 3 momentos queda intacto).
+              if (closing.retroLines.isNotEmpty ||
+                  closing.retroClosing.isNotEmpty)
+                _momentRetro(serif, closing),
               _momentThree(serif, closing),
             ],
           ),
@@ -204,6 +209,97 @@ class _CycleCloseScreenState extends ConsumerState<CycleCloseScreen> {
             ],
           ),
           const SizedBox(height: 26),
+        ],
+      ),
+    );
+  }
+
+  static const _retroIcons = {
+    'presence': '🌙',
+    'area': '🫶',
+    'hard_days': '🕯️',
+    'stars': '✦',
+  };
+
+  /// Momento 2.5 (Q2) — Retrospectiva: el ciclo como relato. Renglones
+  /// condicionales resueltos por el servidor; jamás cifras de lo que faltó.
+  Widget _momentRetro(TextStyle serif, CycleClosing closing) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 30, 28, 24),
+      child: Column(
+        children: [
+          const Text('YOUR CYCLE, AS A STORY', style: AppTypography.eyebrow),
+          const SizedBox(height: 14),
+          Text.rich(
+            TextSpan(children: [
+              TextSpan(
+                text: '28 days of ',
+                style: serif.copyWith(fontSize: 21, color: Colors.white),
+              ),
+              TextSpan(
+                text: closing.constellation.name,
+                style: serif.copyWith(
+                  fontSize: 21,
+                  fontStyle: FontStyle.italic,
+                  color: const Color(0xFFF5D9A8),
+                ),
+              ),
+            ]),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 18),
+          Expanded(
+            child: ListView(
+              children: [
+                for (final line in closing.retroLines)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 9),
+                    padding: const EdgeInsets.all(13),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _retroIcons[line.key] ?? '·',
+                          style: const TextStyle(
+                              fontSize: 16, color: Color(0xFFF5D9A8)),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            line.text,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              height: 1.55,
+                              color: Colors.white.withValues(alpha: 0.92),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (closing.retroClosing.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    closing.retroClosing,
+                    textAlign: TextAlign.center,
+                    style: serif.copyWith(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: const Color(0xFFD8C7E8),
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _whiteCta('Continue', _next),
+          const SizedBox(height: 12),
         ],
       ),
     );

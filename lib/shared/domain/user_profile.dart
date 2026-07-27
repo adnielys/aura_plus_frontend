@@ -15,6 +15,7 @@ class UserProfile {
     required this.dailyTimeSlot,
     required this.preferredMoment,
     required this.onboardingCompleted,
+    this.messageStyle = MessageStyle.warm,
     this.age,
   });
 
@@ -28,5 +29,8 @@ class UserProfile {
   final MainPain? mainPain;
   final TimeSlot dailyTimeSlot;
   final PreferredMoment preferredMoment;
+
+  /// Cómo le habla Aura (Q4). Solo envoltorio: jamás cambia reglas ni guards.
+  final MessageStyle messageStyle;
   final bool onboardingCompleted;
 }

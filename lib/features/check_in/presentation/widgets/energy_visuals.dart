@@ -35,10 +35,10 @@ extension EnergyVisuals on EmotionalState {
   /// (reconciliación #12): 5 estados cualitativos con idéntica dignidad,
   /// sin orden implícito ni gradiente de energía.
   String get checkInHint => switch (this) {
-        EmotionalState.energy => 'Lista para avanzar hoy',
-        EmotionalState.tranquil => 'En modo sostenido',
-        EmotionalState.scattered => 'La mente va en mil direcciones',
-        EmotionalState.exhausted => 'Pide pausa',
+        EmotionalState.energy => 'Ready to move today',
+        EmotionalState.tranquil => 'In steady mode',
+        EmotionalState.scattered => 'Mind going in all directions',
+        EmotionalState.exhausted => 'Asking for a pause',
         EmotionalState.hard => 'Weighs most today',
       };
 }

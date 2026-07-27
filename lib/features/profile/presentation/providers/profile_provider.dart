@@ -42,6 +42,16 @@ Future<void> updateMainPain(WidgetRef ref, MainPain pain) async {
   ref.invalidate(profileProvider);
 }
 
+/// Cómo le habla Aura (Q4): un tap = PATCH /profile. Cambiable cuando quiera,
+/// sin preguntas — solo sesga la rotación del catálogo en el servidor.
+Future<void> updateMessageStyle(WidgetRef ref, MessageStyle style) async {
+  await ref.read(dioProvider).patch<Object?>(
+    '/profile',
+    data: {'message_style': style.wireValue},
+  );
+  ref.invalidate(profileProvider);
+}
+
 /// Actualiza los ajustes (`PATCH /notification-settings`) y refresca
 /// [notificationSettingsProvider]. `preferredTime` en formato 'HH:mm'.
 Future<void> updateNotificationSettings(

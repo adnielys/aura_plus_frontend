@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -31,12 +32,44 @@ class HistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  // Historia total (Q3): páginas extra cargadas al hacer scroll hacia atrás.
+  final List<HistoryDay> _extra = [];
+  bool _hasMore = true;
+  bool _loadingMore = false;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      if (mounted) ref.invalidate(historyProvider);
+      if (mounted) {
+        setState(() {
+          _extra.clear();
+          _hasMore = true;
+        });
+        ref.invalidate(historyProvider);
+      }
     });
+  }
+
+  Future<void> _loadMore(List<HistoryDay> loaded) async {
+    if (_loadingMore || !_hasMore || loaded.isEmpty) return;
+    setState(() => _loadingMore = true);
+    try {
+      final page = await fetchHistoryPage(
+        ref.read(dioProvider),
+        before: loaded.last.date,
+      );
+      if (!mounted) return;
+      setState(() {
+        _extra.addAll(page);
+        _hasMore = page.length >= historyPageSize;
+      });
+    } catch (_) {
+      // Silencioso: el siguiente scroll reintenta (la historia nunca regaña).
+      if (mounted) setState(() {});
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
   }
 
   @override
@@ -58,72 +91,91 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             child: const Text('Try again'),
           ),
         ),
-        data: (days) {
-          final (thisWeek: thisWeek, earlier: earlier) =
-              groupHistory(days, DateTime.now());
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
-            children: [
-              const Text('YOUR STORY · LAST 28 DAYS',
-                  style: AppTypography.sectionLabel),
-              const SizedBox(height: 10),
-              Text.rich(
-                TextSpan(children: [
-                  TextSpan(text: 'What you built, ', style: serif),
-                  TextSpan(
-                    text: 'day by day.',
-                    style: serif.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: AppColors.primary),
-                  ),
-                ]),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                days.isEmpty
-                    ? 'Your story starts with your first check-in.'
-                    : '${days.length} ${days.length == 1 ? 'day' : 'days'} of '
-                        'presence · silence never counts against you.',
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 14),
-              if (thisWeek.isNotEmpty) ...[
-                const _WeekLabel('THIS WEEK'),
-                for (final day in thisWeek) _DayRow(day: day),
-              ],
-              if (earlier.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                const _WeekLabel('EARLIER'),
-                for (final day in earlier) _DayRow(day: day),
-              ],
-              if (days.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                const Center(
-                  child: Text(
-                    'Each day keeps its full story —\ntap it to go back to it.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 11.5,
-                        height: 1.5,
-                        color: AppColors.textSecondary),
-                  ),
+        data: (firstPage) {
+          final days = [...firstPage, ..._extra];
+          final sections = groupHistoryMonths(days, DateTime.now());
+          // Con solo la primera página, "hay más" si vino llena; con páginas
+          // extra manda lo que dijo la última carga.
+          final more =
+              _extra.isEmpty ? firstPage.length >= historyPageSize : _hasMore;
+          return NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (more &&
+                  notification.metrics.pixels >
+                      notification.metrics.maxScrollExtent - 300) {
+                _loadMore(days);
+              }
+              return false;
+            },
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
+              children: [
+                const Text('YOUR STORY', style: AppTypography.sectionLabel),
+                const SizedBox(height: 10),
+                Text.rich(
+                  TextSpan(children: [
+                    TextSpan(text: 'Everything you built ', style: serif),
+                    TextSpan(
+                      text: 'stays yours.',
+                      style: serif.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.primary),
+                    ),
+                  ]),
                 ),
-              ],
-              const SizedBox(height: 4),
-              Center(
-                child: TextButton(
-                  onPressed: () => context.go(AppRoutes.profile),
-                  child: const Text(
-                    '← Back',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
+                const SizedBox(height: 4),
+                Text(
+                  days.isEmpty
+                      ? 'Your story starts with your first check-in.'
+                      : '${days.length} ${days.length == 1 ? 'day' : 'days'} of '
+                          'presence · silence never counts against you.',
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 14),
+                for (final section in sections) ...[
+                  _WeekLabel(section.label),
+                  for (final day in section.days) _DayRow(day: day),
+                  const SizedBox(height: 6),
+                ],
+                if (_loadingMore)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Center(
+                        child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )),
+                  ),
+                if (days.isNotEmpty && !more) ...[
+                  const SizedBox(height: 8),
+                  const Center(
+                    child: Text(
+                      'Your whole story stays with you —\nas far back as your first day.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 11.5,
+                          height: 1.5,
+                          color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.go(AppRoutes.profile),
+                    child: const Text(
+                      '← Back',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),

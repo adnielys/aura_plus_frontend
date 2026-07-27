@@ -14,11 +14,16 @@ class ConstellationModel extends Constellation {
     required super.isCurrent,
     super.completedAt,
     super.daysPresent,
+    super.startDate,
+    super.endDate,
+    super.reflectionAnchor,
   });
 
   /// Construye desde el contenido ya desenvuelto del envelope.
   factory ConstellationModel.fromJson(Map<dynamic, dynamic> json) {
     final completedAt = json['completed_at'] as String?;
+    final startDate = json['start_date'] as String?;
+    final endDate = json['end_date'] as String?;
     return ConstellationModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -29,6 +34,9 @@ class ConstellationModel extends Constellation {
       isCurrent: (json['is_current'] as bool?) ?? true,
       completedAt: completedAt == null ? null : DateTime.tryParse(completedAt),
       daysPresent: json['days_present'] as int?,
+      startDate: startDate == null ? null : DateTime.tryParse(startDate),
+      endDate: endDate == null ? null : DateTime.tryParse(endDate),
+      reflectionAnchor: json['reflection_anchor'] as String?,
     );
   }
 }

@@ -15,6 +15,9 @@ class Constellation {
     required this.isCurrent,
     this.completedAt,
     this.daysPresent,
+    this.startDate,
+    this.endDate,
+    this.reflectionAnchor,
   });
 
   final String id;
@@ -33,6 +36,13 @@ class Constellation {
   /// muestra cuántos faltan (GUARD_TONE_03/04). Null cuando el contexto no lo
   /// calcula (la constelación embebida en `SessionResult`).
   final int? daysPresent;
+
+  /// Ventana del ciclo (galaxia Q1) — memoria, nunca cuenta regresiva.
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  /// Su reflexión del cierre si la dejó (self_moments | my_people | small_daily).
+  final String? reflectionAnchor;
 
   /// Estrellas encendidas en el dibujo: `min(starsEarned, starsMax)`.
   int get litStars => starsEarned < starsMax ? starsEarned : starsMax;

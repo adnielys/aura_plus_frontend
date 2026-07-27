@@ -14,6 +14,11 @@ const _weekdays = [
 /// "July 18" — sin año: cercanía, no expediente.
 String prettyDate(DateTime date) => '${_months[date.month - 1]} ${date.day}';
 
+/// "July" (mismo año) o "May 2025" — cabecera de mes en la historia total.
+String monthLabel(DateTime date, DateTime today) => date.year == today.year
+    ? _months[date.month - 1]
+    : '${_months[date.month - 1]} ${date.year}';
+
 /// "Thursday" — día de la semana (DateTime.weekday: 1 = lunes).
 String weekdayName(DateTime date) => _weekdays[date.weekday - 1];
 

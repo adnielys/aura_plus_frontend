@@ -137,6 +137,19 @@ rotatorio sereno (core/notifications/local_daily_notifications.dart), se
 reprograma en cada arranque y cambio de ajustes, se cancela al logout.
 Alarmas INEXACTAS (sin permiso especial); sobrevive reinicios (BootReceiver).
 
+## Bloque 2 (quick wins) — YA EN LA APP · PREMIUM EXCLUIDO
+Premium quedó FUERA del producto (decisión jul 2026): sin fila "Go Premium",
+sin gating — todo para todas. Q1 My sky: GalaxyScreen rediseñada (cards de
+cielo nocturno con fechas, days present, ✦ y reflexión; actual con NOW);
+entrada "View my sky ✦" en la pestaña constelación. Q3 Historia total:
+historyProvider pagina con before/limit (fetchHistoryPage), scroll infinito,
+grupos THIS WEEK/mes (groupHistoryMonths, testeado; año solo si distinto).
+Q4 voz de Aura: MessageStyle (warm|brief|why) en enums + perfil; pantalla
+"How Aura speaks to you" (selector con ejemplos, un tap = PATCH); fila en
+SETTINGS. Q2 retrospectiva: paso 2.5 del CycleCloseFlow ("YOUR CYCLE, AS A
+STORY", renglones con emoji por key presence/area/hard_days/stars + cierre);
+tolerante: sin bloque `retrospective` del servidor, el paso no existe.
+
 ## Idioma de la UI — INGLÉS (unificado)
 Toda la copy visible de la app está en inglés (decisión de producto).
 Los COMENTARIOS del código siguen en español (convención del repo). Los
