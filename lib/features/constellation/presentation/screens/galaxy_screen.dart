@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/constellation.dart';
 import '../providers/constellation_provider.dart';
+import '../widgets/constellation_visuals.dart';
 
 /// My sky (Bloque 2 · Q1): todos sus ciclos como cielos nocturnos apilados.
 /// Solo lectura sobre `/constellation/all`. Cada ciclo muestra SU luz —
@@ -238,57 +239,20 @@ class _SkyCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 10),
-          _DotsRow(lit: c.litStars, total: c.starsMax),
+          // Su constelación REAL (la pieza del diseñador de ese ciclo) — el
+          // cielo guarda el dibujo tal como lo vivió, no puntos decorativos.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              c.imageAsset,
+              height: 130,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// Fila de estrellas del dibujo: encendidas = lo ganado (tope visual), el
-/// resto en penumbra. Offsets verticales deterministas (índice), sin azar.
-class _DotsRow extends StatelessWidget {
-  const _DotsRow({required this.lit, required this.total});
-
-  final int lit;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 30,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final step = constraints.maxWidth / (total + 1);
-          return Stack(
-            children: [
-              for (var i = 0; i < total; i++)
-                Positioned(
-                  left: step * (i + 1),
-                  top: (i.isEven ? 6 : 18) + (i % 3 == 0 ? 4 : 0),
-                  child: Container(
-                    width: 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i < lit
-                          ? const Color(0xFFF5D9A8)
-                          : const Color(0xFF4A3B60),
-                      boxShadow: i < lit
-                          ? const [
-                              BoxShadow(
-                                color: Color(0xCCF5D9A8),
-                                blurRadius: 6,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}

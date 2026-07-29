@@ -7,6 +7,7 @@ import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/selectable_chip.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../providers/onboarding_controller.dart';
+import '../widgets/pain_reflection.dart';
 
 /// Flujo de onboarding (maquetado `aura_preview`): la frase continua reúne lo
 /// personal (nombre, edad, peques, sentimiento) en un solo paso editable por
@@ -1110,15 +1111,21 @@ class _FirstPersonStep extends StatelessWidget {
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              microcopy!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: AppTypography.serif,
-                fontStyle: FontStyle.italic,
-                fontSize: 13,
-                height: 1.5,
-                color: AppColors.entryHint,
+            // El reflejo cambia con la selección (SPEC V2 §3.1): fade suave,
+            // jamás un salto brusco — Aura responde, no interrumpe.
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Text(
+                microcopy!,
+                key: ValueKey(microcopy),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: AppTypography.serif,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 13,
+                  height: 1.5,
+                  color: AppColors.entryHint,
+                ),
               ),
             ),
           ),
@@ -1165,20 +1172,8 @@ class _StepMainPain extends ConsumerWidget {
     MainPain.all: 'everything at once',
   };
 
-  /// Microcopy reactivo: valida la elección, nunca aconseja ni exige
-  /// (tono del Sistema Emocional; salda el pendiente del incremento 2).
-  static const _microcopy = {
-    MainPain.work:
-        'Work asks a lot. Wanting room for yourself too is not asking too much.',
-    MainPain.family:
-        'The home never clocks out. What you do there counts, even when no one sees it.',
-    MainPain.self:
-        'Turning toward yourself is not selfish. It is where everything else starts.',
-    MainPain.relationships:
-        'Relationships take energy too. Noticing that is already caring for them.',
-    MainPain.all:
-        'When it is everything at once, no one could carry it lightly. You are not failing.',
-  };
+  // Reflejo emocional (SPEC V2 §3.1): textos APROBADOS en
+  // widgets/pain_reflection.dart — mapa constante y testeable.
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1213,7 +1208,7 @@ class _StepMainPain extends ConsumerWidget {
             ),
         ],
       ),
-      microcopy: selected == null ? null : _microcopy[selected],
+      microcopy: selected == null ? null : painReflections[selected],
     );
   }
 }
@@ -1484,7 +1479,7 @@ class _EmotionalContract extends StatelessWidget {
               const SizedBox(height: 18),
               Text(
                 'There are no goals to meet here, nothing to prove.\n'
-                'We start whenever you want.',
+                "We begin whenever you're ready.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -1494,7 +1489,7 @@ class _EmotionalContract extends StatelessWidget {
               ),
               const Spacer(),
               SoftPrimaryButton(
-                label: 'Enter my space',
+                label: 'Enter my space ✦',
                 onPressed: onEnter,
               ),
             ],
