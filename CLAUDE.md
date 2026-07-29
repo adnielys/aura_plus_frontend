@@ -72,22 +72,26 @@ enums en snake_case con mapeo explícito; base URL por plataforma.
       PageView/AnimatedSwitcher), SelectableChip + SoftPrimaryButton, POST
       /onboarding/complete, router por AuthStatus + OnboardingStatus (splash consulta
       GET /status). Tests: mapeo de enums + validación por paso + submit.
-      Pulido: [x] fuente serif Poltawski Nowy bundleada (assets/fonts). Pendiente:
-      adoptar el diseño del mockup (frase continua + rosa sereno + copy EN);
-      pantalla de registro (hoy se registra vía Swagger); microcopy reactivo del
-      paso 4 + pantalla final de contrato emocional (SPEC_CONTENIDO_EMOCIONAL_V2 §3).
-      Check-in = solo energía (5 niveles); las 15 emociones fuera del MVP.
-      Ciclo menstrual: APLAZADO.
-- [ ] 3 — Check-in + Home (POST /check-in → CheckInResult, HomeScreen con HabitCard×2).
-- [ ] 4 — Cierre del día (DayCloseScreen, POST /session, ClosingMessageCard, celebración).
+      Pulido: [x] fuente serif Poltawski Nowy bundleada (assets/fonts) · [x] diseño
+      del mockup (frase continua + copy EN) · [x] CONTRATO EMOCIONAL (SPEC V2 §3,
+      textos aprobados jul 2026): reflejo del paso 4 con AnimatedSwitcher (mapa
+      testeable en widgets/pain_reflection.dart) + pantalla final "That's all I
+      need, {name}" → "Enter my space ✦" (submit NO marca completo; lo hace
+      enterSpace). Check-in = solo energía (5 niveles); las 15 emociones fuera
+      del MVP. Ciclo menstrual: HECHO (Bloque 3, ver sección Mi ciclo).
+- [x] 3 — Check-in + Home (POST /check-in → CheckInResult, HomeScreen con HabitCard×2).
+- [x] 4 — Cierre del día (DayCloseScreen, POST /session, ClosingMessageCard, celebración).
       Incluye SupportBridgeCard para message_type `support_bridge` (SPEC V2 §2):
       tarjeta suave tras el cierre normal, nunca lo sustituye; parser tolerante a
       tipos de mensaje desconocidos.
-- [ ] 5 — Constelación (ConstellationWidget CustomPainter, GalaxyScreen, CelebrationScreen).
-      Incluye CycleCloseFlow (SPEC V2 §1): GET /constellation/closing al entrar,
-      3 pantallas (contemplar → significado + reflexión opcional → transición),
-      closing-ack idempotente. El widget soporta stars_earned > stars_max.
-- [ ] 6 — Perfil + FCM + cola offline + pulido.
+- [x] 5 — Constelación: pestaña + CycleCloseFlow (SPEC V2 §1, con retrospectiva
+      2.5) + My sky con las 20 piezas REALES del diseñador por ciclo (imageAsset
+      derivado del cycle_number; los nombres históricos quedan congelados, por
+      eso en cuentas de prueba renombradas puede no coincidir nombre↔dibujo —
+      en cuentas nuevas siempre coincide).
+- [x] 6 — Perfil + voz de Aura + Mi ciclo + Círculo + notificación local.
+      Pendiente real: cola offline del cierre + recuperación de contraseña +
+      prueba en dispositivo físico (ver mapa_flujos_aura.html).
 
 ## Backend (para conectar)
 Local prod-parity: `docker compose up --build -d` en `C:\dev\auraplus-backend`
