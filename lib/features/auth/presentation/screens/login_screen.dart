@@ -213,6 +213,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Recuperación: discreto, sin culpa — pasa en las mejores
+                    // familias. Abre la pantalla de pedir el enlace.
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.forgotPassword),
+                      child: const Text(
+                        'I forgot my password',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => context.go(AppRoutes.register),
                       child: const Text(

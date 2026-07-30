@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../notifications/local_daily_notifications.dart';
 import '../../features/auth/presentation/providers/auth_controller.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/care/presentation/providers/care_providers.dart';
 import '../../features/care/presentation/screens/care_consent_screen.dart';
@@ -32,6 +33,7 @@ import '../../features/profile/presentation/screens/habit_create_screen.dart';
 import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
 import '../../features/profile/presentation/screens/history_day_screen.dart';
 import '../../features/profile/presentation/screens/history_screen.dart';
+import '../../features/profile/presentation/screens/change_password_screen.dart';
 import '../../features/profile/presentation/screens/message_style_screen.dart';
 import '../../features/profile/presentation/screens/notification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -65,6 +67,8 @@ abstract final class AppRoutes {
   static const String notification = '/notification';
   static const String messageStyle = '/message-style';
   static const String supportCircle = '/my-circle';
+  static const String forgotPassword = '/forgot-password';
+  static const String changePassword = '/change-password';
   static const String care = '/care';
   static const String careConsent = '/care/consent';
   static const String careRequest = '/care/request';
@@ -145,6 +149,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.register,
         builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (_, _) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
@@ -233,6 +241,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, _) => const CircleScreen(),
           ),
           GoRoute(
+            path: AppRoutes.changePassword,
+            builder: (_, _) => const ChangePasswordScreen(),
+          ),
+          GoRoute(
             path: AppRoutes.care,
             builder: (_, _) => const CareScreen(),
           ),
@@ -255,7 +267,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         AuthStatus.unknown =>
           location == AppRoutes.splash ? null : AppRoutes.splash,
         AuthStatus.unauthenticated =>
-          (location == AppRoutes.login || location == AppRoutes.register)
+          (location == AppRoutes.login ||
+                  location == AppRoutes.register ||
+                  location == AppRoutes.forgotPassword)
               ? null
               : AppRoutes.login,
         // Autenticada: el destino depende del onboarding.

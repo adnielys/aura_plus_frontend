@@ -174,6 +174,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const Text('SESSION', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
                 _Row(
+                  icon: Icons.lock_outline,
+                  title: 'Change password',
+                  subtitle: 'Signs you out on other devices',
+                  onTap: () => context.go(AppRoutes.changePassword),
+                ),
+                _Row(
                   icon: Icons.replay,
                   title: 'Restart onboarding',
                   subtitle: 'Answer again · your stars stay',
