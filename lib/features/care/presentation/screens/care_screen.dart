@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -250,9 +251,9 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
             trailing: isRequested
                 ? const CareSentBadge()
                 : isResting
-                    ? const Icon(Icons.lock_outline,
+                    ? const Icon(CupertinoIcons.lock,
                         size: 16, color: Color(0xFFB9AFC2))
-                    : const Icon(Icons.chevron_right,
+                    : const Icon(CupertinoIcons.chevron_right,
                         size: 20, color: AppColors.textSecondary),
           ),
         ),

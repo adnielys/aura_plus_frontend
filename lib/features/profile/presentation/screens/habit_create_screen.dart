@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -223,7 +224,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.arrow_back_ios_new,
+                const Icon(CupertinoIcons.back,
                     size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Text(fromSwap ? 'Home' : 'Catalog',

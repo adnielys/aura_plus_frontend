@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -219,7 +220,7 @@ class _Body extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_right,
+                      const Icon(CupertinoIcons.chevron_right,
                           size: 20, color: AppColors.textSecondary),
                     ],
                   ),
@@ -241,8 +242,10 @@ class _Body extends StatelessWidget {
           );
 }
 
-/// Cielo ROSADO del maquetado: halo radial suave, la ilustración de la
-/// constelación del ciclo, pill con el nombre y "By Aura Plus".
+/// Cielo de la constelación: la ilustración del ciclo, pill con el nombre y
+/// "By Aura Plus". Sin halo rosado de fondo — la ilustración ya trae su nube
+/// y su degradado, así que se apoya sobre el fondo neutro de la pantalla en
+/// vez de recortarse como un rectángulo de color.
 class _Sky extends StatelessWidget {
   const _Sky({required this.constellation});
 
@@ -252,14 +255,7 @@ class _Sky extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(top: 26, bottom: 20),
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.4),
-          radius: 1.1,
-          colors: [Color(0xFFF9DCE7), Color(0xFFFBEAF0), Color(0xFFFAFAFA)],
-          stops: [0, 0.6, 1],
-        ),
-      ),
+      color: AppColors.background,
       child: Column(
         children: [
           Image.asset(

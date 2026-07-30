@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,28 +33,34 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   Widget get child => widget.child;
 
+  // Iconos estilo iOS (Cupertino): contorno en reposo, RELLENO al estar
+  // activo — la convención de la barra de pestañas de iOS.
   static const _tabs = [
     (
       route: AppRoutes.home,
-      icon: Icons.home_outlined,
+      icon: CupertinoIcons.house,
+      activeIcon: CupertinoIcons.house_fill,
       asset: null,
       label: 'Today',
     ),
     (
       route: AppRoutes.constellation,
-      icon: Icons.auto_awesome_outlined,
+      icon: CupertinoIcons.sparkles,
+      activeIcon: CupertinoIcons.sparkles,
       asset: 'assets/images/nav_constellation.svg',
       label: 'Constellation',
     ),
     (
       route: AppRoutes.cycle,
-      icon: Icons.nightlight_outlined,
+      icon: CupertinoIcons.moon,
+      activeIcon: CupertinoIcons.moon_fill,
       asset: null,
       label: 'Cycle',
     ),
     (
       route: AppRoutes.profile,
-      icon: Icons.person_outline,
+      icon: CupertinoIcons.person,
+      activeIcon: CupertinoIcons.person_fill,
       asset: null,
       label: 'Profile',
     ),
@@ -64,7 +71,13 @@ class _AppShellState extends ConsumerState<AppShell> {
     final location = GoRouterState.of(context).matchedLocation;
 
     Widget item(
-        ({String route, IconData icon, String? asset, String label}) tab) {
+        ({
+          String route,
+          IconData icon,
+          IconData activeIcon,
+          String? asset,
+          String label
+        }) tab) {
       final active = location == tab.route;
       final color = active ? AppColors.primary : AppColors.textSecondary;
       final iconWidget = tab.asset != null
@@ -74,7 +87,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               height: 22,
               colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
             )
-          : Icon(tab.icon, size: 22, color: color);
+          : Icon(active ? tab.activeIcon : tab.icon, size: 22, color: color);
       return Expanded(
         child: InkWell(
           onTap: () => context.go(tab.route),

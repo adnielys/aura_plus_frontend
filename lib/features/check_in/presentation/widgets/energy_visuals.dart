@@ -31,14 +31,23 @@ extension EnergyVisuals on EmotionalState {
         EmotionalState.hard => 'assets/images/reco/empty.png',
       };
 
-  /// Sublabel del check-in según DECISION_CHECKIN_ESCALA_ESTADOS
-  /// (reconciliación #12): 5 estados cualitativos con idéntica dignidad,
-  /// sin orden implícito ni gradiente de energía.
+  /// Etiqueta del estado EN EL CHECK-IN (maquetado "How much energy today?").
+  /// Es propia de esta pantalla: el resto de la app sigue usando `label` del
+  /// enum (Home "Today you are calm", historial…), que no se toca aquí.
+  String get checkInLabel => switch (this) {
+        EmotionalState.energy => 'Energized',
+        EmotionalState.tranquil => 'Steady',
+        EmotionalState.scattered => 'So-so',
+        EmotionalState.exhausted => 'Low',
+        EmotionalState.hard => 'Empty',
+      };
+
+  /// Sublabel del check-in (maquetado nueva escala de energía).
   String get checkInHint => switch (this) {
-        EmotionalState.energy => 'Ready to move today',
-        EmotionalState.tranquil => 'In steady mode',
-        EmotionalState.scattered => 'Mind going in all directions',
-        EmotionalState.exhausted => 'Asking for a pause',
-        EmotionalState.hard => 'Weighs most today',
+        EmotionalState.energy => 'Room for a bit more',
+        EmotionalState.tranquil => 'A couple of gentle steps',
+        EmotionalState.scattered => 'Keep it light',
+        EmotionalState.exhausted => 'Just one small thing',
+        EmotionalState.hard => 'Today, only rest',
       };
 }

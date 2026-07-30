@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -94,7 +95,7 @@ class _TopBar extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: canGoBack
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                icon: const Icon(CupertinoIcons.back, size: 18),
                 color: AppColors.textSecondary,
                 onPressed: onBack,
               )
@@ -1423,7 +1424,7 @@ class _CancelLink extends ConsumerWidget {
               color: Color(0xFFECEAEE),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.close, size: 13, color: Color(0xFF8B8692)),
+            child: const Icon(CupertinoIcons.xmark, size: 13, color: Color(0xFF8B8692)),
           ),
         ],
       ),

@@ -1,10 +1,10 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../providers/daily_flow_controller.dart';
@@ -62,11 +62,13 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
                 children: [
+                  // Cabecera centrada (maquetado): saludo tenue, pregunta serif
+                  // con "energy" en carmesí itálica, y la promesa de Aura.
                   Text(
-                    _greeting.toUpperCase(),
-                    // Eyebrow del maquetado: GFS Didot, en el magenta de la app.
-                    style: AppTypography.eyebrow
-                        .copyWith(color: AppColors.primary),
+                    _greeting,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 13, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 6),
                   Text.rich(
@@ -74,18 +76,41 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                       TextSpan(text: 'How much ', style: serif),
                       TextSpan(
                         text: 'energy',
-                        style: serif.copyWith(color: AppColors.primary),
+                        style: serif.copyWith(
+                          color: AppColors.primary,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
-                      TextSpan(text: ' is there today?', style: serif),
+                      TextSpan(text: ' today?', style: serif),
                     ]),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   const Text(
                     'Aura shapes your day around it',
+                    textAlign: TextAlign.center,
                     style:
                         TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
+                  // Hero: cambia a la ilustración del estado elegido a medida
+                  // que ella toca cada tarjeta (recoHeroAsset). Antes de elegir,
+                  // la imagen genérica "energía personal" que invita.
+                  Center(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 280),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: Image.asset(
+                        _selected?.recoHeroAsset ??
+                            'assets/images/energy/energia_personal.png',
+                        key: ValueKey(_selected),
+                        height: 220,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   for (final state in checkInOrder) ...[
                     _StateCard(
                       state: state,
@@ -157,7 +182,7 @@ class _StateCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    state.label,
+                    state.checkInLabel,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -187,7 +212,7 @@ class _StateCard extends StatelessWidget {
                 ),
               ),
               child: selected
-                  ? const Icon(Icons.check, size: 13, color: Colors.white)
+                  ? const Icon(CupertinoIcons.checkmark, size: 13, color: Colors.white)
                   : null,
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,7 +23,7 @@ class CareBackRow extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.arrow_back_ios_new,
+            Icon(CupertinoIcons.back,
                 size: 14, color: AppColors.textSecondary),
             SizedBox(width: 6),
             Text('Profile',
@@ -104,12 +105,12 @@ class CareSearchField extends StatelessWidget {
           isDense: true,
           hintText: 'Search by name or type — doula, psychologist…',
           hintStyle: const TextStyle(fontSize: 12.5, color: Color(0xFFB9AFC2)),
-          prefixIcon: const Icon(Icons.search,
+          prefixIcon: const Icon(CupertinoIcons.search,
               size: 18, color: Color(0xFFB9AFC2)),
           suffixIcon: controller.text.isEmpty
               ? null
               : IconButton(
-                  icon: const Icon(Icons.close,
+                  icon: const Icon(CupertinoIcons.xmark,
                       size: 16, color: Color(0xFFB9AFC2)),
                   onPressed: onClear,
                 ),
@@ -212,7 +213,7 @@ class CareSentBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          Icon(Icons.send_rounded, size: 12, color: AppColors.careAccent),
+          Icon(CupertinoIcons.paperplane_fill, size: 12, color: AppColors.careAccent),
           SizedBox(width: 4),
           Text(
             'sent',
