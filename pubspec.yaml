@@ -41,6 +41,9 @@ dependencies:
   # Navegación declarativa.
   go_router: ^14.6.1
 
+  # Render de SVG (estrella del logo en la barra inferior).
+  flutter_svg: ^2.0.10
+
   # Cliente HTTP para conectar al backend FastAPI.
   dio: ^5.7.0
 
