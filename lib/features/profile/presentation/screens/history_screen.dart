@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
@@ -36,6 +38,37 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final List<HistoryDay> _extra = [];
   bool _hasMore = true;
   bool _loadingMore = false;
+  bool _exporting = false;
+
+  /// Exportar su historia (jul 2026): el servidor compone el diario .txt con
+  /// los textos EXACTOS persistidos; aquí solo se abre la hoja de compartir
+  /// del sistema (guardarlo, enviárselo, imprimirlo — ella decide).
+  Future<void> _exportStory() async {
+    if (_exporting) return;
+    setState(() => _exporting = true);
+    try {
+      final response = await ref.read(dioProvider).get<String>(
+            '/session/export',
+            options: Options(responseType: ResponseType.plain),
+          );
+      final text = response.data ?? '';
+      if (text.isEmpty) throw Exception('empty');
+      await SharePlus.instance.share(
+        ShareParams(text: text, subject: 'My story — Aura+'),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content:
+                Text("We couldn't prepare your story. Try again in a moment."),
+          ));
+      }
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
 
   @override
   void initState() {
@@ -158,6 +191,43 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           fontSize: 11.5,
                           height: 1.5,
                           color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
+                if (days.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  // Exportar (jul 2026): su memoria es SUYA — se la lleva
+                  // cuando quiera, como un diario.
+                  InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: _exporting ? null : _exportStory,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFBFD),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFFE2A9BF),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: _exporting
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: AppColors.primary),
+                              )
+                            : const Text(
+                                'Export my story ✦',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ],

@@ -166,6 +166,14 @@ Tocar un área → AreaGesturesScreen (M3): gestos REGISTRADOS de 28 días con
 resultado en dignidad (Lo hice/A medias/No fue posible) y salida secundaria
 al banco filtrado. Fechas cercanas via shared/utils/dates.dart (hoy/ayer/N de mes).
 
+## Exportar historia — YA EN LA APP (jul 2026)
+Botón "Export my story ✦" al pie de Historia: GET /session/export
+(text/plain, ResponseType.plain — SIN envelope) y hoja de compartir del
+sistema vía share_plus (texto directo, sin archivos temporales: ella
+decide dónde guardarlo). Formato diario elegido por recomendación;
+PDF/JSON evolucionables encima. El servidor compone TODO (textos exactos
+persistidos); el cliente solo comparte.
+
 ## Historia v2 — YA EN LA APP
 Lista viva (V1): color del estado por día (barrita interna — OJO: un borde
 izquierdo grueso NO convive con borderRadius en Flutter), nº de gestos,
