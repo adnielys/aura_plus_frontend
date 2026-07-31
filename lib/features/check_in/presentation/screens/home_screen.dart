@@ -30,12 +30,30 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _closing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Cola offline: si quedó un cierre esperando red, se reintenta en
+    // SILENCIO al entrar; si entra, las estrellas aparecen con normalidad.
+    Future.microtask(() async {
+      if (!mounted) return;
+      final synced = await ref
+          .read(sessionControllerProvider.notifier)
+          .retryPendingClose();
+      if (synced && mounted) {
+        ref.invalidate(todaySessionProvider);
+        ref.invalidate(currentConstellationProvider);
+        ref.invalidate(areasPresenceProvider);
+      }
+    });
+  }
+
   Future<void> _closeDay(Recommendation recommendation) async {
     final draft = ref.read(sessionDraftProvider);
     final habit1 = draft[recommendation.habit1.id];
     if (habit1 == null || _closing) return;
     setState(() => _closing = true);
-    final ok = await ref
+    final outcome = await ref
         .read(sessionControllerProvider.notifier)
         .closeDay(
           habit1Result: habit1,
@@ -48,20 +66,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
     if (!mounted) return;
     setState(() => _closing = false);
-    if (ok) {
-      ref.read(sessionDraftProvider.notifier).clear();
-      ref.invalidate(currentConstellationProvider);
-      ref.invalidate(todaySessionProvider);
-      ref.invalidate(areasPresenceProvider); // el cierre puede encender áreas
-      context.go(AppRoutes.dayClose);
-    } else {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text("We couldn't close your day. Try again in a moment."),
-          ),
-        );
+    switch (outcome) {
+      case CloseOutcome.closed:
+        ref.read(sessionDraftProvider.notifier).clear();
+        ref.invalidate(currentConstellationProvider);
+        ref.invalidate(todaySessionProvider);
+        ref.invalidate(areasPresenceProvider); // el cierre puede encender áreas
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.savedOffline:
+        // El registro NO se pierde: celebración en diferido, sin estrellas.
+        ref.read(sessionDraftProvider.notifier).clear();
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.failed:
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content:
+                  Text("We couldn't close your day. Try again in a moment."),
+            ),
+          );
     }
   }
 

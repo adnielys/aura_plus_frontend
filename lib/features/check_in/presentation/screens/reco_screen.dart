@@ -42,7 +42,7 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
     setState(() => _closing = true);
     final draft = ref.read(sessionDraftProvider);
     // Sin marcar cuenta como "no fue posible": también suma (filosofía).
-    final ok = await ref.read(sessionControllerProvider.notifier).closeDay(
+    final outcome = await ref.read(sessionControllerProvider.notifier).closeDay(
           habit1Result:
               draft[recommendation.habit1.id] ?? HabitResult.notPossible,
           habit2Result: recommendation.habit2 == null
@@ -54,16 +54,21 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
         );
     if (!mounted) return;
     setState(() => _closing = false);
-    if (ok) {
-      ref.read(sessionDraftProvider.notifier).clear();
-      ref.invalidate(currentConstellationProvider);
-      context.go(AppRoutes.dayClose);
-    } else {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
-          content: Text("We couldn't close your day. Try again in a moment."),
-        ));
+    switch (outcome) {
+      case CloseOutcome.closed:
+        ref.read(sessionDraftProvider.notifier).clear();
+        ref.invalidate(currentConstellationProvider);
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.savedOffline:
+        // Sin red: el registro queda guardado y la celebración va en diferido.
+        ref.read(sessionDraftProvider.notifier).clear();
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.failed:
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content: Text("We couldn't close your day. Try again in a moment."),
+          ));
     }
   }
 

@@ -90,12 +90,26 @@ enums en snake_case con mapeo explícito; base URL por plataforma.
       eso en cuentas de prueba renombradas puede no coincidir nombre↔dibujo —
       en cuentas nuevas siempre coincide).
 - [x] 6 — Perfil + voz de Aura + Mi ciclo + Círculo + notificación local.
-      Pendiente real: cola offline del cierre + recuperación de contraseña +
-      prueba en dispositivo físico (ver mapa_flujos_aura.html).
+      Cola offline del cierre: HECHA. Recuperación de contraseña: HECHA.
+      Pendiente real: prueba en dispositivo físico (ver mapa_flujos_aura.html).
 
 ## Backend (para conectar)
 Local prod-parity: `docker compose up --build -d` en `C:\dev\auraplus-backend`
 → `http://localhost:8000`, Swagger en `/docs`, `/health` da 200. Auth Bearer JWT.
+
+## Cola offline del cierre — YA EN LA APP (jul 2026)
+El registro jamás se pierde por la red. Si POST /session falla por RED
+(NetworkFailure, no validación), el cierre se guarda en shared_preferences
+(PendingCloseStore, máx 1) y la celebración va en DIFERIDO: mismo ritual,
+copy aprobado ("Your day is saved with me…"), chip "Waiting for
+connection", SIN estrellas (GUARD_STAR_02) y sin botón a la constelación.
+Reintento SILENCIOSO al arrancar y al entrar al Home (initState); entra ->
+las estrellas aparecen con normalidad (GUARD_SESSION_01 lo hace
+idempotente). Un pendiente solo vale SU día: fecha vieja o 4xx -> se
+descarta sin aviso (el silencio nunca castiga). closeDay devuelve
+CloseOutcome {closed|savedOffline|failed}. OJO verificación: el reintento
+del Home puede caer antes de que la red del emulador esté lista — el del
+arranque lo recoge.
 
 ## Tercer hábito con 30+ — YA EN LA APP (jul 2026)
 El máximo diario sube a 3 SOLO si ella declaró "Some time (30 min+)" y su
