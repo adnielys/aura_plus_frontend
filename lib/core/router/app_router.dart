@@ -13,6 +13,7 @@ import '../../features/care/presentation/screens/care_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
+import '../../features/companion/presentation/screens/companion_screen.dart';
 import '../../features/circle/presentation/screens/circle_screen.dart';
 import '../../features/cycle/presentation/screens/cycle_screen.dart';
 import '../../features/check_in/presentation/screens/home_screen.dart';
@@ -67,6 +68,7 @@ abstract final class AppRoutes {
   static const String notification = '/notification';
   static const String messageStyle = '/message-style';
   static const String supportCircle = '/my-circle';
+  static const String companion = '/companion';
   static const String forgotPassword = '/forgot-password';
   static const String changePassword = '/change-password';
   static const String care = '/care';
@@ -243,6 +245,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.changePassword,
             builder: (_, _) => const ChangePasswordScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.companion,
+            builder: (_, _) => const CompanionScreen(),
           ),
           GoRoute(
             path: AppRoutes.care,
