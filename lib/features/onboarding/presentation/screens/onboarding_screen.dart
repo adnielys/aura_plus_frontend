@@ -707,14 +707,13 @@ class _FeelingCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Marco interior de la ilustración (como el maquetado).
+            // Ilustración sin marco interior: solo el borde externo de la card.
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFF5E6ED)),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(feeling.imageAsset, fit: BoxFit.cover),
@@ -1457,6 +1456,13 @@ class _EmotionalContract extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(30, 24, 30, 28),
           child: Column(
             children: [
+              const SizedBox(height: 8),
+              // Imagen del maquetado (homeimage) sobre el texto de cierre.
+              Image.asset(
+                'assets/images/onboarding/homeimage.png',
+                width: double.infinity,
+                fit: BoxFit.contain,
+              ),
               const Spacer(),
               const Text('✦',
                   style: TextStyle(fontSize: 30, color: AppColors.entryAccent)),
