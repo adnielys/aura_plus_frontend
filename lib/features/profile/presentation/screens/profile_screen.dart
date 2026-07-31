@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -110,7 +111,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const Text('SETTINGS', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
                 _Row(
-                  icon: Icons.notifications_none,
+                  icon: CupertinoIcons.bell,
                   title: 'Daily notification',
                   subtitle: switch (notification.valueOrNull) {
                     null => 'Once a day',
@@ -132,7 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => context.go(AppRoutes.messageStyle),
                 ),
                 _Row(
-                  icon: Icons.calendar_today_outlined,
+                  icon: CupertinoIcons.calendar,
                   title: 'History',
                   subtitle: 'Your whole story',
                   onTap: () => context.go(AppRoutes.history),
@@ -174,19 +175,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const Text('SESSION', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
                 _Row(
-                  icon: Icons.lock_outline,
+                  icon: CupertinoIcons.lock,
                   title: 'Change password',
                   subtitle: 'Signs you out on other devices',
                   onTap: () => context.go(AppRoutes.changePassword),
                 ),
                 _Row(
-                  icon: Icons.replay,
+                  icon: CupertinoIcons.arrow_counterclockwise,
                   title: 'Restart onboarding',
                   subtitle: 'Answer again · your stars stay',
                   onTap: () => _confirmRestart(context, ref),
                 ),
                 _Row(
-                  icon: Icons.logout,
+                  icon: CupertinoIcons.square_arrow_right,
                   title: 'Sign out',
                   subtitle: 'See you soon',
                   onTap: () =>
@@ -393,7 +394,7 @@ class _Row extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right,
+            const Icon(CupertinoIcons.chevron_right,
                 size: 20, color: AppColors.textSecondary),
           ],
         ),

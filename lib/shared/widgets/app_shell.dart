@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
@@ -31,24 +33,61 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   Widget get child => widget.child;
 
+  // Iconos estilo iOS (Cupertino): contorno en reposo, RELLENO al estar
+  // activo — la convención de la barra de pestañas de iOS.
   static const _tabs = [
-    (route: AppRoutes.home, icon: Icons.home_outlined, label: 'Home'),
+    (
+      route: AppRoutes.home,
+      icon: CupertinoIcons.house,
+      activeIcon: CupertinoIcons.house_fill,
+      asset: null,
+      label: 'Today',
+    ),
     (
       route: AppRoutes.constellation,
-      icon: Icons.auto_awesome_outlined,
+      icon: CupertinoIcons.sparkles,
+      activeIcon: CupertinoIcons.sparkles,
+      asset: 'assets/images/nav_constellation.svg',
       label: 'Constellation',
     ),
-    (route: AppRoutes.cycle, icon: Icons.nightlight_outlined, label: 'Cycle'),
-    (route: AppRoutes.profile, icon: Icons.person_outline, label: 'Profile'),
+    (
+      route: AppRoutes.cycle,
+      icon: CupertinoIcons.moon,
+      activeIcon: CupertinoIcons.moon_fill,
+      asset: null,
+      label: 'Cycle',
+    ),
+    (
+      route: AppRoutes.profile,
+      icon: CupertinoIcons.person,
+      activeIcon: CupertinoIcons.person_fill,
+      asset: null,
+      label: 'Profile',
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
 
-    Widget item(({String route, IconData icon, String label}) tab) {
+    Widget item(
+        ({
+          String route,
+          IconData icon,
+          IconData activeIcon,
+          String? asset,
+          String label
+        }) tab) {
       final active = location == tab.route;
       final color = active ? AppColors.primary : AppColors.textSecondary;
+      final iconWidget = tab.asset != null
+          ? SvgPicture.asset(
+              tab.asset!,
+              width: 22,
+              height: 22,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            )
+          : Icon(active ? tab.activeIcon : tab.icon, size: 22, color: color);
       return Expanded(
         child: InkWell(
           onTap: () => context.go(tab.route),
@@ -57,7 +96,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(tab.icon, size: 22, color: color),
+                iconWidget,
                 const SizedBox(height: 2),
                 Text(
                   tab.label,
@@ -105,8 +144,13 @@ class _AppShellState extends ConsumerState<AppShell> {
                               colors: [AppColors.primary, AppColors.secondary],
                             ),
                           ),
-                          child: const Icon(Icons.auto_awesome,
-                              size: 22, color: Colors.white),
+                          child: Center(
+                            child: SvgPicture.asset(
+                              'assets/images/aura_star.svg',
+                              width: 22,
+                              height: 22,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 1),
                         const Text(

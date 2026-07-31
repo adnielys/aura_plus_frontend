@@ -125,6 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Text(
                 '$_greeting, ${profile.valueOrNull?.name ?? '…'}',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -142,9 +143,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
+                  textAlign: TextAlign.center,
                 )
               else
-                Text('Your day starts with you', style: serif),
+                Text(
+                  'Your day starts with you',
+                  textAlign: TextAlign.center,
+                  style: serif,
+                ),
               const SizedBox(height: 14),
               // Hero del maquetado: tras el check-in cambia a la ilustración
               // del estado elegido; antes, la imagen genérica del Home.

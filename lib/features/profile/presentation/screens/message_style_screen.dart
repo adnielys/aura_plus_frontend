@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -123,8 +124,8 @@ class _StyleOption extends StatelessWidget {
               children: [
                 Icon(
                   selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
+                      ? CupertinoIcons.largecircle_fill_circle
+                      : CupertinoIcons.circle,
                   size: 18,
                   color: selected
                       ? AppColors.primary

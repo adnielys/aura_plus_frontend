@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -213,7 +214,7 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                       color: Color(0xFFECEAEE),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close,
+                    child: const Icon(CupertinoIcons.xmark,
                         size: 13, color: Color(0xFF8B8692)),
                   ),
                 ],

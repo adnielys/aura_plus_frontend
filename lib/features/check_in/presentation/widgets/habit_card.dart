@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -152,7 +153,7 @@ class HabitCard extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.border),
                         ),
-                        child: const Icon(Icons.swap_horiz,
+                        child: const Icon(CupertinoIcons.arrow_right_arrow_left,
                             size: 16, color: AppColors.textSecondary),
                       ),
                     ),

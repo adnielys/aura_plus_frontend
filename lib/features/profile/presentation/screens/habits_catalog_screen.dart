@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -144,7 +145,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                     color: Color(0xFFB9AFC2),
                   ),
                   prefixIcon: const Icon(
-                    Icons.search,
+                    CupertinoIcons.search,
                     size: 18,
                     color: Color(0xFFB9AFC2),
                   ),
@@ -152,7 +153,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                       ? null
                       : IconButton(
                           icon: const Icon(
-                            Icons.close,
+                            CupertinoIcons.xmark,
                             size: 16,
                             color: Color(0xFFB9AFC2),
                           ),
@@ -258,7 +259,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: const Icon(
-                        Icons.star_border,
+                        CupertinoIcons.star,
                         size: 16,
                         color: AppColors.primary,
                       ),
@@ -331,18 +332,9 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
           color: on ? fillBg : AppColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: on ? Colors.transparent : AppColors.border,
+            color: on ? accent : AppColors.border,
             width: 1.5,
           ),
-          boxShadow: on
-              ? [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.16),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
         ),
         child: Column(
           children: [

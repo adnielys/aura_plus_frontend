@@ -2,6 +2,10 @@
 // en los espejos es poco fiable en esta red; el JAR normal sí resuelve.
 // app/build.gradle.kts lo aplica SOLO si google-services.json existe.
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
         classpath("com.google.gms:google-services:4.4.3")
     }
