@@ -20,6 +20,19 @@ class CycleScreen extends ConsumerStatefulWidget {
   ConsumerState<CycleScreen> createState() => _CycleScreenState();
 }
 
+/// Predicciones de fertilidad (ovulación, ventana fértil): OCULTAS por
+/// decisión de producto (jul 2026). El código queda intacto y se reactiva
+/// cambiando esta bandera, pero hoy NO se muestran porque:
+///   · afirmar probabilidad de embarazo acerca la app a producto sanitario
+///     (precedente Natural Cycles: ensayos clínicos + marcado CE/FDA);
+///   · el modelo de 28 días fijos ignora la regularidad que ella declaró —
+///     a un cuerpo irregular le hablaría con una certeza que no existe;
+///   · Aura acompaña, no mide: una ventana fértil pone al cuerpo a rendir
+///     cuentas contra una norma (y duele distinto en posparto, en pérdida
+///     o buscando embarazo).
+/// Si algún día se activa, es producto aparte y con revisión legal.
+const bool showFertilityInsights = false;
+
 /// Copy por estación. Winter es HECHO registrado; el resto habla con "may"
 /// (GUARD_MENS_04: una estimación jamás se presenta como certeza).
 const _seasonCopy = {
@@ -287,40 +300,44 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
         const SizedBox(height: 12),
         _auraAdaptsCard(),
         const SizedBox(height: 12),
-        Row(children: [
-          Expanded(
-            child: _infoCard(
-              icon: Icons.egg_alt_outlined,
-              tint: const Color(0xFFEAF7EF),
-              iconColor: const Color(0xFF2E9E5B),
-              title: 'Ovulation',
-              pill: est.daysToOvulation == 0
-                  ? 'today'
-                  : 'in ${est.daysToOvulation} days',
-              pillColor: const Color(0xFF2E9E5B),
-              pillBg: const Color(0xFFEAF7EF),
-              detail: 'Day ${CycleEstimate.ovulationDay}',
+        // Ovulación + próxima regla + ventana fértil: ocultas (ver
+        // showFertilityInsights). El widget sigue vivo para reactivarlas.
+        if (showFertilityInsights) ...[
+          Row(children: [
+            Expanded(
+              child: _infoCard(
+                icon: Icons.egg_alt_outlined,
+                tint: const Color(0xFFEAF7EF),
+                iconColor: const Color(0xFF2E9E5B),
+                title: 'Ovulation',
+                pill: est.daysToOvulation == 0
+                    ? 'today'
+                    : 'in ${est.daysToOvulation} days',
+                pillColor: const Color(0xFF2E9E5B),
+                pillBg: const Color(0xFFEAF7EF),
+                detail: 'Day ${CycleEstimate.ovulationDay}',
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _infoCard(
-              icon: Icons.water_drop_outlined,
-              tint: const Color(0xFFFCE3EC),
-              iconColor: AppColors.primary,
-              title: 'Next Period',
-              pill: est.inPeriod ? 'now' : 'in ${est.daysToNextPeriod} days',
-              pillColor: AppColors.primary,
-              pillBg: const Color(0xFFFCE3EC),
-              detail: est.inPeriod
-                  ? 'Day ${est.cycleDay} of period'
-                  : 'Around day ${CycleEstimate.cycleLength}',
+            const SizedBox(width: 12),
+            Expanded(
+              child: _infoCard(
+                icon: Icons.water_drop_outlined,
+                tint: const Color(0xFFFCE3EC),
+                iconColor: AppColors.primary,
+                title: 'Next Period',
+                pill: est.inPeriod ? 'now' : 'in ${est.daysToNextPeriod} days',
+                pillColor: AppColors.primary,
+                pillBg: const Color(0xFFFCE3EC),
+                detail: est.inPeriod
+                    ? 'Day ${est.cycleDay} of period'
+                    : 'Around day ${CycleEstimate.cycleLength}',
+              ),
             ),
-          ),
-        ]),
-        const SizedBox(height: 12),
-        _fertilityCard(fert),
-        const SizedBox(height: 12),
+          ]),
+          const SizedBox(height: 12),
+          _fertilityCard(fert),
+          const SizedBox(height: 12),
+        ],
         Row(children: [
           Expanded(
             child: _statTile('${CycleEstimate.cycleLength}', 'Avg Cycle',
