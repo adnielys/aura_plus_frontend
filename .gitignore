@@ -47,3 +47,10 @@ app.*.map.json
 # Design preview bundle — vive en su propio repo (github.com/adnielys/aura_preview)
 /aura_preview/
 android/build/
+
+# Secretos: llaves de API en archivos sueltos. JAMÁS al repositorio —
+# si una llave llega a un commit, queda en el historial para siempre y
+# hay que rotarla, no basta con borrar el archivo.
+APIKEY.txt
+*.key
+secrets/
