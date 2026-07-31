@@ -1256,10 +1256,10 @@ class _StepTime extends ConsumerWidget {
             ),
         ],
       ),
-      // Anti-vergüenza: promete poco en el momento exacto de la decisión.
+      // Anti-vergüenza REACTIVA: valida el número que ELLA dijo — jamás un
+      // benchmark que deje corta una opción (textos aprobados jul 2026).
       microcopy:
-          'Ten minutes a day is enough to build something that matters. '
-          'Aura+ adapts to what you have.',
+          selected == null ? timeReflectionDefault : timeReflections[selected],
     );
   }
 }
@@ -1324,8 +1324,11 @@ class _StepMoment extends ConsumerWidget {
             ),
         ],
       ),
-      // La promesa del producto, explícita en el momento de la decisión.
-      microcopy: 'One message a day, at this moment. Nothing more.',
+      // La promesa del producto (1 mensaje/día) es idéntica en las 4
+      // opciones; solo se tiñe del momento elegido (aprobados jul 2026).
+      microcopy: selected == null
+          ? momentReflectionDefault
+          : momentReflections[selected],
     );
   }
 }

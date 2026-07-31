@@ -36,6 +36,63 @@ void main() {
     });
   });
 
+  group('timeReflections (3/3) y momentReflections (4/4) — aprobados', () {
+    test('cubren todas las opciones sin vacíos ni repetidos', () {
+      expect(timeReflections.length, TimeSlot.values.length);
+      expect(momentReflections.length, PreferredMoment.values.length);
+      for (final text in [
+        ...timeReflections.values,
+        ...momentReflections.values,
+        timeReflectionDefault,
+        momentReflectionDefault,
+      ]) {
+        expect(text.trim(), isNotEmpty);
+      }
+      expect(timeReflections.values.toSet().length, TimeSlot.values.length);
+      expect(
+        momentReflections.values.toSet().length,
+        PreferredMoment.values.length,
+      );
+    });
+
+    test('5 minutos se valida TAL CUAL — jamás un benchmark de 10', () {
+      expect(
+        timeReflections[TimeSlot.minimal],
+        "Five minutes is not little — it's a door. Aura fits inside it.",
+      );
+      expect(timeReflections[TimeSlot.minimal], isNot(contains('Ten')));
+    });
+
+    test('la promesa 1/día está en las 4 variantes de momento', () {
+      for (final text in momentReflections.values) {
+        expect(text, contains('One message a day'));
+        expect(text, contains('Nothing more.'));
+      }
+    });
+  });
+
+  group('paso 5 · el reflejo de tiempo cambia con la selección', () {
+    testWidgets('sin selección el neutro; con 5 min su validación',
+        (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: OnboardingScreen()),
+        ),
+      );
+      container.read(onboardingControllerProvider.notifier).goToStep(5);
+      await tester.pumpAndSettle();
+      expect(find.text(timeReflectionDefault), findsOneWidget);
+
+      await tester.tap(find.text('Almost none (5 min)'));
+      await tester.pumpAndSettle();
+      expect(find.text(timeReflections[TimeSlot.minimal]!), findsOneWidget);
+      expect(find.text(timeReflectionDefault), findsNothing);
+    });
+  });
+
   group('paso 4 · la línea cambia con la selección', () {
     testWidgets('tocar un chip muestra su reflejo; cambiar lo sustituye',
         (tester) async {
