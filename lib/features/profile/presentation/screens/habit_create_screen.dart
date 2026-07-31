@@ -11,11 +11,13 @@ import '../../../check_in/presentation/providers/daily_flow_controller.dart';
 import '../providers/habits_catalog_provider.dart';
 
 /// Contexto opcional al crear (H4): desde el cambio ⇄ llega con el área fija
-/// y la duración limitada al hueco; al guardar, sustituye directo.
+/// y la duración limitada al hueco; al guardar, sustituye directo. Con
+/// [edit] la pantalla pasa a MODO EDICIÓN de un hábito propio privado.
 typedef HabitCreateArgs = ({
   HabitArea? fixedArea,
   int? maxMinutes,
   int? swapSlot,
+  CatalogHabit? edit,
 });
 
 /// H2 · Crear tu microhábito (+ H3 confirmación en la misma pantalla).
@@ -45,13 +47,25 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
   int get _maxMinutes => widget.args?.maxMinutes ?? 20;
   int? get _swapSlot => widget.args?.swapSlot;
 
+  /// Modo edición (decisión B jul 2026): solo llega aquí un hábito PRIVADO.
+  CatalogHabit? get _editing => widget.args?.edit;
+
   List<int> get _durations =>
       [5, 10, 15, 20].where((minutes) => minutes <= _maxMinutes).toList();
 
   @override
   void initState() {
     super.initState();
-    _area = _fixedArea ?? HabitArea.self;
+    final editing = _editing;
+    if (editing != null) {
+      _titleController.text = editing.title;
+      _area = editing.area;
+      _minutes = _durations.contains(editing.durationMinutes)
+          ? editing.durationMinutes
+          : 5;
+    } else {
+      _area = _fixedArea ?? HabitArea.self;
+    }
   }
 
   @override
@@ -65,6 +79,30 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
     if (title.length < 3 || _saving) return;
     setState(() => _saving = true);
     final router = GoRouter.of(context);
+
+    // Modo edición: PATCH y de vuelta al catálogo (sin ceremonia extra).
+    final editing = _editing;
+    if (editing != null) {
+      try {
+        await updateHabit(
+          ref,
+          id: editing.id,
+          title: title,
+          area: _area,
+          durationMinutes: _minutes,
+        );
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Couldn't save it. Try again.")),
+          );
+          setState(() => _saving = false);
+        }
+        return;
+      }
+      router.go(AppRoutes.habits);
+      return;
+    }
 
     final CatalogHabit habit;
     try {
@@ -346,6 +384,9 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
           ),
         ),
         const SizedBox(height: 10),
+        // En edición no hay palanca de compartir: un privado editado sigue
+        // privado (decisión B); compartirlo sería crear uno nuevo.
+        if (_editing == null)
         Container(
           padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
@@ -419,7 +460,11 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                       strokeWidth: 2, color: Colors.white),
                 )
               : Text(
-                  fromSwap ? 'Save and use it today' : 'Save my microhabit',
+                  _editing != null
+                      ? 'Save changes'
+                      : fromSwap
+                          ? 'Save and use it today'
+                          : 'Save my microhabit',
                   style: const TextStyle(
                       fontWeight: FontWeight.w700, color: Colors.white),
                 ),

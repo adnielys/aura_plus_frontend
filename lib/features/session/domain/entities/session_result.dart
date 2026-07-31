@@ -11,6 +11,7 @@ class DailySession {
     required this.starsEarned,
     required this.closingMessage,
     this.habit2Result,
+    this.habit3Result,
     this.reflection,
   });
 
@@ -18,6 +19,7 @@ class DailySession {
   final DateTime date;
   final HabitResult habit1Result;
   final HabitResult? habit2Result;
+  final HabitResult? habit3Result;
   final String? reflection;
   final int starsEarned;
 

@@ -49,6 +49,12 @@ class _CelebrateScreenState extends ConsumerState<CelebrateScreen> {
     final result = ref.watch(sessionControllerProvider).valueOrNull;
 
     if (result == null) {
+      // Cola offline: sin resultado del servidor pero con un cierre de HOY
+      // guardado -> celebración en DIFERIDO. Sin número de estrellas (las
+      // pone el servidor al sincronizar, GUARD_STAR_02) y sin botón a la
+      // constelación (aún no tiene las nuevas).
+      final pending = ref.watch(pendingCloseProvider).valueOrNull ?? false;
+      if (pending) return _DeferredCelebrate(image: _image);
       return const Scaffold(
         backgroundColor: AppColors.closingBackground,
         body: Center(
@@ -192,6 +198,156 @@ class _CelebrateScreenState extends ConsumerState<CelebrateScreen> {
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           color: Colors.white.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Celebración en DIFERIDO (cola offline): el mismo ritual sereno, pero
+/// honesto — sin estrellas inventadas ni acceso a una constelación que aún
+/// no las tiene. Copy aprobado (jul 2026). El reintento es silencioso.
+class _DeferredCelebrate extends StatelessWidget {
+  const _DeferredCelebrate({required this.image});
+
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [0, 0.55, 1],
+            colors: [Color(0xFF2A0A22), Color(0xFF1E081A), Color(0xFF140610)],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.sizeOf(context).height * 0.58,
+              child: ShaderMask(
+                shaderCallback: (rect) => const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 0.8, 0.92, 1],
+                  colors: [
+                    Colors.black,
+                    Colors.black,
+                    Colors.black54,
+                    Colors.transparent,
+                  ],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 0, 26, 32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const _AuraSparks(),
+                    const SizedBox(height: 14),
+                    Text(
+                      'You showed up today',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium!
+                          .copyWith(
+                            color: Colors.white,
+                            fontStyle: FontStyle.italic,
+                            fontSize: 24,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Your day is saved with me.\n'
+                      "I'll tuck it into your sky as soon as "
+                      "we're back online.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.65,
+                        color: Colors.white.withValues(alpha: 0.78),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: AppColors.star.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: AppColors.star.withValues(alpha: 0.4)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.cloud_off_outlined,
+                                size: 14, color: AppColors.star),
+                            SizedBox(width: 7),
+                            Text(
+                              'Waiting for connection',
+                              style: TextStyle(
+                                  fontSize: 11.5, color: AppColors.star),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    SizedBox(
+                      height: 52,
+                      child: Material(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(50),
+                          onTap: () => context.go(AppRoutes.home),
+                          child: const Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                'Go to start',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              Positioned(
+                                right: 22,
+                                child: Text(
+                                  '✦',
+                                  style: TextStyle(
+                                      fontSize: 13, color: AppColors.primary),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

@@ -43,25 +43,33 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
     setState(() => _closing = true);
     final draft = ref.read(sessionDraftProvider);
     // Sin marcar cuenta como "no fue posible": también suma (filosofía).
-    final ok = await ref.read(sessionControllerProvider.notifier).closeDay(
+    final outcome = await ref.read(sessionControllerProvider.notifier).closeDay(
           habit1Result:
               draft[recommendation.habit1.id] ?? HabitResult.notPossible,
           habit2Result: recommendation.habit2 == null
               ? null
               : draft[recommendation.habit2!.id] ?? HabitResult.notPossible,
+          habit3Result: recommendation.habit3 == null
+              ? null
+              : draft[recommendation.habit3!.id] ?? HabitResult.notPossible,
         );
     if (!mounted) return;
     setState(() => _closing = false);
-    if (ok) {
-      ref.read(sessionDraftProvider.notifier).clear();
-      ref.invalidate(currentConstellationProvider);
-      context.go(AppRoutes.dayClose);
-    } else {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
-          content: Text("We couldn't close your day. Try again in a moment."),
-        ));
+    switch (outcome) {
+      case CloseOutcome.closed:
+        ref.read(sessionDraftProvider.notifier).clear();
+        ref.invalidate(currentConstellationProvider);
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.savedOffline:
+        // Sin red: el registro queda guardado y la celebración va en diferido.
+        ref.read(sessionDraftProvider.notifier).clear();
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.failed:
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content: Text("We couldn't close your day. Try again in a moment."),
+          ));
     }
   }
 
@@ -143,9 +151,11 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                         ],
                       ),
                       child: Text(
-                        habits.length == 1
-                            ? 'One small gesture, just for you'
-                            : 'Two small gestures, in ${habits.length} areas',
+                        switch (habits.length) {
+                          1 => 'One small gesture, just for you',
+                          2 => 'Two small gestures, in 2 areas',
+                          _ => 'Three small gestures, in 3 areas',
+                        },
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -168,9 +178,9 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                                 context,
                                 slot: index + 1,
                                 current: habit,
-                                other: habits
+                                others: habits
                                     .where((h) => h.id != habit.id)
-                                    .firstOrNull,
+                                    .toList(),
                                 state: result.checkIn.emotionalState,
                               ),
                       onMark: (value) => ref

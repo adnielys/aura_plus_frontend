@@ -7,6 +7,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/constellation.dart';
 import '../providers/constellation_provider.dart';
+import '../providers/cycle_story_provider.dart';
+import '../widgets/constellation_visuals.dart';
 
 /// My sky (Bloque 2 · Q1): todos sus ciclos como cielos nocturnos apilados.
 /// Solo lectura sobre `/constellation/all`. Cada ciclo muestra SU luz —
@@ -131,7 +133,8 @@ const _anchorLabels = {
   'small_daily': 'the small things of each day',
 };
 
-/// Tarjeta de cielo nocturno de UN ciclo (mockup Q1).
+/// Tarjeta de cielo nocturno de UN ciclo (mockup Q1). Los ciclos YA
+/// cerrados se pueden tocar: abren su relato guardado (retrospectiva).
 class _SkyCard extends StatelessWidget {
   const _SkyCard({required this.constellation});
 
@@ -152,7 +155,13 @@ class _SkyCard extends StatelessWidget {
     ].join(' · ');
     final anchor = _anchorLabels[c.reflectionAnchor];
 
-    return Container(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        // Solo los ciclos cerrados tienen relato (el actual aún se escribe).
+        onTap: c.isCurrent ? null : () => _showCycleStory(context, c),
+        child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -238,57 +247,189 @@ class _SkyCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 10),
-          _DotsRow(lit: c.litStars, total: c.starsMax),
+          // Su constelación REAL (la pieza del diseñador de ese ciclo) — el
+          // cielo guarda el dibujo tal como lo vivió, no puntos decorativos.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              c.imageAsset,
+              height: 130,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
         ],
       ),
-    );
-  }
-}
-
-/// Fila de estrellas del dibujo: encendidas = lo ganado (tope visual), el
-/// resto en penumbra. Offsets verticales deterministas (índice), sin azar.
-class _DotsRow extends StatelessWidget {
-  const _DotsRow({required this.lit, required this.total});
-
-  final int lit;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 30,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final step = constraints.maxWidth / (total + 1);
-          return Stack(
-            children: [
-              for (var i = 0; i < total; i++)
-                Positioned(
-                  left: step * (i + 1),
-                  top: (i.isEven ? 6 : 18) + (i % 3 == 0 ? 4 : 0),
-                  child: Container(
-                    width: 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i < lit
-                          ? const Color(0xFFF5D9A8)
-                          : const Color(0xFF4A3B60),
-                      boxShadow: i < lit
-                          ? const [
-                              BoxShadow(
-                                color: Color(0xCCF5D9A8),
-                                blurRadius: 6,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
+        ),
       ),
     );
   }
 }
+
+/// Hoja del relato (Q2 releído): misma estética nocturna de la tarjeta.
+Future<void> _showCycleStory(BuildContext context, Constellation c) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF221833),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+    ),
+    builder: (_) => FractionallySizedBox(
+      heightFactor: 0.88,
+      child: _CycleStorySheet(constellation: c),
+    ),
+  );
+}
+
+class _CycleStorySheet extends ConsumerWidget {
+  const _CycleStorySheet({required this.constellation});
+
+  final Constellation constellation;
+
+  static const _icons = {
+    'presence': '🌙',
+    'area': '🫶',
+    'hard_days': '🕯️',
+    'stars': '✦',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = constellation;
+    final story = ref.watch(cycleStoryProvider(c.id));
+    final range = (c.startDate != null && c.endDate != null)
+        ? '${_shortDate(c.startDate!)} — ${_shortDate(c.endDate!)}'
+        : null;
+    final meta = [
+      ?range,
+      if (c.daysPresent != null)
+        '${c.daysPresent} ${c.daysPresent == 1 ? 'day' : 'days'} present',
+      '${c.starsEarned} ✦',
+    ].join(' · ');
+    final anchor = _anchorLabels[c.reflectionAnchor];
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 28),
+      children: [
+        const Text(
+          'YOUR CYCLE, AS A STORY',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 2,
+            color: Color(0xFFB9A8CC),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          c.name,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: AppTypography.serif,
+            fontStyle: FontStyle.italic,
+            fontSize: 22,
+            color: Color(0xFFF3EAF8),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          meta,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 11, color: Color(0xFFB9A8CC)),
+        ),
+        const SizedBox(height: 14),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Image.asset(
+            c.imageAsset,
+            height: 150,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...story.when(
+          loading: () => const [
+            Padding(
+              padding: EdgeInsets.all(28),
+              child: Center(
+                child: CircularProgressIndicator(color: Color(0xFFF5D9A8)),
+              ),
+            ),
+          ],
+          error: (_, _) => [
+            Center(
+              child: TextButton(
+                onPressed: () => ref.invalidate(cycleStoryProvider(c.id)),
+                child: const Text(
+                  'Try again',
+                  style: TextStyle(color: Color(0xFFF5D9A8)),
+                ),
+              ),
+            ),
+          ],
+          data: (retro) => [
+            for (final line in retro.lines)
+              Container(
+                margin: const EdgeInsets.only(bottom: 9),
+                padding: const EdgeInsets.all(13),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _icons[line.key] ?? '✦',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Text(
+                        line.text,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          height: 1.55,
+                          color: Color(0xFFF3EAF8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (retro.closing.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                retro.closing,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: AppTypography.serif,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 15,
+                  height: 1.5,
+                  color: Color(0xFFD8C7E8),
+                ),
+              ),
+            ],
+          ],
+        ),
+        if (anchor != null) ...[
+          const SizedBox(height: 14),
+          Text(
+            '“What stays with me: $anchor.”',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: Color(0xFFD8C7E8),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+

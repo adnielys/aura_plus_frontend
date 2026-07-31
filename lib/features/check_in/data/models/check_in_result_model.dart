@@ -44,14 +44,17 @@ class RecommendationModel extends Recommendation {
     required super.id,
     required super.habit1,
     super.habit2,
+    super.habit3,
   });
 
   factory RecommendationModel.fromJson(Map<dynamic, dynamic> json) {
     final habit2 = json['habit_2'];
+    final habit3 = json['habit_3'];
     return RecommendationModel(
       id: json['id'] as String,
       habit1: HabitModel.fromJson(json['habit_1'] as Map),
       habit2: habit2 == null ? null : HabitModel.fromJson(habit2 as Map),
+      habit3: habit3 == null ? null : HabitModel.fromJson(habit3 as Map),
     );
   }
 }

@@ -30,35 +30,62 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _closing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Cola offline: si quedó un cierre esperando red, se reintenta en
+    // SILENCIO al entrar; si entra, las estrellas aparecen con normalidad.
+    Future.microtask(() async {
+      if (!mounted) return;
+      final synced = await ref
+          .read(sessionControllerProvider.notifier)
+          .retryPendingClose();
+      if (synced && mounted) {
+        ref.invalidate(todaySessionProvider);
+        ref.invalidate(currentConstellationProvider);
+        ref.invalidate(areasPresenceProvider);
+      }
+    });
+  }
+
   Future<void> _closeDay(Recommendation recommendation) async {
     final draft = ref.read(sessionDraftProvider);
     final habit1 = draft[recommendation.habit1.id];
     if (habit1 == null || _closing) return;
     setState(() => _closing = true);
-    final ok = await ref
+    final outcome = await ref
         .read(sessionControllerProvider.notifier)
         .closeDay(
           habit1Result: habit1,
           habit2Result: recommendation.habit2 == null
               ? null
               : draft[recommendation.habit2!.id],
+          habit3Result: recommendation.habit3 == null
+              ? null
+              : draft[recommendation.habit3!.id],
         );
     if (!mounted) return;
     setState(() => _closing = false);
-    if (ok) {
-      ref.read(sessionDraftProvider.notifier).clear();
-      ref.invalidate(currentConstellationProvider);
-      ref.invalidate(todaySessionProvider);
-      ref.invalidate(areasPresenceProvider); // el cierre puede encender áreas
-      context.go(AppRoutes.dayClose);
-    } else {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text("We couldn't close your day. Try again in a moment."),
-          ),
-        );
+    switch (outcome) {
+      case CloseOutcome.closed:
+        ref.read(sessionDraftProvider.notifier).clear();
+        ref.invalidate(currentConstellationProvider);
+        ref.invalidate(todaySessionProvider);
+        ref.invalidate(areasPresenceProvider); // el cierre puede encender áreas
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.savedOffline:
+        // El registro NO se pierde: celebración en diferido, sin estrellas.
+        ref.read(sessionDraftProvider.notifier).clear();
+        context.go(AppRoutes.dayClose);
+      case CloseOutcome.failed:
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content:
+                  Text("We couldn't close your day. Try again in a moment."),
+            ),
+          );
     }
   }
 
@@ -214,9 +241,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     result: ref.watch(sessionDraftProvider)[habit.id],
                     // Día cerrado: la opción elegida se pinta TACHADA
                     // (todaySession null = día abierto -> null).
-                    closedResult: index == 0
-                        ? todaySession?.habit1Result
-                        : todaySession?.habit2Result,
+                    closedResult: switch (index) {
+                      0 => todaySession?.habit1Result,
+                      1 => todaySession?.habit2Result,
+                      _ => todaySession?.habit3Result,
+                    },
                     // ⇄ solo con el día abierto y la tarjeta sin marcar:
                     // sustituye, nunca añade (el número lo fijó el motor).
                     onSwap:
@@ -229,9 +258,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             context,
                             slot: index + 1,
                             current: habit,
-                            other: result.recommendation.habits
+                            others: result.recommendation.habits
                                 .where((h) => h.id != habit.id)
-                                .firstOrNull,
+                                .toList(),
                             state: result.checkIn.emotionalState,
                           ),
                     onMark: (value) => ref

@@ -17,12 +17,14 @@ class SessionRepositoryImpl implements SessionRepository {
   Future<SessionResult> close({
     required HabitResult habit1Result,
     HabitResult? habit2Result,
+    HabitResult? habit3Result,
     String? reflection,
   }) async {
     try {
       return await _remote.close(
         habit1Result: habit1Result,
         habit2Result: habit2Result,
+        habit3Result: habit3Result,
         reflection: reflection,
       );
     } on ApiException catch (e) {

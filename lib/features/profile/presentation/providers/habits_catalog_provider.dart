@@ -81,6 +81,30 @@ final habitsCatalogProvider = FutureProvider<List<CatalogHabit>>((ref) async {
 /// Crea un microhábito propio (`POST /habits`). Con [share] pide llevarlo al
 /// banco común (nace pending_review); sin él es privado para siempre. En
 /// ambos casos, para ELLA queda disponible al instante.
+/// Edita un hábito propio PRIVADO (`PATCH /habits/{id}`, decisión B jul 2026).
+/// Los compartidos/publicados no se editan: se retiran y se crea otro.
+Future<void> updateHabit(
+  WidgetRef ref, {
+  required String id,
+  required String title,
+  required HabitArea area,
+  required int durationMinutes,
+}) async {
+  await ref.read(dioProvider).patch<Object?>('/habits/$id', data: {
+    'title': title,
+    'area': area.wireValue,
+    'duration_minutes': durationMinutes,
+  });
+  ref.invalidate(habitsCatalogProvider);
+}
+
+/// Retira un hábito propio (`DELETE /habits/{id}`, decisión A jul 2026):
+/// sale del banco de TODAS; los gestos pasados quedan intactos.
+Future<void> retireHabit(WidgetRef ref, {required String id}) async {
+  await ref.read(dioProvider).delete<Object?>('/habits/$id');
+  ref.invalidate(habitsCatalogProvider);
+}
+
 Future<CatalogHabit> createHabit(
   WidgetRef ref, {
   required String title,
