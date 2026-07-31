@@ -32,17 +32,23 @@ extension EnergyVisuals on EmotionalState {
       };
 
   /// Etiqueta del estado EN EL CHECK-IN (maquetado "How much energy today?").
-  /// Es propia de esta pantalla: el resto de la app sigue usando `label` del
-  /// enum (Home "Today you are calm", historial…), que no se toca aquí.
+  ///
+  /// REGLA (DECISION_CHECKIN_ESCALA_ESTADOS + revisión jul 2026): el título
+  /// nombra EL DÍA, jamás a ella — "At the limit" es un lugar donde se está
+  /// hoy; "Empty" sería algo que se es. Y `scattered` conserva su nombre: no
+  /// es un peldaño intermedio, es una energía distinta (la hay, va en cinco
+  /// direcciones). Mismos nombres que la historia, el export y el Home: un
+  /// día no puede llamarse de dos formas según la pantalla.
   String get checkInLabel => switch (this) {
         EmotionalState.energy => 'Energized',
-        EmotionalState.tranquil => 'Steady',
-        EmotionalState.scattered => 'So-so',
-        EmotionalState.exhausted => 'Low',
-        EmotionalState.hard => 'Empty',
+        EmotionalState.tranquil => 'Calm',
+        EmotionalState.scattered => 'Scattered',
+        EmotionalState.exhausted => 'Tired',
+        EmotionalState.hard => 'At the limit',
       };
 
-  /// Sublabel del check-in (maquetado nueva escala de energía).
+  /// Sublabel del check-in: promesa de lo que Aura hará con su día (nunca un
+  /// diagnóstico de ella).
   String get checkInHint => switch (this) {
         EmotionalState.energy => 'Room for a bit more',
         EmotionalState.tranquil => 'A couple of gentle steps',
