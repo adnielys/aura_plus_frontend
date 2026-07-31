@@ -58,7 +58,7 @@ Future<void> showSwapHabitSheet(
   BuildContext context, {
   required int slot,
   required Habit current,
-  required Habit? other,
+  required List<Habit> others,
   required EmotionalState state,
 }) {
   return showModalBottomSheet<void>(
@@ -73,7 +73,7 @@ Future<void> showSwapHabitSheet(
       child: _SwapSheet(
         slot: slot,
         current: current,
-        other: other,
+        others: others,
         state: state,
       ),
     ),
@@ -84,13 +84,16 @@ class _SwapSheet extends ConsumerStatefulWidget {
   const _SwapSheet({
     required this.slot,
     required this.current,
-    required this.other,
+    required this.others,
     required this.state,
   });
 
   final int slot;
   final Habit current;
-  final Habit? other;
+
+  /// Los DEMÁS gestos del día (0-2): el sustituto no puede compartir área
+  /// con ninguno (BE-21 extendido a 3).
+  final List<Habit> others;
   final EmotionalState state;
 
   @override
@@ -104,7 +107,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
   /// Motivo del bloqueo (null = elegible). Sin culpa: dice por qué, no "no".
   String? _lockReason(CatalogHabit habit) {
     if (habit.id == widget.current.id) return 'your current gesture';
-    if (widget.other != null && habit.area == widget.other!.area) {
+    if (widget.others.any((other) => other.area == habit.area)) {
       final name = _areaStyle[habit.area]!.$4;
       return 'your other gesture is already $name — we protect your balance';
     }
@@ -135,7 +138,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
   @override
   Widget build(BuildContext context) {
     final catalog = ref.watch(habitsCatalogProvider);
-    final gestures = widget.other == null ? 1 : 2;
+    final gestures = widget.others.length + 1;
 
     return Column(
       children: [

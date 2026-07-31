@@ -13,6 +13,7 @@ class SessionRemoteDataSource {
   Future<SessionResultModel> close({
     required HabitResult habit1Result,
     HabitResult? habit2Result,
+    HabitResult? habit3Result,
     String? reflection,
   }) async {
     final response = await _dio.post<Object?>(
@@ -20,6 +21,7 @@ class SessionRemoteDataSource {
       data: {
         'habit_1_result': habit1Result.wireValue,
         'habit_2_result': habit2Result?.wireValue,
+        'habit_3_result': habit3Result?.wireValue,
         if (reflection != null && reflection.isNotEmpty)
           'reflection': reflection,
       },

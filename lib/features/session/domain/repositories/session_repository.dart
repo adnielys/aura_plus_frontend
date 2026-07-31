@@ -8,6 +8,7 @@ abstract interface class SessionRepository {
   Future<SessionResult> close({
     required HabitResult habit1Result,
     HabitResult? habit2Result,
+    HabitResult? habit3Result,
     String? reflection,
   });
 }

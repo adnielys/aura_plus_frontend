@@ -97,6 +97,15 @@ enums en snake_case con mapeo explícito; base URL por plataforma.
 Local prod-parity: `docker compose up --build -d` en `C:\dev\auraplus-backend`
 → `http://localhost:8000`, Swagger en `/docs`, `/health` da 200. Auth Bearer JWT.
 
+## Tercer hábito con 30+ — YA EN LA APP (jul 2026)
+El máximo diario sube a 3 SOLO si ella declaró "Some time (30 min+)" y su
+estado es positivo (el servidor decide; el cliente solo pinta). Contrato:
+`habit_3`/`habit_3_result` nullables (mismo patrón que habit_2).
+`Recommendation.habits` = [h1, ?h2, ?h3]: Home y Reco pintan N tarjetas sin
+tocar el layout; el cierre manda `habit_3_result`; el ⇄ acepta slot 3 y el
+sheet recibe `others` (lista) — el sustituto no comparte área con ninguno.
+El pill del Reco tiene variante "Three small gestures, in 3 areas".
+
 ## Care (Pilar 3 · Carril B · Etapa 1) — YA EN LA APP
 `features/care/`: fila CUIDADO en el perfil (A1) + directorio (A2) + consentir
 y pedir (A3) + petición enviada (A4) + respuesta recibida (A5/A5b) + episodio

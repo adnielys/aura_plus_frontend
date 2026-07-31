@@ -48,6 +48,9 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
           habit2Result: recommendation.habit2 == null
               ? null
               : draft[recommendation.habit2!.id] ?? HabitResult.notPossible,
+          habit3Result: recommendation.habit3 == null
+              ? null
+              : draft[recommendation.habit3!.id] ?? HabitResult.notPossible,
         );
     if (!mounted) return;
     setState(() => _closing = false);
@@ -142,9 +145,11 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                         ],
                       ),
                       child: Text(
-                        habits.length == 1
-                            ? 'One small gesture, just for you'
-                            : 'Two small gestures, in ${habits.length} areas',
+                        switch (habits.length) {
+                          1 => 'One small gesture, just for you',
+                          2 => 'Two small gestures, in 2 areas',
+                          _ => 'Three small gestures, in 3 areas',
+                        },
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -167,9 +172,9 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                                 context,
                                 slot: index + 1,
                                 current: habit,
-                                other: habits
+                                others: habits
                                     .where((h) => h.id != habit.id)
-                                    .firstOrNull,
+                                    .toList(),
                                 state: result.checkIn.emotionalState,
                               ),
                       onMark: (value) => ref

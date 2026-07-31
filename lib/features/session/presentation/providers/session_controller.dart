@@ -51,6 +51,7 @@ class SessionController extends Notifier<AsyncValue<SessionResult?>> {
   Future<bool> closeDay({
     required HabitResult habit1Result,
     HabitResult? habit2Result,
+    HabitResult? habit3Result,
     String? reflection,
   }) async {
     state = const AsyncLoading();
@@ -58,6 +59,7 @@ class SessionController extends Notifier<AsyncValue<SessionResult?>> {
       final result = await _repository.close(
         habit1Result: habit1Result,
         habit2Result: habit2Result,
+        habit3Result: habit3Result,
         reflection: reflection,
       );
       state = AsyncData(result);

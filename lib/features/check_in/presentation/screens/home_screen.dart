@@ -42,6 +42,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           habit2Result: recommendation.habit2 == null
               ? null
               : draft[recommendation.habit2!.id],
+          habit3Result: recommendation.habit3 == null
+              ? null
+              : draft[recommendation.habit3!.id],
         );
     if (!mounted) return;
     setState(() => _closing = false);
@@ -208,9 +211,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     result: ref.watch(sessionDraftProvider)[habit.id],
                     // Día cerrado: la opción elegida se pinta TACHADA
                     // (todaySession null = día abierto -> null).
-                    closedResult: index == 0
-                        ? todaySession?.habit1Result
-                        : todaySession?.habit2Result,
+                    closedResult: switch (index) {
+                      0 => todaySession?.habit1Result,
+                      1 => todaySession?.habit2Result,
+                      _ => todaySession?.habit3Result,
+                    },
                     // ⇄ solo con el día abierto y la tarjeta sin marcar:
                     // sustituye, nunca añade (el número lo fijó el motor).
                     onSwap:
@@ -223,9 +228,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             context,
                             slot: index + 1,
                             current: habit,
-                            other: result.recommendation.habits
+                            others: result.recommendation.habits
                                 .where((h) => h.id != habit.id)
-                                .firstOrNull,
+                                .toList(),
                             state: result.checkIn.emotionalState,
                           ),
                     onMark: (value) => ref

@@ -34,16 +34,23 @@ class Habit {
   final String? icon;
 }
 
-/// Recomendación del día: 1 o 2 hábitos. `habit2` nulo = modo CARE/ANCHOR
-/// (reconciliación #4): hoy solo una cosa pequeña.
+/// Recomendación del día: 1 a 3 hábitos. `habit2` nulo = modo CARE/ANCHOR
+/// (reconciliación #4): hoy solo una cosa pequeña. `habit3` solo llega con
+/// 30+ min declarados y estado positivo (decisión jul 2026).
 class Recommendation {
-  const Recommendation({required this.id, required this.habit1, this.habit2});
+  const Recommendation({
+    required this.id,
+    required this.habit1,
+    this.habit2,
+    this.habit3,
+  });
 
   final String id;
   final Habit habit1;
   final Habit? habit2;
+  final Habit? habit3;
 
-  List<Habit> get habits => [habit1, ?habit2];
+  List<Habit> get habits => [habit1, ?habit2, ?habit3];
 }
 
 /// Mensajes del sistema para el flujo del día (los escribe el servidor).
