@@ -97,6 +97,19 @@ enums en snake_case con mapeo explícito; base URL por plataforma.
 Local prod-parity: `docker compose up --build -d` en `C:\dev\auraplus-backend`
 → `http://localhost:8000`, Swagger en `/docs`, `/health` da 200. Auth Bearer JWT.
 
+## Acompañante (companion) — YA EN LA APP (jul 2026)
+features/companion/: la conversación con Aura NO es una pestaña — es una
+puerta siempre abierta + dos momentos. CompanionDoor: frase al pie del
+Home ("Do you want to tell me something? / I'm here, no rush"), SIN badge,
+SIN contador, y Aura JAMÁS inicia (un chat con puntito rojo sería una
+tarea pendiente más, y la app promete un mensaje al día). CompanionInvite:
+solo tras check-in hard/exhausted. Ambas desaparecen si el servidor tiene
+la flag apagada (404 -> nada, nunca una promesa vacía). En la pantalla:
+Aura en SERIF (su voz de los cierres), ella en sans; el chip de
+suggested_action lo manda el SERVIDOR y se pinta como invitación, jamás
+como orden. Decisión de producto: NO va en la pestaña Cycle (es opt-in, o
+sea invisible para quien más lo necesita; y sus temas no son del ciclo).
+
 ## My sky · historia del ciclo — YA EN LA APP (jul 2026)
 Tocar un ciclo YA cerrado en la galaxia abre su relato (bottom sheet con
 la estética nocturna de la tarjeta): "YOUR CYCLE, AS A STORY" + arte +
