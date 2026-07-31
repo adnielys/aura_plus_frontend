@@ -99,8 +99,10 @@ class _AreaCapsule extends StatelessWidget {
     final (fg, iconBg, name) = AreasPresenceCard._style[area]!;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      // Invitación, no reproche: abre el catálogo filtrado a esa área.
-      onTap: () => context.go(AppRoutes.habits, extra: area),
+      // Al tocar un área: la lista de lo que la usuaria ya se regaló ahí
+      // (gestos registrados en los últimos 28 días). Desde esa pantalla se
+      // puede saltar al catálogo del área.
+      onTap: () => context.go(AppRoutes.areaGestures, extra: area),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.symmetric(vertical: 12),

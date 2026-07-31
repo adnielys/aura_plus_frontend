@@ -332,18 +332,9 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
           color: on ? fillBg : AppColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: on ? Colors.transparent : AppColors.border,
+            color: on ? accent : AppColors.border,
             width: 1.5,
           ),
-          boxShadow: on
-              ? [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.16),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
         ),
         child: Column(
           children: [
