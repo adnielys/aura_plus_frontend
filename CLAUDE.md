@@ -97,6 +97,15 @@ enums en snake_case con mapeo explícito; base URL por plataforma.
 Local prod-parity: `docker compose up --build -d` en `C:\dev\auraplus-backend`
 → `http://localhost:8000`, Swagger en `/docs`, `/health` da 200. Auth Bearer JWT.
 
+## My sky · historia del ciclo — YA EN LA APP (jul 2026)
+Tocar un ciclo YA cerrado en la galaxia abre su relato (bottom sheet con
+la estética nocturna de la tarjeta): "YOUR CYCLE, AS A STORY" + arte +
+fechas/presencia/✦ + renglones de la retrospectiva (mismos iconos del
+paso 2.5) + cierre + su reflexión anclada. cycleStoryProvider.family
+sobre GET /constellation/{id}/story — el servidor lo regenera
+determinista (releer jamás cambia el texto ni avanza rotaciones). El
+ciclo ACTUAL no es tappable: aún se escribe.
+
 ## Cola offline del cierre — YA EN LA APP (jul 2026)
 El registro jamás se pierde por la red. Si POST /session falla por RED
 (NetworkFailure, no validación), el cierre se guarda en shared_preferences
