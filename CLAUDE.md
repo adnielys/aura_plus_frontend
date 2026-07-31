@@ -138,6 +138,16 @@ profesional solo llega con accepted; polling suave al entrar (initState
 invalida careCurrentReferralProvider) — care JAMÁS llega por push
 (GUARD_CARE_09). Vista única gobernada por resolveCareView (testeada).
 
+## Hábitos propios: editar/retirar — YA EN LA APP (jul 2026, decisiones A+B)
+Menú ⋮ SOLO en los suyos (catálogo): "Edit" únicamente si visibility ==
+private (decisión B; un compartido no se edita: se retira y se crea otro)
+y "Retire" siempre. Editar reusa HabitCreateScreen en MODO EDICIÓN
+(HabitCreateArgs.edit: prefill, sin palanca de compartir, botón "Save
+changes", PATCH /habits/{id}). Retirar: diálogo sereno ("Retire this
+gesture? It leaves the bank and Aura won't suggest it again. Every day
+you lived it stays in your story." · Keep it / Retire) -> DELETE — sale
+del banco de TODAS (decisión A) y los gestos pasados quedan intactos.
+
 ## Hábitos v2 — YA EN LA APP
 Catálogo con buscador (texto + chips de área, `filterCatalog` testeado) y
 badges "tuyo" / "tuyo · en revisión". Crear el propio: HabitCreateScreen

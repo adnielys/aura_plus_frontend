@@ -274,6 +274,7 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                         fixedArea: widget.current.area,
                         maxMinutes: _maxMinutesByState[widget.state]!,
                         swapSlot: widget.slot,
+                        edit: null,
                       );
                       Navigator.of(context).pop();
                       context.go(AppRoutes.habitCreate, extra: args);
