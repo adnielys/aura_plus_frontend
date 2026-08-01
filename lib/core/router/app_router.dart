@@ -35,6 +35,7 @@ import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
 import '../../features/profile/presentation/screens/history_day_screen.dart';
 import '../../features/profile/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/change_password_screen.dart';
+import '../../features/profile/presentation/screens/language_screen.dart';
 import '../../features/profile/presentation/screens/message_style_screen.dart';
 import '../../features/profile/presentation/screens/notification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -67,6 +68,7 @@ abstract final class AppRoutes {
   static const String historyDay = '/history/day';
   static const String notification = '/notification';
   static const String messageStyle = '/message-style';
+  static const String language = '/language';
   static const String supportCircle = '/my-circle';
   static const String companion = '/companion';
   static const String forgotPassword = '/forgot-password';
@@ -237,6 +239,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.messageStyle,
             builder: (_, _) => const MessageStyleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.language,
+            builder: (_, _) => const LanguageScreen(),
           ),
           GoRoute(
             path: AppRoutes.supportCircle,

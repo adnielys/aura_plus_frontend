@@ -26,9 +26,12 @@ class _AppShellState extends ConsumerState<AppShell> {
     super.initState();
     // El día de la usuaria se calcula en SU timezone: se sincroniza con el
     // servidor una vez por arranque, ya autenticada (fire-and-forget).
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => syncDeviceTimezone(ref),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      syncDeviceTimezone(ref);
+      // También aquí: quien acaba de registrarse entra por el shell sin
+      // volver a pasar por el splash. La marca local evita repetirlo.
+      syncDeviceLanguage(ref);
+    });
   }
 
   Widget get child => widget.child;

@@ -133,6 +133,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => context.go(AppRoutes.messageStyle),
                 ),
                 _Row(
+                  icon: Icons.translate_outlined,
+                  title: 'Language',
+                  subtitle: 'The language Aura speaks to you in',
+                  onTap: () => context.go(AppRoutes.language),
+                ),
+                _Row(
                   icon: CupertinoIcons.calendar,
                   title: 'History',
                   subtitle: 'Your whole story',

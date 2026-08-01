@@ -236,7 +236,27 @@ ve una página WEB en inglés (sin app): resumen agregado semanal — jamás
 palabras ni día a día; revocado/vencido/pausado = la misma página neutra.
 Antivigilancia inversa: la app jamás muestra si abrieron el enlace.
 
-## Idioma de la UI — INGLÉS (unificado)
+## Idioma de Aura — TRILINGÜE es · en · de (jul 2026, decisión A)
+Contrato `lang` en el perfil. `AppLanguage` (shared/domain/enums.dart) con
+`fromLocale` (solo el código base: de_AT y de_DE son alemán; lo que no
+hablamos cae a inglés, jamás a un error) — testeado.
+`syncDeviceLanguage` propone el idioma del TELÉFONO **una sola vez por
+instalación** (flag `device_language_synced` en shared_preferences), a
+diferencia de `syncDeviceTimezone`, que va en cada arranque: la timezone es
+un HECHO, el idioma es una PREFERENCIA. Si se mandara siempre, una madre en
+Berlín que eligió español volvería al alemán cada vez que abre la app —
+eso no es acompañar, es corregirla. Se llama desde el splash y desde el
+shell (quien acaba de registrarse no vuelve a pasar por el splash); si el
+PATCH falla (sin red, o perfil aún inexistente) NO se marca la flag y se
+reintenta al siguiente arranque.
+LanguageScreen + fila "Language" en SETTINGS: un tap = PATCH, y desde ese
+momento manda ella. La nota al pie dice la verdad — hoy esto cambia los
+textos del SERVIDOR (la conversación con Aura); la interfaz sigue en inglés
+mientras se traduce.
+Verificado en emulador con el sistema en de-DE: perfil nuevo -> `de` solo;
+al elegir Español, sobrevive al reinicio.
+
+## Idioma de la UI — INGLÉS mientras se traduce
 Toda la copy visible de la app está en inglés (decisión de producto).
 Los COMENTARIOS del código siguen en español (convención del repo). Los
 MENSAJES EMOCIONALES del servidor (cierres, ceremonia, CARE_CLOSE — SPEC
