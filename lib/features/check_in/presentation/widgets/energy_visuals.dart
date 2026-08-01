@@ -36,10 +36,10 @@ extension EnergyVisuals on EmotionalState {
   /// enum (Home "Today you are calm", historial…), que no se toca aquí.
   String get checkInLabel => switch (this) {
         EmotionalState.energy => 'Energized',
-        EmotionalState.tranquil => 'Steady',
-        EmotionalState.scattered => 'So-so',
-        EmotionalState.exhausted => 'Low',
-        EmotionalState.hard => 'Empty',
+        EmotionalState.tranquil => 'Calm',
+        EmotionalState.scattered => 'Scattered',
+        EmotionalState.exhausted => 'Exhausted',
+        EmotionalState.hard => 'At the limit',
       };
 
   /// Sublabel del check-in (maquetado nueva escala de energía).

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../session/presentation/providers/session_controller.dart';
 import '../../data/datasources/check_in_remote_data_source.dart';
 import '../../data/repositories/check_in_repository_impl.dart';
 import '../../domain/entities/check_in_result.dart';
@@ -32,6 +33,11 @@ class DailyFlowController extends AsyncNotifier<CheckInResult?> {
     state = const AsyncLoading();
     try {
       final result = await _repository.submit(emotionalState);
+      // Un check-in inicia un día fresco: descarta cualquier cierre pendiente
+      // (offline) huérfano, para que el día NUNCA aparezca "cerrado" sin que
+      // ella haya dado "Close my day". El pendiente legítimo se guarda DESPUÉS,
+      // al cerrar, así que esto no lo afecta.
+      await ref.read(pendingCloseStoreProvider).clear();
       state = AsyncData(result);
       return true;
     } on Failure catch (failure) {

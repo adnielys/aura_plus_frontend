@@ -1452,58 +1452,66 @@ class _EmotionalContract extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 24, 30, 28),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              // Imagen del maquetado (homeimage) sobre el texto de cierre.
-              Image.asset(
-                'assets/images/onboarding/homeimage.png',
-                width: double.infinity,
-                fit: BoxFit.contain,
-              ),
-              const Spacer(),
-              const Text('✦',
-                  style: TextStyle(fontSize: 30, color: AppColors.entryAccent)),
-              const SizedBox(height: 22),
-              // Frase-contrato: el nombre en carmesí, el resto en tinta suave.
-              Text.rich(
-                TextSpan(children: [
-                  TextSpan(
-                    text: "That's all I need, ",
-                    style: serif.copyWith(color: AppColors.entryInk, height: 1.35),
-                  ),
-                  TextSpan(
-                    text: name,
-                    style: serif.copyWith(
-                        color: AppColors.entryAccent, height: 1.35),
-                  ),
-                  TextSpan(
-                    text: '.',
-                    style: serif.copyWith(color: AppColors.entryInk, height: 1.35),
-                  ),
-                ]),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'There are no goals to meet here, nothing to prove.\n'
-                "We begin whenever you're ready.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.6,
-                  color: AppColors.entryMuted,
+        child: Column(
+          children: [
+            // Hero del maquetado (cofre) a todo el ancho, arriba.
+            Image.asset(
+              'assets/images/onboarding/chest.png',
+              width: double.infinity,
+              fit: BoxFit.contain,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(30, 6, 30, 28),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 4),
+                    const Text('✦',
+                        style: TextStyle(
+                            fontSize: 30, color: AppColors.entryAccent)),
+                    const SizedBox(height: 20),
+                    // Frase-contrato: nombre en carmesí, el resto en tinta.
+                    Text.rich(
+                      TextSpan(children: [
+                        TextSpan(
+                          text: "That's all I need, ",
+                          style: serif.copyWith(
+                              color: AppColors.entryInk, height: 1.35),
+                        ),
+                        TextSpan(
+                          text: name,
+                          style: serif.copyWith(
+                              color: AppColors.entryAccent, height: 1.35),
+                        ),
+                        TextSpan(
+                          text: '.',
+                          style: serif.copyWith(
+                              color: AppColors.entryInk, height: 1.35),
+                        ),
+                      ]),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'There are no goals to meet here, nothing to prove.\n'
+                      "We begin whenever you're ready.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: AppColors.entryMuted,
+                      ),
+                    ),
+                    const Spacer(),
+                    SoftPrimaryButton(
+                      label: 'Enter my space ✦',
+                      onPressed: onEnter,
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              SoftPrimaryButton(
-                label: 'Enter my space ✦',
-                onPressed: onEnter,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

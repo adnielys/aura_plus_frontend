@@ -10,6 +10,7 @@ import '../../features/care/presentation/providers/care_providers.dart';
 import '../../features/care/presentation/screens/care_consent_screen.dart';
 import '../../features/care/presentation/screens/care_request_screen.dart';
 import '../../features/care/presentation/screens/care_screen.dart';
+import '../../features/care/presentation/screens/support_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
@@ -57,6 +58,7 @@ abstract final class AppRoutes {
   static const String constellation = '/constellation';
   static const String galaxy = '/galaxy';
   static const String cycle = '/cycle';
+  static const String support = '/support';
   static const String profile = '/profile';
   static const String habits = '/habits';
   static const String habitCreate = '/habits/create';
@@ -195,6 +197,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.cycle,
             builder: (_, _) => const CycleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.support,
+            builder: (_, _) => const SupportScreen(),
           ),
           GoRoute(
             path: AppRoutes.profile,

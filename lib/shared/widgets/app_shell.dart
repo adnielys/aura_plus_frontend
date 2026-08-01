@@ -51,11 +51,11 @@ class _AppShellState extends ConsumerState<AppShell> {
       label: 'Constellation',
     ),
     (
-      route: AppRoutes.cycle,
-      icon: CupertinoIcons.moon,
-      activeIcon: CupertinoIcons.moon_fill,
+      route: AppRoutes.support,
+      icon: CupertinoIcons.chat_bubble_2,
+      activeIcon: CupertinoIcons.chat_bubble_2_fill,
       asset: null,
-      label: 'Cycle',
+      label: 'Support',
     ),
     (
       route: AppRoutes.profile,
