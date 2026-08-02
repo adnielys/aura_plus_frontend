@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 
 /// Pedir el enlace de recuperación (mockup R2). Anti-enumeración: el estado
@@ -84,38 +85,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
               const SizedBox(height: 14),
               if (!_sent)
-                SizedBox(
-                  height: 50,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [AppColors.primary, Color(0xFF8E2C8E)]),
-                      borderRadius: BorderRadius.circular(26),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(26),
-                        onTap: _sending ? null : _send,
-                        child: Center(
-                          child: _sending
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2, color: Colors.white),
-                                )
-                              : const Text(
-                                  'Send me the link  ✦',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
+                SoftPrimaryButton(
+                  label: 'Send me the link',
+                  onPressed: _send,
+                  isLoading: _sending,
                 )
               else
                 Container(

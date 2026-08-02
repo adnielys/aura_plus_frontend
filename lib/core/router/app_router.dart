@@ -179,6 +179,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.cycleClose,
+        // Sin el dato (deep-link/notificación/restauración): al Home, sin crash.
+        redirect: (_, state) =>
+            state.extra is CycleClosing ? null : AppRoutes.home,
         builder: (_, state) =>
             CycleCloseScreen(closing: state.extra! as CycleClosing),
       ),
@@ -226,6 +229,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.areaGestures,
+            redirect: (_, state) =>
+                state.extra is HabitArea ? null : AppRoutes.areas,
             builder: (_, state) =>
                 AreaGesturesScreen(area: state.extra! as HabitArea),
           ),
@@ -235,6 +240,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.historyDay,
+            redirect: (_, state) =>
+                state.extra is DateTime ? null : AppRoutes.history,
             builder: (_, state) =>
                 HistoryDayScreen(date: state.extra! as DateTime),
           ),
@@ -268,6 +275,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.careConsent,
+            redirect: (_, state) =>
+                state.extra is CareProviderInfo ? null : AppRoutes.care,
             builder: (_, state) => CareConsentScreen(
                 provider: state.extra! as CareProviderInfo),
           ),

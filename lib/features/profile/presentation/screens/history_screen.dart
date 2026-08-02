@@ -369,7 +369,7 @@ class _DayRow extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: day.hadSession
-                      ? const Color(0xFFFCE3EC)
+                      ? AppColors.selectedRose
                       : AppColors.surfaceTint,
                   borderRadius: BorderRadius.circular(50),
                 ),

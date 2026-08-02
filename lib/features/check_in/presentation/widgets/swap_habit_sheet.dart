@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/habit_icons.dart';
@@ -28,8 +29,8 @@ const Map<HabitArea, (Color bg, Color fg, Color iconBg, String name)>
 _areaStyle = {
   HabitArea.self: (
     Color(0xFFFFE3EE),
-    Color(0xFFC01448),
-    Color(0xFFFFF0F4),
+    AppColors.primary,
+    AppColors.roseTint,
     'Me',
   ),
   HabitArea.family: (
@@ -325,50 +326,10 @@ class _SwapSheetState extends ConsumerState<_SwapSheet> {
                 ),
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: _selectedId == null
-                        ? null
-                        : const LinearGradient(
-                            colors: [
-                              AppColors.entryAccent,
-                              AppColors.entryAccentDark,
-                            ],
-                          ),
-                    color: _selectedId == null ? const Color(0xFFF2A9C4) : null,
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(28),
-                      onTap: _selectedId == null || _submitting
-                          ? null
-                          : _replace,
-                      child: Center(
-                        child: _submitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Replace habit   ✦',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
+              SoftPrimaryButton(
+                label: 'Replace habit',
+                onPressed: _selectedId == null ? null : _replace,
+                isLoading: _submitting,
               ),
               const SizedBox(height: 8),
               const Text(

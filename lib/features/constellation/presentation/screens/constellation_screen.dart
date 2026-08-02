@@ -192,7 +192,7 @@ class _Body extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFFFF0F4),
+                          color: AppColors.roseTint,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.blur_circular,
@@ -286,9 +286,10 @@ class _Sky extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'By Aura Plus',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
-              color: AppColors.secondary.withValues(alpha: 0.9),
+              // Carmesí de marca (no el rosa secondary): legible sobre claro.
+              color: AppColors.primary,
             ),
           ),
         ],

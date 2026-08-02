@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../providers/circle_provider.dart';
 
@@ -36,15 +37,59 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
     super.dispose();
   }
 
-  Future<void> _run(Future<void> Function() action) async {
-    if (_busy) return;
+  /// Ejecuta una acción del círculo. Devuelve true si salió bien. Ante error
+  /// avisa sereno (sin regañar) en vez de tragarlo: el fallo silencioso hacía
+  /// creer que la invitación entró cuando no.
+  Future<bool> _run(Future<void> Function() action) async {
+    if (_busy) return false;
     setState(() => _busy = true);
     try {
       await action();
+      return true;
     } catch (_) {
-      // El siguiente gesto reintenta: el círculo jamás regaña.
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content: Text("That didn't go through. No rush — try again in a moment."),
+          ));
+      }
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// "Remove" es terminal (el enlace muere al instante): pide confirmación
+  /// serena. Cancelar una invitación aún no aceptada no la pide (bajo riesgo).
+  Future<void> _confirmRemove(CircleMember member) async {
+    if (member.status != 'accepted') {
+      await _run(() => revokeCircleMember(ref, member.id));
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove from your circle?'),
+        content: Text(
+          '${member.email} will stop seeing your weekly summary. '
+          'The link ends right away — quietly, without telling them.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Keep'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Remove',
+                style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _run(() => revokeCircleMember(ref, member.id));
     }
   }
 
@@ -192,8 +237,9 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
         _primary('Send invite', () async {
           final email = _emailController.text.trim();
           if (email.isEmpty || !email.contains('@')) return;
-          await _run(() => inviteCircleMember(ref, email));
-          if (mounted) {
+          final ok = await _run(() => inviteCircleMember(ref, email));
+          // Solo si entró de verdad: si no, el email se queda para reintentar.
+          if (ok && mounted) {
             _emailController.clear();
             setState(() => _inviting = false);
           }
@@ -266,9 +312,7 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
             ),
           ),
           TextButton(
-            onPressed: _busy
-                ? null
-                : () => _run(() => revokeCircleMember(ref, member.id)),
+            onPressed: _busy ? null : () => _confirmRemove(member),
             child: Text(
               member.status == 'accepted' ? 'Remove' : 'Cancel',
               style: const TextStyle(
@@ -358,37 +402,10 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
   }
 
   Widget _primary(String label, VoidCallback onTap) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-              colors: [AppColors.primary, Color(0xFF8E2C8E)]),
-          borderRadius: BorderRadius.circular(26),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(26),
-            onTap: _busy ? null : onTap,
-            child: Center(
-              child: _busy
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text('$label  ✦',
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white)),
-            ),
-          ),
-        ),
-      ),
+    return SoftPrimaryButton(
+      label: label,
+      onPressed: onTap,
+      isLoading: _busy,
     );
   }
 }

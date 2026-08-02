@@ -33,7 +33,7 @@ class SoftPrimaryButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isEnabled ? AppColors.entryGradient : null,
           // Deshabilitado: rosa sereno del maquetado, sin sombra.
-          color: isEnabled ? null : const Color(0xFFF2A9C4),
+          color: isEnabled ? null : AppColors.primaryDisabled,
           borderRadius: BorderRadius.circular(29),
           boxShadow: isEnabled
               ? [

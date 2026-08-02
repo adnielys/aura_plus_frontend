@@ -114,7 +114,7 @@ class _SupportRow extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: iconBackground ?? const Color(0xFFFFF0F4),
+                color: iconBackground ?? AppColors.roseTint,
                 borderRadius: BorderRadius.circular(12),
               ),
               child:

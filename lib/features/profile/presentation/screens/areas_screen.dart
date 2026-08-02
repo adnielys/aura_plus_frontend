@@ -19,7 +19,7 @@ const Map<HabitArea, _AreaInfo> _areaInfo = {
     name: 'Me',
     what: 'Rest, body, mind, personal time.',
     bg: Color(0xFFFFE3EE),
-    fg: Color(0xFFC01448),
+    fg: AppColors.primary,
     icon: Icons.self_improvement,
   ),
   HabitArea.family: (
@@ -189,7 +189,7 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
                           onSelected:
                               _savingPain ? null : (_) => _setPain(pain),
                           showCheckmark: false,
-                          selectedColor: const Color(0xFFFCE3EC),
+                          selectedColor: AppColors.selectedRose,
                           backgroundColor: AppColors.surface,
                           labelStyle: TextStyle(
                             fontSize: 11.5,
@@ -278,7 +278,7 @@ class _AreaCard extends StatelessWidget {
                         horizontal: 9, vertical: 4),
                     decoration: BoxDecoration(
                       color: lit
-                          ? const Color(0xFFFCE3EC)
+                          ? AppColors.selectedRose
                           : AppColors.surfaceTint,
                       borderRadius: BorderRadius.circular(50),
                     ),

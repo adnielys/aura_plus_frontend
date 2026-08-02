@@ -35,7 +35,7 @@ class HabitCard extends StatelessWidget {
   /// Colores por área (AREA del maquetado). El icono es del HÁBITO
   /// ([habitIconData]); el área solo pone el color, como en el maquetado.
   static const _areaStyle = {
-    HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), Color(0xFFFFF0F4)),
+    HabitArea.self: (Color(0xFFFFE3EE), AppColors.primary, AppColors.roseTint),
     HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), Color(0xFFFFF6EE)),
     HabitArea.relationships: (Color(0xFFECE1FB), Color(0xFF9B6FD4),
         Color(0xFFF6F0FF)),
@@ -141,20 +141,31 @@ class HabitCard extends StatelessWidget {
                     ),
                   ),
                   if (onSwap != null) ...[
-                    const SizedBox(width: 8),
-                    // ⇄ del maquetado: cambiarlo por otro del banco.
-                    InkWell(
-                      borderRadius: BorderRadius.circular(15),
-                      onTap: onSwap,
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.border),
+                    // ⇄ del maquetado: cambiarlo por otro del banco. Área táctil
+                    // de 48 (accesibilidad) con el círculo visible en 30.
+                    Tooltip(
+                      message: 'Swap for another gesture',
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: onSwap,
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: const Icon(
+                                  CupertinoIcons.arrow_right_arrow_left,
+                                  size: 16,
+                                  color: AppColors.textSecondary),
+                            ),
+                          ),
                         ),
-                        child: const Icon(CupertinoIcons.arrow_right_arrow_left,
-                            size: 16, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -174,7 +185,7 @@ class HabitCard extends StatelessWidget {
                             horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: option == closedResult
-                              ? const Color(0xFFFCE3EC)
+                              ? AppColors.selectedRose
                               : AppColors.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
@@ -191,7 +202,8 @@ class HabitCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             color: option == closedResult
                                 ? AppColors.primary
-                                : const Color(0xFFC9C2CE),
+                                // De-énfasis legible (antes #C9C2CE, 1.6:1).
+                                : AppColors.textSecondary,
                             decoration: option == closedResult
                                 ? TextDecoration.lineThrough
                                 : null,
@@ -221,7 +233,7 @@ class HabitCard extends StatelessWidget {
                       if (index > 0)
                         Container(
                             width: 1,
-                            height: 42,
+                            height: 48,
                             color: AppColors.surfaceTint),
                       Expanded(
                         child: InkWell(
@@ -236,6 +248,8 @@ class HabitCard extends StatelessWidget {
                           ),
                           onTap: () => onMark(option),
                           child: Container(
+                            // Tap target ≥48 (accesibilidad).
+                            constraints: const BoxConstraints(minHeight: 48),
                             padding:
                                 const EdgeInsets.symmetric(vertical: 12),
                             alignment: Alignment.center,

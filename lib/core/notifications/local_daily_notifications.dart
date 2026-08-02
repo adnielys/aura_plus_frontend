@@ -7,12 +7,12 @@
 /// abrir la app y también a reinicios del teléfono (BootReceiver).
 library;
 
-import 'dart:ui' show Color;
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+
+import '../theme/app_colors.dart';
 
 const _channelId = 'aura_daily';
 const _channelName = 'Daily message';
@@ -123,7 +123,7 @@ Future<void> scheduleDailyNotifications({
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
             // Carmesí de marca en icono y acentos del sistema.
-            color: Color(0xFFC01448),
+            color: AppColors.primary,
           ),
         ),
         androidScheduleMode: mode,

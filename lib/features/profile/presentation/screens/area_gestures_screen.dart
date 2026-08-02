@@ -13,7 +13,7 @@ import '../providers/area_gestures_provider.dart';
 
 /// Colores por área (mismos tonos que las HabitCards) + nombre en español.
 const Map<HabitArea, (Color bg, Color fg, String name)> _areaStyle = {
-  HabitArea.self: (Color(0xFFFFE3EE), Color(0xFFC01448), 'Me'),
+  HabitArea.self: (Color(0xFFFFE3EE), AppColors.primary, 'Me'),
   HabitArea.family: (Color(0xFFFCE9D6), Color(0xFFE0894A), 'Family'),
   HabitArea.relationships: (Color(0xFFECE1FB), Color(0xFF9B6FD4), 'Relationships'),
   HabitArea.work: (Color(0xFFDCE9F6), Color(0xFF3F7CB0), 'Work'),
@@ -173,7 +173,7 @@ class _GestureRow extends ConsumerWidget {
     final (bg, _, _) = _areaStyle[gesture.area]!;
     // Chip del resultado: los tres con dignidad — jamás rojo de error.
     final (chipBg, chipFg) = switch (gesture.result) {
-      HabitResult.done => (const Color(0xFFFCE3EC), AppColors.primary),
+      HabitResult.done => (AppColors.selectedRose, AppColors.primary),
       HabitResult.partial => (const Color(0xFFFFF6E8), const Color(0xFFB07A2D)),
       HabitResult.notPossible => (
           AppColors.surfaceTint,

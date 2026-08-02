@@ -7,6 +7,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 
 /// Cambiar contraseña con sesión abierta (perfil · SESSION). Exige la actual;
 /// el servidor revoca las demás sesiones y devuelve un par nuevo — este
@@ -119,38 +120,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ),
             ],
             const SizedBox(height: 18),
-            SizedBox(
-              height: 50,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [AppColors.primary, Color(0xFF8E2C8E)]),
-                  borderRadius: BorderRadius.circular(26),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(26),
-                    onTap: _busy ? null : _submit,
-                    child: Center(
-                      child: _busy
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Text(
-                              'Save my new password  ✦',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white),
-                            ),
-                    ),
-                  ),
-                ),
-              ),
+            SoftPrimaryButton(
+              label: 'Save my new password',
+              onPressed: _submit,
+              isLoading: _busy,
             ),
             Center(
               child: TextButton(

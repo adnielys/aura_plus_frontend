@@ -196,8 +196,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: CupertinoIcons.square_arrow_right,
                   title: 'Sign out',
                   subtitle: 'See you soon',
-                  onTap: () =>
-                      ref.read(authControllerProvider.notifier).logout(),
+                  onTap: () => _confirmSignOut(context, ref),
                 ),
               ],
             ),
@@ -269,6 +268,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         );
       }
     }
+  }
+
+  /// Confirma antes de cerrar sesión: un toque accidental no debe echarla.
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Sign out?',
+          style: TextStyle(
+            fontFamily: AppTypography.serif,
+            fontStyle: FontStyle.italic,
+            fontSize: 20,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: const Text(
+          "Your space stays just as you left it. You'll sign back in whenever "
+          'you want.',
+          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text(
+              'Stay',
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text(
+              'Sign out',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(authControllerProvider.notifier).logout();
   }
 }
 
@@ -346,7 +394,7 @@ class _Row extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: iconBackground ?? const Color(0xFFFFF0F4),
+                color: iconBackground ?? AppColors.roseTint,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, size: 20, color: iconColor ?? AppColors.primary),
@@ -372,7 +420,7 @@ class _Row extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFCE3EC),
+                            color: AppColors.selectedRose,
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Text(

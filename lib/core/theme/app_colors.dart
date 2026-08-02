@@ -29,6 +29,17 @@ abstract final class AppColors {
   /// Borde de tarjetas de la zona app (--border).
   static const Color border = Color(0xFFEDD5E0);
 
+  /// Rosa muy suave para superficies (invitaciones, cápsulas de icono). Antes
+  /// se hardcodeaba como 0xFFFFF0F4 en ~12 sitios.
+  static const Color roseTint = Color(0xFFFFF0F4);
+
+  /// Rosa de "opción seleccionada" (chips y pills elegidos). Antes 0xFFFCE3EC
+  /// repetido ~15 veces sin token.
+  static const Color selectedRose = Color(0xFFFCE3EC);
+
+  /// Rosa del botón primario deshabilitado. Antes 0xFFF2A9C4 suelto.
+  static const Color primaryDisabled = Color(0xFFF2A9C4);
+
   static const Color textPrimary = Color(0xFF1C1520); // --ink
   static const Color textSecondary = Color(0xFF6B6273); // --muted
 
@@ -47,11 +58,13 @@ abstract final class AppColors {
   /// Texto principal de la frase del onboarding (--text-main).
   static const Color entryInk = Color(0xFF5D5D5D);
 
-  /// Gris del párrafo de bienvenida (copy p).
-  static const Color entryMuted = Color(0xFF8A8A8A);
+  /// Gris del párrafo de bienvenida (copy p). Oscurecido del #8A8A8A del
+  /// maquetado para cumplir WCAG AA sobre blanco (3.5:1 → 5.1:1).
+  static const Color entryMuted = Color(0xFF6E6E6E);
 
-  /// Pistas pequeñas del onboarding (.ob-hint).
-  static const Color entryHint = Color(0xFF9B8088);
+  /// Pistas pequeñas del onboarding (.ob-hint). Oscurecido del #9B8088 para
+  /// cumplir AA sobre blanco (3.7:1 → 5.8:1), conservando el matiz malva.
+  static const Color entryHint = Color(0xFF74606A);
 
   /// Placeholder de la frase (seg-val vacío) y bordes rosados de la entrada.
   static const Color entryPlaceholder = Color(0xFFE2A9BF);

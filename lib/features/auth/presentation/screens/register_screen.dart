@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../providers/auth_controller.dart';
 
@@ -164,52 +165,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                   ],
                   const SizedBox(height: 18),
-                  SizedBox(
-                    height: 56,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            AppColors.entryAccent,
-                            AppColors.entryAccentDark
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(29),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                AppColors.entryAccent.withValues(alpha: 0.35),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(29),
-                          onTap: state.isSubmitting ? null : _submit,
-                          child: Center(
-                            child: state.isSubmitting
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Create account   ✦',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  SoftPrimaryButton(
+                    label: 'Create account',
+                    onPressed: _submit,
+                    isLoading: state.isSubmitting,
                   ),
                   const SizedBox(height: 12),
                   TextButton(

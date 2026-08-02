@@ -25,8 +25,8 @@ const Map<HabitArea, _AreaStyle> _areaStyle = {
   HabitArea.self: (
     name: 'Me',
     bg: Color(0xFFFFE3EE),
-    fg: Color(0xFFC01448),
-    iconBg: Color(0xFFFFF0F4),
+    fg: AppColors.primary,
+    iconBg: AppColors.roseTint,
     icon: Icons.self_improvement,
   ),
   HabitArea.family: (
@@ -255,7 +255,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFCE3EC),
+                        color: AppColors.selectedRose,
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: const Icon(
@@ -315,7 +315,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
     final on = _filter == area;
     final style = area == null ? null : _areaStyle[area]!;
     final accent = style?.fg ?? AppColors.primary;
-    final fillBg = area == null ? const Color(0xFFFCE3EC) : style!.bg;
+    final fillBg = area == null ? AppColors.selectedRose : style!.bg;
     // "Relationships" no cabe en cápsula estrecha: en el FILTRO se abrevia.
     final label = switch (area) {
       null => 'All',
@@ -546,7 +546,7 @@ class _HabitRow extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: habit.visibility == 'pending_review'
                         ? const Color(0xFFFFF6E8)
-                        : const Color(0xFFFCE3EC),
+                        : AppColors.selectedRose,
                     borderRadius: BorderRadius.circular(50),
                     border: habit.visibility == 'pending_review'
                         ? Border.all(color: const Color(0xFFF2DFC2))

@@ -142,7 +142,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       TextSpan(text: 'Today you are ', style: serif),
                       TextSpan(
                         text: result.checkIn.emotionalState.label.toLowerCase(),
-                        style: serif.copyWith(color: AppColors.secondary),
+                        // Carmesí de marca (no el rosa secondary): legible sobre
+                        // fondo claro (WCAG AA 5.5:1 vs 2.6:1) siendo el titular.
+                        style: serif.copyWith(color: AppColors.primary),
                       ),
                     ],
                   ),
@@ -165,12 +167,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         height: 190,
                         width: double.infinity,
                         fit: BoxFit.contain,
+                        // Refuerzo decorativo: el estado ya va en el titular.
+                        excludeFromSemantics: true,
                       )
                     : Image.asset(
                         'assets/images/home.png',
                         height: 160,
                         width: double.infinity,
                         fit: BoxFit.cover,
+                        excludeFromSemantics: true,
                       ),
               ),
               const SizedBox(height: 12),
@@ -214,6 +219,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     padding: EdgeInsets.all(24),
                     child: CircularProgressIndicator(),
                   ),
+                )
+              // Error sin dato cacheado: NO disfrazarlo de "aún no empezaste".
+              // Un fallo de red tiene su propia puerta, con reintento sereno.
+              else if (daily.hasError && result == null)
+                _DayLoadError(
+                  onRetry: () =>
+                      ref.read(dailyFlowProvider.notifier).refresh(),
                 )
               else if (result == null)
                 _CheckInInvite(onTap: () => context.go(AppRoutes.checkIn))
@@ -298,6 +310,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+/// Día no cargado por un fallo de red (nunca se confunde con "aún no
+/// empezaste"): mensaje sereno, sin culpa, con reintento a un toque.
+class _DayLoadError extends StatelessWidget {
+  const _DayLoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.roseTint,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "We couldn't reach your day",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'No rush — it might be the connection. Try again when you like.',
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 14),
+          SoftPrimaryButton(label: 'Try again', onPressed: onRetry),
+        ],
+      ),
+    );
+  }
+}
+
 /// Invitación al check-in cuando el día aún no empezó (una puerta, no un
 /// reproche: sin culpa ni urgencia).
 class _CheckInInvite extends StatelessWidget {
@@ -310,7 +361,7 @@ class _CheckInInvite extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF0F4),
+        color: AppColors.roseTint,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -368,7 +419,7 @@ class _DayClosedCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFFC01448).withValues(alpha: 0.82),
+                    AppColors.primary.withValues(alpha: 0.82),
                     const Color(0xFF961042).withValues(alpha: 0.92),
                   ],
                 ),

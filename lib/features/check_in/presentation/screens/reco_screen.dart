@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../session/presentation/providers/session_controller.dart';
 import '../../../session/presentation/providers/session_draft_provider.dart';
@@ -116,9 +117,10 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
+                    // Sin contador (no evalúa, acompaña): solo un aliento sereno.
                     done >= habits.length
                         ? 'All done — beautiful'
-                        : '$done of ${habits.length} done',
+                        : "Whenever you're ready — no rush",
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 13, color: AppColors.textSecondary),
@@ -130,6 +132,7 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
                       state.recoHeroAsset,
                       height: 210,
                       fit: BoxFit.contain,
+                      excludeFromSemantics: true,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -222,61 +225,11 @@ class _RecoScreenState extends ConsumerState<RecoScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 2, 24, 20),
-              child: SizedBox(
-                height: 56,
-                width: double.infinity,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.entryAccent, AppColors.entryAccentDark],
-                    ),
-                    borderRadius: BorderRadius.circular(29),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.entryAccent.withValues(alpha: 0.35),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(29),
-                      onTap: _closing
-                          ? null
-                          : () => _closeDay(result.recommendation),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (_closing)
-                            const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            )
-                          else
-                            const Text(
-                              'Close my day',
-                              // continue-btn de la zona app: firme, w700.
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                          const Positioned(
-                            right: 24,
-                            child: Text('✦',
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              child: SoftPrimaryButton(
+                label: 'Close my day',
+                onPressed:
+                    _closing ? null : () => _closeDay(result.recommendation),
+                isLoading: _closing,
               ),
             ),
           ],

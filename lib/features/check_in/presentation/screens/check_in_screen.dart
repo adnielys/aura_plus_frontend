@@ -107,6 +107,8 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                         key: ValueKey(_selected),
                         height: 220,
                         fit: BoxFit.contain,
+                        // Decorativa: el estado se anuncia por las tarjetas.
+                        excludeFromSemantics: true,
                       ),
                     ),
                   ),
@@ -152,14 +154,22 @@ class _StateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: AnimatedContainer(
+    // Grupo de radios accesible: el lector anuncia la etiqueta y si está
+    // elegida (antes no había forma de saber cuál estaba seleccionada).
+    return Semantics(
+      button: true,
+      inMutuallyExclusiveGroup: true,
+      selected: selected,
+      label: '${state.checkInLabel}. ${state.checkInHint}',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: ExcludeSemantics(
+          child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFFF0F4) : AppColors.surface,
+          color: selected ? AppColors.roseTint : AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: selected ? AppColors.primary : AppColors.border,
@@ -216,6 +226,8 @@ class _StateCard extends StatelessWidget {
                   : null,
             ),
           ],
+            ),
+          ),
         ),
       ),
     );

@@ -98,6 +98,7 @@ class _TopBar extends StatelessWidget {
             ? IconButton(
                 icon: const Icon(CupertinoIcons.back, size: 18),
                 color: AppColors.textSecondary,
+                tooltip: 'Back',
                 onPressed: onBack,
               )
             : const SizedBox.shrink(),
@@ -629,34 +630,10 @@ class _FeelingsModal extends ConsumerWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 6, 24, 18),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: feelings.isEmpty
-                          ? [AppColors.entryPlaceholder, AppColors.entryPlaceholder]
-                          : [AppColors.entryAccent, AppColors.entryAccentDark],
-                    ),
-                    borderRadius: BorderRadius.circular(29),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(29),
-                      onTap: feelings.isEmpty
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      child: const Center(
-                        child: Text(
-                          'Done   ✦',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              child: SoftPrimaryButton(
+                label: 'Done',
+                onPressed:
+                    feelings.isEmpty ? null : () => Navigator.of(context).pop(),
               ),
             ),
           ],
@@ -1001,7 +978,7 @@ class _ChildrenControl extends ConsumerWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: count == n
-                        ? const Color(0xFFFFF0F4)
+                        ? AppColors.roseTint
                         : const Color(0xFFF8F4FC),
                     border: Border.all(
                       color: count == n
@@ -1356,7 +1333,7 @@ class _MomentChip extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFFF0F4) : const Color(0xFFF8F4FC),
+          color: selected ? AppColors.roseTint : const Color(0xFFF8F4FC),
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
             color: selected ? AppColors.entryAccent : const Color(0xFFE8E0F0),

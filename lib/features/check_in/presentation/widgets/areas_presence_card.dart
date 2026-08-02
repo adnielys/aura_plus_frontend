@@ -18,7 +18,7 @@ class AreasPresenceCard extends ConsumerWidget {
   const AreasPresenceCard({super.key});
 
   static const _style = {
-    HabitArea.self: (Color(0xFFC01448), Color(0xFFFFF0F4), 'Me'),
+    HabitArea.self: (AppColors.primary, AppColors.roseTint, 'Me'),
     HabitArea.family: (Color(0xFFE0894A), Color(0xFFFFF6EE), 'Family'),
     HabitArea.relationships: (Color(0xFF9B6FD4), Color(0xFFF6F0FF), 'Relationships'),
     HabitArea.work: (Color(0xFF3F7CB0), Color(0xFFEEF5FC), 'Work'),

@@ -330,7 +330,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                       ? null // desde el ⇄ el área es la del hueco
                       : (_) => setState(() => _area = area),
                   showCheckmark: false,
-                  selectedColor: const Color(0xFFFCE3EC),
+                  selectedColor: AppColors.selectedRose,
                   backgroundColor: AppColors.surface,
                   labelStyle: TextStyle(
                     fontSize: 11.5,
@@ -362,7 +362,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
                   selected: _minutes == minutes,
                   onSelected: (_) => setState(() => _minutes = minutes),
                   showCheckmark: false,
-                  selectedColor: const Color(0xFFFCE3EC),
+                  selectedColor: AppColors.selectedRose,
                   backgroundColor: AppColors.surface,
                   labelStyle: TextStyle(
                     fontSize: 11.5,
@@ -447,7 +447,7 @@ class _HabitCreateScreenState extends ConsumerState<HabitCreateScreen> {
               _titleController.text.trim().length < 3 || _saving ? null : _save,
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.entryAccent,
-            disabledBackgroundColor: const Color(0xFFF2A9C4),
+            disabledBackgroundColor: AppColors.primaryDisabled,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),

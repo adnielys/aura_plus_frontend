@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../cycle_estimate.dart';
 import '../providers/cycle_provider.dart';
@@ -284,7 +285,10 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
         const SizedBox(height: 10),
         Center(
           child:
-              Image.asset(phase.heroAsset, height: 180, fit: BoxFit.contain),
+              Image.asset(phase.heroAsset,
+                  height: 180,
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true),
         ),
         const SizedBox(height: 10),
         Center(
@@ -322,12 +326,12 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
             Expanded(
               child: _infoCard(
                 icon: Icons.water_drop_outlined,
-                tint: const Color(0xFFFCE3EC),
+                tint: AppColors.selectedRose,
                 iconColor: AppColors.primary,
                 title: 'Next Period',
                 pill: est.inPeriod ? 'now' : 'in ${est.daysToNextPeriod} days',
                 pillColor: AppColors.primary,
-                pillBg: const Color(0xFFFCE3EC),
+                pillBg: AppColors.selectedRose,
                 detail: est.inPeriod
                     ? 'Day ${est.cycleDay} of period'
                     : 'Around day ${CycleEstimate.cycleLength}',
@@ -850,7 +854,7 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFCE3EC) : AppColors.surface,
+          color: selected ? AppColors.selectedRose : AppColors.surface,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
               color: selected ? AppColors.primary : AppColors.border),
@@ -867,37 +871,10 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
   }
 
   Widget _primary(String label, VoidCallback onTap) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-              colors: [AppColors.primary, Color(0xFF8E2C8E)]),
-          borderRadius: BorderRadius.circular(26),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(26),
-            onTap: _busy ? null : onTap,
-            child: Center(
-              child: _busy
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text('$label  ✦',
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white)),
-            ),
-          ),
-        ),
-      ),
+    return SoftPrimaryButton(
+      label: label,
+      onPressed: onTap,
+      isLoading: _busy,
     );
   }
 

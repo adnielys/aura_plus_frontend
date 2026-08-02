@@ -15,7 +15,7 @@ import 'history_screen.dart' show stateColors;
 
 /// Colores por área para el icono del gesto (mismos tonos de siempre).
 const Map<HabitArea, (Color bg, Color fg)> _areaTones = {
-  HabitArea.self: (Color(0xFFFFF0F4), Color(0xFFC01448)),
+  HabitArea.self: (AppColors.roseTint, AppColors.primary),
   HabitArea.family: (Color(0xFFFFF6EE), Color(0xFFE0894A)),
   HabitArea.relationships: (Color(0xFFF6F0FF), Color(0xFF9B6FD4)),
   HabitArea.work: (Color(0xFFEEF5FC), Color(0xFF3F7CB0)),
@@ -156,7 +156,7 @@ class HistoryDayScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFCE3EC),
+                      color: AppColors.selectedRose,
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Text(
@@ -229,7 +229,7 @@ class _GestureRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = _areaTones[gesture.area]!;
     final (chipBg, chipFg) = switch (gesture.result) {
-      HabitResult.done => (const Color(0xFFFCE3EC), AppColors.primary),
+      HabitResult.done => (AppColors.selectedRose, AppColors.primary),
       HabitResult.partial => (const Color(0xFFFFF6E8), const Color(0xFFB07A2D)),
       HabitResult.notPossible => (
           AppColors.surfaceTint,
