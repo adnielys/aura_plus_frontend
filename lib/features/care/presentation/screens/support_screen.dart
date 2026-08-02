@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -268,8 +269,9 @@ class _CareCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(Icons.chevron_right_rounded,
-                        size: 26, color: AppColors.textSecondary),
+                    // Mismo chevron iOS que Profile.
+                    const Icon(CupertinoIcons.chevron_right,
+                        size: 20, color: AppColors.textSecondary),
                   ],
                 ),
               ),

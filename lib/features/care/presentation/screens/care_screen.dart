@@ -442,8 +442,9 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
                     const Icon(CupertinoIcons.lock,
                         size: 16, color: Color(0xFFB9AFC2))
                   else
-                    const Icon(Icons.chevron_right_rounded,
-                        size: 24, color: AppColors.textSecondary),
+                    // Mismo chevron iOS que Profile.
+                    const Icon(CupertinoIcons.chevron_right,
+                        size: 20, color: AppColors.textSecondary),
                 ],
               ),
             ),
