@@ -96,86 +96,188 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
       ));
   }
 
+  String get _pendingName => widget.pending?.providerName == null
+      ? 'this person'
+      : shortProviderName(widget.pending!.providerName!);
+
+  void _goBack() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.support);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final directory = ref.watch(careDirectoryProvider);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      padding: EdgeInsets.zero,
       children: [
-        const CareBackRow(),
-        const SizedBox(height: 6),
-        const Text('PEOPLE WHO CAN WALK WITH YOU',
-            style: AppTypography.sectionLabel),
-        const SizedBox(height: 10),
-        if (_locked) ...[
-          CareLockBanner(
-            name: widget.pending?.providerName == null
-                ? 'esa persona'
-                : shortProviderName(widget.pending!.providerName!),
-          ),
-          const SizedBox(height: 10),
-        ] else ...[
-          Text.rich(
-            TextSpan(children: [
-              TextSpan(
-                text: 'Choose who to take ',
-                style: _serif(context),
+        _hero(context),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 2, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_locked) ...[
+                CareLockBanner(name: _pendingName),
+                const SizedBox(height: 10),
+              ],
+              CareSearchField(
+                controller: _searchController,
+                enabled: !_locked,
+                onChanged: (value) => setState(() => _query = value),
+                onClear: () {
+                  _searchController.clear();
+                  setState(() => _query = '');
+                },
               ),
-              TextSpan(
-                text: 'the first step with.',
-                style: _serifAccent(context),
+              const SizedBox(height: 10),
+              CareTierChips(
+                selected: _tier,
+                enabled: !_locked,
+                onSelected: (tier) => setState(() => _tier = tier),
               ),
-            ]),
-          ),
-          const SizedBox(height: 14),
-        ],
-        CareSearchField(
-          controller: _searchController,
-          enabled: !_locked,
-          onChanged: (value) => setState(() => _query = value),
-          onClear: () {
-            _searchController.clear();
-            setState(() => _query = '');
-          },
-        ),
-        const SizedBox(height: 10),
-        CareTierChips(
-          selected: _tier,
-          enabled: !_locked,
-          onSelected: (tier) => setState(() => _tier = tier),
-        ),
-        const SizedBox(height: 12),
-        ...directory.when(
-          loading: () => const [
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(color: AppColors.careAccent),
+              const SizedBox(height: 12),
+              const Text(
+                'Specialists for you',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-          ],
-          error: (_, _) => [
-            _ErrorRetry(onRetry: () => ref.invalidate(careDirectoryProvider)),
-          ],
-          data: (providers) => _directoryList(context, providers),
-        ),
-        const SizedBox(height: 20),
-        if (_locked)
-          CarePrimaryButton(
-            label: 'View my request',
-            crimson: true,
-            onPressed: () => context.go(AppRoutes.careRequest),
-          )
-        else
-          const Center(
-            child: Text(
-              "I'm still here with you — this only adds\none more person by your side.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
-            ),
+              const SizedBox(height: 10),
+              ...directory.when(
+                loading: () => const [
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child:
+                          CircularProgressIndicator(color: AppColors.careAccent),
+                    ),
+                  ),
+                ],
+                error: (_, _) => [
+                  _ErrorRetry(
+                      onRetry: () => ref.invalidate(careDirectoryProvider)),
+                ],
+                data: (providers) => _directoryList(context, providers),
+              ),
+              const SizedBox(height: 12),
+              if (_locked)
+                CarePrimaryButton(
+                  label: 'View my request',
+                  crimson: true,
+                  onPressed: () => context.push(AppRoutes.careRequest),
+                )
+              else
+                const _CareFooterNote(),
+            ],
           ),
+        ),
       ],
+    );
+  }
+
+  /// Hero ilustrado (recorte superior de hero.png: hojas y luna, sin las
+  /// mujeres), difuminándose a blanco, con back sutil y el titular carmesí.
+  Widget _hero(BuildContext context) {
+    final h = MediaQuery.of(context).size.height;
+    final title = Theme.of(context).textTheme.headlineMedium!.copyWith(
+          fontSize: 30,
+          height: 1.1,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        );
+    return SizedBox(
+      height: h * 0.24,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/care/directory_hero.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: h * 0.12,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    AppColors.background,
+                    AppColors.background.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(CupertinoIcons.back,
+                          size: 22, color: AppColors.textPrimary),
+                      tooltip: 'Care',
+                      onPressed: _goBack,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('CARE',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.4,
+                              color: AppColors.textPrimary,
+                            )),
+                        const SizedBox(height: 8),
+                        FractionallySizedBox(
+                          widthFactor: 0.72,
+                          alignment: Alignment.centerLeft,
+                          child: Text('Find someone\nwho understands',
+                              style: title),
+                        ),
+                        const SizedBox(height: 10),
+                        const FractionallySizedBox(
+                          widthFactor: 0.66,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Compassionate specialists, here for you — '
+                            'when and how you need them.',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              height: 1.45,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -191,13 +293,13 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
       if (support.isNotEmpty) ...[
         const CareTierLabel(tier: 'support'),
         const SizedBox(height: 8),
-        for (final provider in support) _providerTile(context, provider),
+        for (final provider in support) _specialistCard(context, provider),
       ],
       if (clinical.isNotEmpty) ...[
         const SizedBox(height: 10),
         const CareTierLabel(tier: 'clinical'),
         const SizedBox(height: 8),
-        for (final provider in clinical) _providerTile(context, provider),
+        for (final provider in clinical) _specialistCard(context, provider),
       ],
       if (visible.isEmpty && _query.trim().isNotEmpty)
         // Nunca un vacío sin salida (D2).
@@ -227,36 +329,235 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
     ];
   }
 
-  Widget _providerTile(BuildContext context, CareProviderInfo provider) {
-    final isRequested =
-        _locked && provider.id == widget.pending?.providerId;
+  Widget _specialistCard(BuildContext context, CareProviderInfo provider) {
+    final isRequested = _locked && provider.id == widget.pending?.providerId;
     final isResting = _locked && !isRequested;
+    final clinical = provider.tier == 'clinical';
+    final accent = clinical ? AppColors.clinicalAccent : AppColors.careAccent;
+    final tint = clinical ? AppColors.clinicalSurface : AppColors.careSurface;
+    final specialty = provider.specialties.isNotEmpty
+        ? provider.specialties.take(2).join(' · ')
+        : (clinical ? 'Clinical support' : 'Companion support');
+    final languages = provider.languages.map((l) => l.toUpperCase()).join(' / ');
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Opacity(
-        opacity: isResting ? 0.45 : 1,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: isRequested
-              ? () => context.go(AppRoutes.careRequest)
-              : isResting
-                  ? _showOneAtATime
-                  : () => context.go(AppRoutes.careConsent, extra: provider),
-          child: CareProviderCard(
-            name: provider.fullName,
-            meta: providerMetaLine(provider),
-            tier: provider.tier,
-            highlighted: isRequested,
-            trailing: isRequested
-                ? const CareSentBadge()
+        opacity: isResting ? 0.5 : 1,
+        child: Material(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: isRequested
+                ? () => context.push(AppRoutes.careRequest)
                 : isResting
-                    ? const Icon(CupertinoIcons.lock,
+                    ? _showOneAtATime
+                    : () =>
+                        context.push(AppRoutes.careConsent, extra: provider),
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color:
+                        isRequested ? AppColors.careBorder : AppColors.border),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: tint,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      provider.fullName.isEmpty
+                          ? '·'
+                          : provider.fullName.characters.first.toUpperCase(),
+                      style: TextStyle(
+                        fontFamily: AppTypography.serif,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: accent,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          provider.fullName,
+                          style: const TextStyle(
+                            fontFamily: AppTypography.serif,
+                            fontSize: 16,
+                            height: 1.15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            Icon(
+                                clinical
+                                    ? Icons.verified_user_outlined
+                                    : Icons.spa_outlined,
+                                size: 14,
+                                color: accent),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                specialty,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: accent),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (languages.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(languages,
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary)),
+                        ],
+                        const SizedBox(height: 7),
+                        _statusChip(provider),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (isRequested)
+                    const CareSentBadge()
+                  else if (isResting)
+                    const Icon(CupertinoIcons.lock,
                         size: 16, color: Color(0xFFB9AFC2))
-                    : const Icon(CupertinoIcons.chevron_right,
-                        size: 20, color: AppColors.textSecondary),
+                  else
+                    const Icon(Icons.chevron_right_rounded,
+                        size: 24, color: AppColors.textSecondary),
+                ],
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Chip de verificación (dot + texto), al estilo "disponibilidad" del target.
+  Widget _statusChip(CareProviderInfo provider) {
+    final text =
+        provider.licenseVerified ? 'Licensed & verified' : 'Verified';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.careSurface,
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: const BoxDecoration(
+                color: AppColors.careAccent, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(text,
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.careAccent)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Footer del directorio con el estilo del mensaje de Aura: fondo oscuro con
+/// resplandor, corazón en círculo claro, hojas al fondo y texto serif itálica.
+class _CareFooterNote extends StatelessWidget {
+  const _CareFooterNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1A0820), Color(0xFF4A0828)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/care/card2.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.centerRight,
+              opacity: const AlwaysStoppedAnimation(0.14),
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                      color: AppColors.roseTint, shape: BoxShape.circle),
+                  child: const Icon(Icons.favorite_border_rounded,
+                      size: 20, color: AppColors.primary),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'You deserve care that feels right.',
+                        style: TextStyle(
+                          fontFamily: AppTypography.serif,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 15,
+                          height: 1.3,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        "We're here to help you find it.",
+                        style: TextStyle(
+                          fontFamily: AppTypography.serif,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                          height: 1.35,
+                          color: Colors.white.withValues(alpha: 0.72),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
