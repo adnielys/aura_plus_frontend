@@ -156,6 +156,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // aquí dentro — jamás en push (GUARD_CARE_09).
                 const Text('CARE', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
+                // Ayuda inmediata (SPEC_RECURSOS_CRISIS): PRIMERO lo de esta
+                // noche, después lo de las próximas semanas. Sin insignia,
+                // sin contador y sin rojo: un botón de pánico permanente le
+                // recordaría cada día que podría estar en crisis, y eso sería
+                // evaluarla. Funciona con el acompañante apagado y sin red.
+                _Row(
+                  icon: Icons.support_outlined,
+                  iconColor: AppColors.careAccent,
+                  iconBackground: AppColors.careSurface,
+                  title: 'If you need someone right now',
+                  subtitle: 'Free, anonymous, day or night',
+                  onTap: () => context.go(AppRoutes.rightNow),
+                ),
                 _CareRow(),
                 // Círculo de Apoyo (Bloque 4): resumen semanal agregado a
                 // hasta 3 personas de confianza — jamás palabras ni día a día.

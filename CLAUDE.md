@@ -236,6 +236,28 @@ ve una página WEB en inglés (sin app): resumen agregado semanal — jamás
 palabras ni día a día; revocado/vencido/pausado = la misma página neutra.
 Antivigilancia inversa: la app jamás muestra si abrieron el enlace.
 
+## Ayuda inmediata: el teléfono se marca de un toque (ago 2026)
+features/crisis/. Antes los números eran texto muerto dentro de la
+conversación: había que memorizarlos y teclearlos a mano. Ahora
+`url_launcher` (única dependencia nueva, solo aquí) abre el marcador con el
+número puesto — NO llama: ella pulsa, y esa fricción es deliberada.
+Dos caminos: (1) filas llamables dentro de la plantilla de crisis, que
+SUSTITUYEN la línea de teléfonos — `_splitAroundResources` parte el texto por
+el primer número; si no lo encuentra, se pinta entero y las filas van debajo:
+nunca se pierde una palabra; (2) fila "If you need someone right now" /
+"Free, anonymous, day or night" al inicio de CARE, que funciona con el
+acompañante apagado y sin red.
+`crisisHelpProvider` en tres niveles: servidor -> caché en
+shared_preferences -> copia mínima incrustada (112 en los tres idiomas). Es
+la ÚNICA pantalla de la app que debe funcionar en modo avión, y por eso
+nunca lanza. Sin insignia, sin contador y sin rojo: un botón de pánico
+permanente le recordaría cada día que podría estar en crisis, y eso sería
+evaluarla.
+Verificado en emulador con el chat APAGADO: la fila está, la pantalla sale en
+alemán y al tocar se abre el marcador con 08001110111 y el botón de llamar
+esperando. Spec: `docs/SPEC_RECURSOS_CRISIS.md` del backend.
+⚠ Los números NO están auditados: `docs/VERIFICACION_RECURSOS_CRISIS.md`.
+
 ## Idioma de Aura — TRILINGÜE es · en · de (jul 2026, decisión A)
 Contrato `lang` en el perfil. `AppLanguage` (shared/domain/enums.dart) con
 `fromLocale` (solo el código base: de_AT y de_DE son alemán; lo que no

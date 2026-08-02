@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../crisis/domain/crisis_resource.dart';
+import '../../../crisis/presentation/widgets/resource_row.dart';
 import '../providers/companion_provider.dart';
 
 /// Conversación con Aura (SPEC_COMPANION_LLM · mockup aprobado jul 2026).
@@ -64,7 +66,9 @@ class _CompanionScreenState extends ConsumerState<CompanionScreen> {
             'sigue aquí; puedes intentarlo en un momento.',
           );
     } else {
-      ref.read(companionThreadProvider.notifier).addAura(reply.reply);
+      ref
+          .read(companionThreadProvider.notifier)
+          .addAura(reply.reply, resources: reply.resources);
       setState(() => _suggestedAction = reply.suggestedAction);
     }
     _toBottom();
@@ -258,6 +262,28 @@ class _Opening extends StatelessWidget {
   }
 }
 
+/// Parte la plantilla de crisis en (antes, después) de la línea de recursos.
+///
+/// La línea se localiza por el PRIMER número: no se adivina con expresiones
+/// regulares sobre texto de seguridad. Si no se encuentra —plantilla nueva,
+/// idioma raro—, todo el texto va antes y las filas se añaden debajo: nunca
+/// se pierde una palabra.
+(String, String) _splitAroundResources(
+  String content,
+  List<CrisisResource> resources,
+) {
+  const newline = '\n';
+  final lines = content.split(newline);
+  final index = lines.indexWhere(
+    (line) => resources.any((r) => line.contains(r.phone)),
+  );
+  if (index == -1) return (content.trim(), '');
+  return (
+    lines.sublist(0, index).join(newline).trim(),
+    lines.sublist(index + 1).join(newline).trim(),
+  );
+}
+
 class _Bubble extends StatelessWidget {
   const _Bubble({required this.turn});
 
@@ -278,16 +304,42 @@ class _Bubble extends StatelessWidget {
           bottomRight: Radius.circular(mine ? 5 : 16),
         ),
       ),
-      child: Text(
-        turn.content,
-        style: TextStyle(
-          // La voz de Aura va en serif (como sus mensajes de cierre); la de
-          // ella, en la tipografía de siempre.
-          fontFamily: mine ? null : AppTypography.serif,
-          fontSize: mine ? 13.5 : 14,
-          height: 1.5,
-          color: mine ? Colors.white : AppColors.textPrimary,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            // Con recursos, el texto se parte por la línea de teléfonos y
+            // esta se sustituye por filas llamables. Sin ellos se pinta
+            // entero — el número sigue estando escrito (degradación sin
+            // pérdida, SPEC_RECURSOS_CRISIS §4.2).
+            turn.resources.isEmpty
+                ? turn.content
+                : _splitAroundResources(turn.content, turn.resources).$1,
+            style: TextStyle(
+              // La voz de Aura va en serif (como sus mensajes de cierre); la
+              // de ella, en la tipografía de siempre.
+              fontFamily: mine ? null : AppTypography.serif,
+              fontSize: mine ? 13.5 : 14,
+              height: 1.5,
+              color: mine ? Colors.white : AppColors.textPrimary,
+            ),
+          ),
+          if (turn.resources.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (final resource in turn.resources)
+              ResourceRow(resource: resource),
+            const SizedBox(height: 4),
+            Text(
+              _splitAroundResources(turn.content, turn.resources).$2,
+              style: const TextStyle(
+                fontFamily: AppTypography.serif,
+                fontSize: 14,
+                height: 1.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
