@@ -55,7 +55,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       icon: CupertinoIcons.chat_bubble_2,
       activeIcon: CupertinoIcons.chat_bubble_2_fill,
       asset: null,
-      label: 'Support',
+      label: 'Care',
     ),
     (
       route: AppRoutes.profile,

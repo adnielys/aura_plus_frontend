@@ -1504,7 +1504,7 @@ class _EmotionalContract extends StatelessWidget {
                     ),
                     const Spacer(),
                     SoftPrimaryButton(
-                      label: 'Enter my space ✦',
+                      label: 'Enter my space',
                       onPressed: onEnter,
                     ),
                   ],

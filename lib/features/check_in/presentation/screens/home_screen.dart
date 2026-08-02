@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../cycle/presentation/providers/cycle_provider.dart';
@@ -49,20 +50,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _closeDay(Recommendation recommendation) async {
-    final draft = ref.read(sessionDraftProvider);
-    final habit1 = draft[recommendation.habit1.id];
-    if (habit1 == null || _closing) return;
+    if (_closing) return;
     setState(() => _closing = true);
+    final draft = ref.read(sessionDraftProvider);
+    // Sin marcar cuenta como "no fue posible": también suma (filosofía).
     final outcome = await ref
         .read(sessionControllerProvider.notifier)
         .closeDay(
-          habit1Result: habit1,
+          habit1Result:
+              draft[recommendation.habit1.id] ?? HabitResult.notPossible,
           habit2Result: recommendation.habit2 == null
               ? null
-              : draft[recommendation.habit2!.id],
+              : draft[recommendation.habit2!.id] ?? HabitResult.notPossible,
           habit3Result: recommendation.habit3 == null
               ? null
-              : draft[recommendation.habit3!.id],
+              : draft[recommendation.habit3!.id] ?? HabitResult.notPossible,
         );
     if (!mounted) return;
     setState(() => _closing = false);
@@ -274,12 +276,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   SoftPrimaryButton(
                     label: 'Close my day',
                     isLoading: _closing,
-                    onPressed:
-                        ref
-                            .watch(sessionDraftProvider)
-                            .containsKey(result.recommendation.habit1.id)
-                        ? () => _closeDay(result.recommendation)
-                        : null,
+                    // Siempre activo: el día se puede cerrar sin haber marcado
+                    // nada (lo sin marcar cuenta como "no fue posible").
+                    onPressed: _closing
+                        ? null
+                        : () => _closeDay(result.recommendation),
                   ),
               ],
             ],

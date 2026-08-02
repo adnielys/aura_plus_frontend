@@ -42,7 +42,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
           children: [
-            const Text('SUPPORT', style: AppTypography.sectionLabel),
+            const Text('CARE', style: AppTypography.sectionLabel),
             const SizedBox(height: 10),
             Text("You don't have to walk alone.", style: serif),
             const SizedBox(height: 6),
