@@ -93,6 +93,7 @@ flutter:
     - assets/images/feelings/
     - assets/images/reco/
     - assets/images/cycle/
+    - assets/images/care/
 
   # Tres voces del maquetado: Poltawski (frases emocionales), GFS Didot
   # (marca/eyebrows), Inter (cuerpo y controles).
