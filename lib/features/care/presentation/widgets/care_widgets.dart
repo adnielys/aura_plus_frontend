@@ -9,26 +9,32 @@ import '../providers/care_providers.dart';
 /// Piezas visuales del flujo care. Verde sereno (#3E7C7B) para el apoyo,
 /// lila para lo clínico — nunca el carmesí de la acción diaria.
 
-/// Vuelta al perfil (el flujo care cuelga de la fila CUIDADO).
+/// Vuelta al origen del flujo care (por defecto el tab Care; antes iba fijo a
+/// Profile aunque se entrara desde el tab Care).
 class CareBackRow extends StatelessWidget {
-  const CareBackRow({super.key});
+  const CareBackRow({super.key, this.to = AppRoutes.support, this.label = 'Care'});
+
+  /// Ruta a la que vuelve y su nombre visible.
+  final String to;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(8),
-      onTap: () => context.go(AppRoutes.profile),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 4),
+      // Pop si se entró con push (lo normal); si no, al tab Care.
+      onTap: () => context.canPop() ? context.pop() : context.go(to),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(CupertinoIcons.back,
+            const Icon(CupertinoIcons.back,
                 size: 14, color: AppColors.textSecondary),
-            SizedBox(width: 6),
-            Text('Profile',
-                style:
-                    TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            const SizedBox(width: 6),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 13, color: AppColors.textSecondary)),
           ],
         ),
       ),

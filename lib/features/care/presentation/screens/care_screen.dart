@@ -529,7 +529,7 @@ class _EpisodeViewState extends ConsumerState<_EpisodeView> {
         ),
       );
     }
-    router.go(AppRoutes.profile);
+    router.go(AppRoutes.support);
   }
 
   @override

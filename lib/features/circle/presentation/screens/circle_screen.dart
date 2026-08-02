@@ -12,7 +12,11 @@ import '../providers/circle_provider.dart';
 /// confianza ven UN resumen semanal agregado — jamás sus palabras, jamás su
 /// día a día. Espejo transparente, revocación silenciosa, pausa de un toque.
 class CircleScreen extends ConsumerStatefulWidget {
-  const CircleScreen({super.key});
+  const CircleScreen({super.key, this.origin = AppRoutes.support});
+
+  /// A dónde volver al salir: el tab Care por defecto; Profile si se entró
+  /// desde ahí. Evita que "atrás" caiga siempre en Profile o salga de la app.
+  final String origin;
 
   @override
   ConsumerState<CircleScreen> createState() => _CircleScreenState();
@@ -114,6 +118,16 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
     );
   }
 
+  /// Vuelve atrás: hace pop si se entró con push (lo normal); si no, va al
+  /// origen (tab Care). Así el atrás nunca cae en Profile ni sale de la app.
+  void _goBack() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(widget.origin);
+    }
+  }
+
   // --- S1 (vacío) + S3 (gestión): una sola pantalla con espejo ---------------
   Widget _main(BuildContext context, CircleView view) {
     final empty = view.members.isEmpty;
@@ -179,7 +193,7 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
           ),
         Center(
           child: TextButton(
-            onPressed: () => context.go(AppRoutes.profile),
+            onPressed: _goBack,
             child: const Text('← Back',
                 style: TextStyle(
                     fontWeight: FontWeight.w400,

@@ -163,7 +163,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: Icons.workspaces_outline,
                   title: 'My circle',
                   subtitle: 'Share your light — only if you want',
-                  onTap: () => context.go(AppRoutes.supportCircle),
+                  // push: al volver atrás regresa aquí (Profile), no al tab Care.
+                  onTap: () => context.push(AppRoutes.supportCircle),
                 ),
                 const SizedBox(height: 18),
                 // Premium quedó EXCLUIDO del producto (decisión jul 2026):
@@ -347,7 +348,7 @@ class _CareRow extends ConsumerWidget {
       iconColor: AppColors.careAccent,
       iconBackground: AppColors.careSurface,
       subtitleColor: highlighted ? AppColors.careAccent : null,
-      onTap: () => context.go(AppRoutes.care),
+      onTap: () => context.push(AppRoutes.care),
     );
   }
 }

@@ -61,14 +61,16 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
               iconBackground: AppColors.careSurface,
               title: 'Support from one person',
               subtitle: 'People who can walk with you',
-              onTap: () => context.go(AppRoutes.care),
+              // push (no go): deja el tab Care en el stack, así "atrás" vuelve
+              // aquí en vez de salir de la app o caer en Profile.
+              onTap: () => context.push(AppRoutes.care),
             ),
             // Círculo de apoyo: resumen a hasta 3 personas de confianza.
             _SupportRow(
               icon: Icons.workspaces_outline,
               title: 'My circle',
               subtitle: 'Share your light — only if you want',
-              onTap: () => context.go(AppRoutes.supportCircle),
+              onTap: () => context.push(AppRoutes.supportCircle),
             ),
           ],
         ),
