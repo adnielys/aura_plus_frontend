@@ -16,6 +16,7 @@ class UserProfile {
     required this.preferredMoment,
     required this.onboardingCompleted,
     this.messageStyle = MessageStyle.warm,
+    this.lang = AppLanguage.en,
     this.age,
   });
 
@@ -32,5 +33,9 @@ class UserProfile {
 
   /// Cómo le habla Aura (Q4). Solo envoltorio: jamás cambia reglas ni guards.
   final MessageStyle messageStyle;
+
+  /// En qué idioma le habla (textos del servidor). Su elección manda sobre
+  /// el idioma del teléfono.
+  final AppLanguage lang;
   final bool onboardingCompleted;
 }

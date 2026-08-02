@@ -53,6 +53,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       // la timezone del dispositivo (si falla, no bloquea el arranque).
       await syncDeviceTimezone(ref);
       if (!mounted) return;
+      // El idioma del teléfono, solo la PRIMERA vez: a partir de ahí manda
+      // el que ella haya elegido (a diferencia de la timezone, que es hecho).
+      await syncDeviceLanguage(ref);
+      if (!mounted) return;
       // Push (FCM): registra el token para LA notificación diaria. No-op sin
       // google-services.json; jamás bloquea el arranque.
       await registerPushToken(ref);

@@ -14,6 +14,7 @@ import '../../features/care/presentation/screens/support_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/check_in/presentation/screens/check_in_screen.dart';
+import '../../features/companion/presentation/screens/companion_screen.dart';
 import '../../features/circle/presentation/screens/circle_screen.dart';
 import '../../features/cycle/presentation/screens/cycle_screen.dart';
 import '../../features/check_in/presentation/screens/home_screen.dart';
@@ -35,6 +36,7 @@ import '../../features/profile/presentation/screens/habits_catalog_screen.dart';
 import '../../features/profile/presentation/screens/history_day_screen.dart';
 import '../../features/profile/presentation/screens/history_screen.dart';
 import '../../features/profile/presentation/screens/change_password_screen.dart';
+import '../../features/profile/presentation/screens/language_screen.dart';
 import '../../features/profile/presentation/screens/message_style_screen.dart';
 import '../../features/profile/presentation/screens/notification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -68,7 +70,9 @@ abstract final class AppRoutes {
   static const String historyDay = '/history/day';
   static const String notification = '/notification';
   static const String messageStyle = '/message-style';
+  static const String language = '/language';
   static const String supportCircle = '/my-circle';
+  static const String companion = '/companion';
   static const String forgotPassword = '/forgot-password';
   static const String changePassword = '/change-password';
   static const String care = '/care';
@@ -243,12 +247,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, _) => const MessageStyleScreen(),
           ),
           GoRoute(
+            path: AppRoutes.language,
+            builder: (_, _) => const LanguageScreen(),
+          ),
+          GoRoute(
             path: AppRoutes.supportCircle,
             builder: (_, _) => const CircleScreen(),
           ),
           GoRoute(
             path: AppRoutes.changePassword,
             builder: (_, _) => const ChangePasswordScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.companion,
+            builder: (_, _) => const CompanionScreen(),
           ),
           GoRoute(
             path: AppRoutes.care,

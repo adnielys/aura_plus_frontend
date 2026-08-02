@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/network/api_envelope.dart';
 import '../../../../core/network/dio_client.dart';
@@ -30,6 +33,51 @@ Future<void> syncDeviceTimezone(WidgetRef ref) async {
   } catch (_) {
     // Sin red o sin plugin: se reintenta en el próximo arranque.
   }
+}
+
+/// Marca de que el idioma del teléfono ya se propuso una vez.
+const _deviceLangSyncedKey = 'device_language_synced';
+
+/// Propone el idioma del DISPOSITIVO al servidor — UNA SOLA VEZ por
+/// instalación, a diferencia de la timezone.
+///
+/// La timezone es un HECHO y se sincroniza en cada arranque; el idioma es una
+/// PREFERENCIA. Si lo mandáramos siempre, una madre en Berlín que eligió
+/// español volvería al alemán cada vez que abre la app: eso no es acompañar,
+/// es corregirla. Se propone al principio y después manda ella.
+///
+/// Hoy decide los textos que vienen del servidor (la conversación con Aura y
+/// el catálogo emocional). La interfaz sigue en inglés hasta que esté
+/// traducida. Nunca bloquea el arranque.
+Future<void> syncDeviceLanguage(WidgetRef ref) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_deviceLangSyncedKey) ?? false) return;
+
+    final locale = PlatformDispatcher.instance.locale.languageCode;
+    await ref.read(dioProvider).patch<Object?>(
+      '/profile',
+      data: {'lang': AppLanguage.fromLocale(locale).wireValue},
+    );
+    await prefs.setBool(_deviceLangSyncedKey, true);
+    ref.invalidate(profileProvider);
+  } catch (_) {
+    // Sin red todavía: se reintenta en el próximo arranque (la marca solo se
+    // escribe cuando el servidor lo aceptó).
+  }
+}
+
+/// En qué idioma le habla Aura: un tap = PATCH /profile. Su elección manda
+/// desde este momento sobre el idioma del teléfono.
+Future<void> updateLanguage(WidgetRef ref, AppLanguage lang) async {
+  await ref.read(dioProvider).patch<Object?>(
+    '/profile',
+    data: {'lang': lang.wireValue},
+  );
+  // Que no se lo vuelva a proponer el dispositivo en el próximo arranque.
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_deviceLangSyncedKey, true);
+  ref.invalidate(profileProvider);
 }
 
 /// "Lo que más te pesa ahora" (Mis áreas M2): un tap = PATCH /profile.

@@ -14,6 +14,7 @@ class UserProfileModel extends UserProfile {
     required super.preferredMoment,
     required super.onboardingCompleted,
     super.messageStyle,
+    super.lang,
     super.age,
   });
 
@@ -36,6 +37,7 @@ class UserProfileModel extends UserProfile {
           PreferredMoment.fromWire(json['preferred_moment'] as String),
       messageStyle:
           MessageStyle.fromWire((json['message_style'] as String?) ?? 'warm'),
+      lang: AppLanguage.fromWire((json['lang'] as String?) ?? 'en'),
       onboardingCompleted: (json['onboarding_completed'] as bool?) ?? true,
     );
   }

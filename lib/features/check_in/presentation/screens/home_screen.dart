@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
+import '../../../companion/presentation/widgets/companion_door.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../cycle/presentation/providers/cycle_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -282,7 +283,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ? null
                         : () => _closeDay(result.recommendation),
                   ),
+                // Invitación CONTEXTUAL: solo si hoy llegó al límite o
+                // cansada — el momento en que la contención vale.
+                CompanionInvite(state: result.checkIn.emotionalState),
               ],
+              // La puerta al acompañante, siempre al pie y siempre callada:
+              // Aura jamás inicia; ella entra si quiere.
+              const CompanionDoor(),
             ],
           ),
         ),

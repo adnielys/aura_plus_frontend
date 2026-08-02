@@ -190,3 +190,31 @@ enum ChildAge {
     return null;
   }
 }
+
+/// Idioma en que Aura le habla (contrato `lang`). Hoy decide los textos que
+/// vienen del SERVIDOR — la conversación con Aura y el catálogo emocional;
+/// la interfaz de la app sigue en inglés hasta que esté traducida.
+///
+/// Se propone desde el idioma del teléfono la PRIMERA vez y nada más: a
+/// partir de ahí manda lo que ella elija. Una app que te devuelve al inglés
+/// cada vez que arrancas no está escuchando.
+enum AppLanguage {
+  en('en', 'English'),
+  de('de', 'Deutsch'),
+  es('es', 'Español');
+
+  const AppLanguage(this.wireValue, this.label);
+
+  final String wireValue;
+  final String label;
+
+  static AppLanguage fromWire(String value) => values.firstWhere(
+        (e) => e.wireValue == value,
+        orElse: () => AppLanguage.en, // tolerante: un idioma nuevo no rompe
+      );
+
+  /// Idioma del dispositivo -> el nuestro. Solo el código base ('de_AT' y
+  /// 'de_DE' son alemán); lo que no hablamos cae a inglés.
+  static AppLanguage fromLocale(String languageCode) =>
+      fromWire(languageCode.toLowerCase().split(RegExp('[_-]')).first);
+}
