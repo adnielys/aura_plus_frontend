@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../companion/presentation/providers/companion_provider.dart';
 import '../providers/care_providers.dart';
 
 /// Tab "Care": cuidado humano (Carril B). Hero ilustrado a fondo completo que
@@ -28,7 +29,12 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     super.initState();
     // Polling suave (mismo patrón que el resto de tabs): refresca al entrar.
     Future.microtask(() {
-      if (mounted) ref.invalidate(careCurrentReferralProvider);
+      if (mounted) {
+        ref.invalidate(careCurrentReferralProvider);
+        // Re-chequea si el acompañante sigue disponible: si se apaga en el
+        // servidor, su puerta desaparece sin dejar una promesa vacía.
+        ref.invalidate(companionAvailableProvider);
+      }
     });
   }
 
@@ -107,7 +113,19 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                   FractionallySizedBox(
                     widthFactor: 0.72,
                     alignment: Alignment.centerLeft,
-                    child: Text('You don’t have\nto walk alone', style: title),
+                    // Titular a dos tonos (como "Hi, yuki" en Profile): la
+                    // primera línea en gris y la segunda en carmesí, para que
+                    // el énfasis caiga al final.
+                    child: Text.rich(
+                      TextSpan(children: [
+                        TextSpan(
+                          text: 'You don’t have\n',
+                          style: title.copyWith(color: AppColors.textPrimary),
+                        ),
+                        const TextSpan(text: 'to walk alone'),
+                      ]),
+                      style: title,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   FractionallySizedBox(
@@ -132,8 +150,12 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     );
   }
 
-  // ── Contenido: pregunta + dos puertas + privacidad ──────────────────────────
+  // ── Contenido: pregunta + puertas + privacidad ──────────────────────────────
   Widget _content(BuildContext context) {
+    // La puerta a Aura solo aparece si el acompañante está encendido en el
+    // servidor (misma regla que la puerta del Home: sin promesas vacías).
+    final companionOn =
+        ref.watch(companionAvailableProvider).valueOrNull ?? false;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
       child: Column(
@@ -149,6 +171,23 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          // Aura primero: el apoyo inmediato: desde aquí escala a personas.
+          if (companionOn) ...[
+            _CareCard(
+              // Carmesí OSCURO (el aura profundo): distingue la puerta de Aura
+              // del resto de puertas, en borde, título e icono.
+              accent: AppColors.primaryDark,
+              border: AppColors.primaryDark,
+              iconTint: AppColors.roseTint,
+              leafAsset: 'assets/images/care/card3.png',
+              icon: Icons.auto_awesome,
+              title: 'Talk with Aura',
+              subtitle: 'A quiet space to say it out loud',
+              // push (no go): "atrás" vuelve al tab Care, no sale ni va a Profile.
+              onTap: () => context.push(AppRoutes.companion),
+            ),
+            const SizedBox(height: 14),
+          ],
           _CareCard(
             accent: AppColors.careAccent,
             border: _tealBorder,
@@ -206,13 +245,13 @@ class _CareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: border),
           ),
           child: Stack(
@@ -228,21 +267,23 @@ class _CareCard extends StatelessWidget {
                   errorBuilder: (_, _, _) => const SizedBox.shrink(),
                 ),
               ),
+              // Mismas medidas que los cards de Profile (_Row): padding 12,
+              // cápsula 40, gap 12, título 14 / subtítulo 12.
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+                padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
                     // Icono en cápsula redondeada con tinte del área.
                     Container(
-                      width: 50,
-                      height: 50,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: iconTint,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(icon, size: 26, color: accent),
+                      child: Icon(icon, size: 20, color: accent),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,17 +291,17 @@ class _CareCard extends StatelessWidget {
                           Text(
                             title,
                             style: TextStyle(
-                              fontSize: 16.5,
+                              fontSize: 14,
                               height: 1.2,
                               fontWeight: FontWeight.w700,
                               color: accent,
                             ),
                           ),
-                          const SizedBox(height: 3),
+                          const SizedBox(height: 2),
                           Text(
                             subtitle,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               height: 1.3,
                               color: AppColors.textSecondary,
                             ),

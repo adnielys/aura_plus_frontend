@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,7 +35,9 @@ class CompanionDoor extends ConsumerWidget {
         const SizedBox(height: 14),
         InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => context.go(AppRoutes.companion),
+          // push (no go): al salir del chat el "atrás" vuelve AQUÍ, no a una
+          // pantalla fija. Misma regla que las puertas de Care.
+          onTap: () => context.push(AppRoutes.companion),
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 6),
             child: Column(
@@ -80,50 +83,87 @@ class CompanionInvite extends ConsumerWidget {
     final available = ref.watch(companionAvailableProvider).valueOrNull ?? false;
     if (!available) return const SizedBox.shrink();
 
-    return Container(
-      margin: const EdgeInsets.only(top: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFDF2F6),
+    // Mismo card que "Talk with Aura" en la tab Care (icono destello, título,
+    // subtítulo, hojas y chevron), pero el subtítulo lleva el mensaje CONTEXTUAL
+    // del día duro: la contención sigue, con el lenguaje visual del resto.
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Material(
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF0C3D3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Days like this weigh more when nobody hears them. '
-            'If you want, tell me.',
-            style: TextStyle(
-              fontSize: 12.5,
-              height: 1.55,
-              color: Color(0xFF72243E),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          // push (no go): al salir del chat el "atrás" vuelve AQUÍ, no a una
+          // pantalla fija. Misma regla que las puertas de Care.
+          onTap: () => context.push(AppRoutes.companion),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              // Carmesí OSCURO: mismo tratamiento que la puerta de Aura en Care.
+              border: Border.all(color: AppColors.primaryDark),
             ),
-          ),
-          const SizedBox(height: 10),
-          InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: () => context.go(AppRoutes.companion),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 9),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE2A9BF)),
-              ),
-              child: const Center(
-                child: Text(
-                  'Talk with Aura',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/care/card3.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topRight,
+                    opacity: const AlwaysStoppedAnimation(0.22),
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.roseTint,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.auto_awesome,
+                            size: 20, color: AppColors.primaryDark),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Talk with Aura',
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.2,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryDark,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Days like this weigh more when nobody hears '
+                              'them. If you want, tell me.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                height: 1.3,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(CupertinoIcons.chevron_right,
+                          size: 20, color: AppColors.textSecondary),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

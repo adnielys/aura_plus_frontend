@@ -11,6 +11,7 @@ import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../care/presentation/providers/care_providers.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../onboarding/presentation/providers/onboarding_controller.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../providers/profile_provider.dart';
 
 /// Perfil (maquetado · tab "perfil"): cabecera con degradado carmesí,
@@ -45,64 +46,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final stars = constellation.valueOrNull?.starsEarned;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // Cabecera con el degradado del maquetado (plum → carmesí).
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 54, 24, 26),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF2A0A22), Color(0xFF7A0B30), Color(0xFFB01046)],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'YOUR ACCOUNT',
-                  style: TextStyle(
-                    fontFamily: AppTypography.didot,
-                    fontSize: 12,
-                    letterSpacing: 2,
-                    color: Color(0xFFD9A8BE),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text.rich(
-                  TextSpan(children: [
-                    TextSpan(
-                      text: 'Hi, ',
-                      style: serif.copyWith(
-                        color: Colors.white,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    TextSpan(
-                      text: profile.valueOrNull?.name ?? '…',
-                      style: serif.copyWith(
-                        color: AppColors.secondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ]),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  stars == null
-                      ? 'Your sky is beginning ✦'
-                      : '$stars ${stars == 1 ? 'star' : 'stars'} in your sky ✦',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.75),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Hero botánico del patrón CARE: acuarela clara difuminándose a
+          // blanco. Sustituye a la banda carmesí: la misma calidez que el resto
+          // de la app, y el nombre respira en vez de gritar.
+          _hero(context, serif, profile.valueOrNull?.name, stars),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
             child: Column(
@@ -110,100 +61,171 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 const Text('SETTINGS', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
-                _Row(
-                  icon: CupertinoIcons.bell,
-                  title: 'Daily notification',
-                  subtitle: switch (notification.valueOrNull) {
-                    null => 'Once a day',
-                    (isEnabled: false, preferredTime: _) => 'Off',
-                    final n => 'Once a day · ${n.preferredTime}',
-                  },
-                  onTap: () => context.go(AppRoutes.notification),
-                ),
-                _Row(
-                  icon: Icons.track_changes,
-                  title: 'My life areas',
-                  subtitle: 'Me · Family · Relationships · Work',
-                  onTap: () => context.go(AppRoutes.areas),
-                ),
-                _Row(
-                  icon: Icons.record_voice_over_outlined,
-                  title: 'How Aura speaks to you',
-                  subtitle: 'Same warmth, your volume',
-                  onTap: () => context.go(AppRoutes.messageStyle),
-                ),
-                _Row(
-                  icon: Icons.translate_outlined,
-                  title: 'Language',
-                  subtitle: 'The language Aura speaks to you in',
-                  onTap: () => context.go(AppRoutes.language),
-                ),
-                _Row(
-                  icon: CupertinoIcons.calendar,
-                  title: 'History',
-                  subtitle: 'Your whole story',
-                  onTap: () => context.go(AppRoutes.history),
-                ),
-                _Row(
-                  icon: Icons.checklist,
-                  title: 'All microhabits',
-                  subtitle: 'Browse the full list',
-                  onTap: () => context.go(AppRoutes.habits),
-                ),
-                const SizedBox(height: 18),
+                _Group(children: [
+                  _Row(
+                    icon: CupertinoIcons.bell,
+                    title: 'Daily notification',
+                    subtitle: switch (notification.valueOrNull) {
+                      null => 'Once a day',
+                      (isEnabled: false, preferredTime: _) => 'Off',
+                      final n => 'Once a day · ${n.preferredTime}',
+                    },
+                    onTap: () => context.go(AppRoutes.notification),
+                  ),
+                  _Row(
+                    icon: Icons.track_changes,
+                    title: 'My life areas',
+                    subtitle: 'Me · Family · Relationships · Work',
+                    onTap: () => context.go(AppRoutes.areas),
+                  ),
+                  _Row(
+                    icon: Icons.record_voice_over_outlined,
+                    title: 'How Aura speaks to you',
+                    subtitle: 'Same warmth, your volume',
+                    onTap: () => context.go(AppRoutes.messageStyle),
+                  ),
+                  _Row(
+                    icon: Icons.translate_outlined,
+                    title: 'Language',
+                    subtitle: 'The language Aura speaks to you in',
+                    onTap: () => context.go(AppRoutes.language),
+                  ),
+                  _Row(
+                    icon: CupertinoIcons.calendar,
+                    title: 'History',
+                    subtitle: 'Your whole story',
+                    onTap: () => context.go(AppRoutes.history),
+                  ),
+                  _Row(
+                    icon: Icons.checklist,
+                    title: 'All microhabits',
+                    subtitle: 'Browse the full list',
+                    onTap: () => context.go(AppRoutes.habits),
+                  ),
+                ]),
+                const SizedBox(height: 22),
                 // CUIDADO (Carril B): la ÚNICA superficie de care fuera de su
                 // flujo. Discreta, sin badges ni contadores; el "aceptó" vive
                 // aquí dentro — jamás en push (GUARD_CARE_09).
                 const Text('CARE', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
-                _CareRow(),
-                // Círculo de Apoyo (Bloque 4): resumen semanal agregado a
-                // hasta 3 personas de confianza — jamás palabras ni día a día.
-                _Row(
-                  icon: Icons.workspaces_outline,
-                  title: 'My circle',
-                  subtitle: 'Share your light — only if you want',
-                  // push: al volver atrás regresa aquí (Profile), no al tab Care.
-                  onTap: () => context.push(AppRoutes.supportCircle),
-                ),
-                const SizedBox(height: 18),
+                _Group(children: [
+                  _CareRow(),
+                  // Círculo de Apoyo (Bloque 4): resumen semanal agregado a
+                  // hasta 3 personas de confianza — jamás palabras ni día a día.
+                  _Row(
+                    icon: Icons.workspaces_outline,
+                    title: 'My circle',
+                    subtitle: 'Share your light — only if you want',
+                    // push: al volver atrás regresa aquí (Profile), no al tab Care.
+                    onTap: () => context.push(AppRoutes.supportCircle),
+                  ),
+                ]),
+                const SizedBox(height: 22),
                 // Premium quedó EXCLUIDO del producto (decisión jul 2026):
                 // todo lo construido es para todas — sin fila "Go Premium".
                 const Text('COMING SOON', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
-                _Row(
-                  icon: Icons.nightlight_outlined,
-                  title: 'My cycle',
-                  titleBadge: 'v2',
-                  subtitle: 'Advanced personalization',
-                  onTap: () => context.go(AppRoutes.cycle),
-                ),
-                const SizedBox(height: 18),
+                _Group(children: [
+                  _Row(
+                    icon: Icons.nightlight_outlined,
+                    title: 'My cycle',
+                    titleBadge: 'v2',
+                    subtitle: 'Advanced personalization',
+                    onTap: () => context.go(AppRoutes.cycle),
+                  ),
+                ]),
+                const SizedBox(height: 22),
                 const Text('SESSION', style: AppTypography.sectionLabel),
                 const SizedBox(height: 10),
-                _Row(
-                  icon: CupertinoIcons.lock,
-                  title: 'Change password',
-                  subtitle: 'Signs you out on other devices',
-                  onTap: () => context.go(AppRoutes.changePassword),
-                ),
-                _Row(
-                  icon: CupertinoIcons.arrow_counterclockwise,
-                  title: 'Restart onboarding',
-                  subtitle: 'Answer again · your stars stay',
-                  onTap: () => _confirmRestart(context, ref),
-                ),
-                _Row(
-                  icon: CupertinoIcons.square_arrow_right,
-                  title: 'Sign out',
-                  subtitle: 'See you soon',
-                  onTap: () => _confirmSignOut(context, ref),
-                ),
+                _Group(children: [
+                  _Row(
+                    icon: CupertinoIcons.lock,
+                    title: 'Change password',
+                    subtitle: 'Signs you out on other devices',
+                    onTap: () => context.go(AppRoutes.changePassword),
+                  ),
+                  _Row(
+                    icon: CupertinoIcons.arrow_counterclockwise,
+                    title: 'Restart onboarding',
+                    subtitle: 'Answer again · your stars stay',
+                    onTap: () => _confirmRestart(context, ref),
+                  ),
+                  _Row(
+                    icon: CupertinoIcons.square_arrow_right,
+                    title: 'Sign out',
+                    subtitle: 'See you soon',
+                    onTap: () => _confirmSignOut(context, ref),
+                  ),
+                ]),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Hero del perfil: acuarela botánica anclada arriba-derecha que se difumina
+  /// a blanco, con el saludo sobreimpreso a la izquierda y la insignia de
+  /// estrella. Mismo lenguaje que Care y My circle.
+  Widget _hero(
+    BuildContext context,
+    TextStyle serif,
+    String? name,
+    int? stars,
+  ) {
+    return SectionHero(
+      asset: 'assets/images/care/my_circle_hero.jpg',
+      child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'YOUR ACCOUNT',
+                    style: TextStyle(
+                      fontFamily: AppTypography.didot,
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text.rich(
+                    TextSpan(children: [
+                      TextSpan(
+                        text: 'Hi, ',
+                        style: serif.copyWith(
+                          fontSize: 32,
+                          color: AppColors.textPrimary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      TextSpan(
+                        text: name ?? '…',
+                        style: serif.copyWith(
+                          fontSize: 32,
+                          color: AppColors.primary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    stars == null
+                        ? 'Your sky is beginning ✦'
+                        : '$stars ${stars == 1 ? 'star' : 'stars'} in your sky ✦',
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -353,6 +375,17 @@ class _CareRow extends ConsumerWidget {
   }
 }
 
+/// Sección de ajustes: las filas van como cards INDEPENDIENTES, cada una con su
+/// borde (no un card grande con divisores). Solo las apila.
+class _Group extends StatelessWidget {
+  const _Group({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(children: children);
+}
+
 /// Fila de ajuste del maquetado: icono CARMESÍ en cápsula rosa + título +
 /// subtítulo + chevron.
 class _Row extends StatelessWidget {
@@ -378,25 +411,31 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
+    // Card independiente: borde propio y separación con la siguiente fila.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              child: Row(
           children: [
             Container(
               width: 40,
               height: 40,
               decoration: BoxDecoration(
                 color: iconBackground ?? AppColors.roseTint,
-                borderRadius: BorderRadius.circular(12),
+                // Cápsula CIRCULAR, como el maquetado.
+                shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 20, color: iconColor ?? AppColors.primary),
             ),
@@ -452,6 +491,9 @@ class _Row extends StatelessWidget {
             const Icon(CupertinoIcons.chevron_right,
                 size: 20, color: AppColors.textSecondary),
           ],
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../providers/care_providers.dart';
 import '../widgets/care_widgets.dart';
 
@@ -182,78 +183,66 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
     );
   }
 
-  /// Hero ilustrado (recorte superior de hero.png: hojas y luna, sin las
-  /// mujeres), difuminándose a blanco, con back sutil y el titular carmesí.
+  /// Hero ilustrado con el titular carmesí. Usa la cabecera ESTÁNDAR
+  /// ([SectionHero]): misma altura que My circle y Profile.
   Widget _hero(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
     final title = Theme.of(context).textTheme.headlineMedium!.copyWith(
           fontSize: 30,
           height: 1.1,
           fontWeight: FontWeight.w700,
           color: AppColors.primary,
         );
-    return SizedBox(
-      height: h * 0.24,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/care/directory_hero.png',
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: h * 0.12,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    AppColors.background,
-                    AppColors.background.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: Padding(
+    return SectionHero(
+      asset: 'assets/images/care/directory_hero.png',
+      child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: const Icon(CupertinoIcons.back,
-                          size: 22, color: AppColors.textPrimary),
-                      tooltip: 'Care',
-                      onPressed: _goBack,
-                    ),
+                  // Chevron y etiqueta en la MISMA línea: flecha primero, luego
+                  // el rótulo de sección.
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.back,
+                            size: 22, color: AppColors.textPrimary),
+                        tooltip: 'Care',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: _goBack,
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('CARE',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.4,
+                            color: AppColors.textPrimary,
+                          )),
+                    ],
                   ),
+                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(left: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('CARE',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.4,
-                              color: AppColors.textPrimary,
-                            )),
-                        const SizedBox(height: 8),
                         FractionallySizedBox(
                           widthFactor: 0.72,
                           alignment: Alignment.centerLeft,
-                          child: Text('Find someone\nwho understands',
-                              style: title),
+                          // Dos tonos: primera línea gris, segunda carmesí.
+                          child: Text.rich(
+                            TextSpan(children: [
+                              TextSpan(
+                                text: 'Find someone\n',
+                                style:
+                                    title.copyWith(color: AppColors.textPrimary),
+                              ),
+                              const TextSpan(text: 'who understands'),
+                            ]),
+                            style: title,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         const FractionallySizedBox(
@@ -275,9 +264,6 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
     );
   }
 

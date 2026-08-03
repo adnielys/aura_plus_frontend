@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../providers/circle_provider.dart';
@@ -102,18 +104,20 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
     final circle = ref.watch(circleProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: circle.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(
+      backgroundColor: AppColors.background,
+      body: circle.when(
+        loading: () =>
+            const SafeArea(child: Center(child: CircularProgressIndicator())),
+        error: (_, _) => SafeArea(
+          child: Center(
             child: TextButton(
               onPressed: () => ref.invalidate(circleProvider),
               child: const Text('Try again'),
             ),
           ),
-          data: (view) =>
-              _inviting ? _invite(context, view) : _main(context, view),
         ),
+        data: (view) =>
+            _inviting ? _invite(context, view) : _main(context, view),
       ),
     );
   }
@@ -132,16 +136,15 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
   Widget _main(BuildContext context, CircleView view) {
     final empty = view.members.isEmpty;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+      padding: EdgeInsets.zero,
       children: [
-        const Text('MY CIRCLE', style: AppTypography.sectionLabel),
-        const SizedBox(height: 10),
-        Text(
-          empty ? 'Share your light — only if you want.' : 'Your people, your rules.',
-          style: _serif(context),
-        ),
-        if (empty) ...[
-          const SizedBox(height: 6),
+        _header(context, empty),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+        if (empty)
           const Text(
             'Choose up to 3 people you trust. Once a week, they see a small '
             'summary of what you BUILT — never your words, never your '
@@ -149,8 +152,8 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
             style: TextStyle(
                 fontSize: 12.5, height: 1.55, color: AppColors.textSecondary),
           ),
-        ],
-        const SizedBox(height: 16),
+        // Más aire antes del bloque de cards: el mockup lo respira más abajo.
+        const SizedBox(height: 40),
         if (!empty) ...[
           for (final member in view.members) _memberRow(member),
           const SizedBox(height: 14),
@@ -158,7 +161,7 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
         _mirror(view),
         const SizedBox(height: 12),
         if (empty) _neverSee(),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         if (view.spotsLeft > 0 && !view.paused)
           _primary(
             empty
@@ -183,12 +186,18 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
           ),
         ],
         if (empty)
+          // Ancho completo: en una Column alineada a start el texto se queda
+          // con su ancho natural y textAlign.center no lo centraría en la
+          // pantalla — quedaría pegado a la izquierda, no bajo el botón.
           const Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'Nothing is shared until someone accepts your invite.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(
+                'Nothing is shared until someone accepts your invite.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              ),
             ),
           ),
         Center(
@@ -200,13 +209,78 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
                     color: AppColors.textSecondary)),
           ),
         ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  /// Cabecera ESTÁNDAR ([SectionHero]): misma altura que Care y Profile, para
+  /// que las pantallas de sección se lean como un sistema. Titular serif a dos
+  /// líneas en charcoal (no carmesí — es una pantalla serena).
+  Widget _header(BuildContext context, bool empty) {
+    final title = Theme.of(context).textTheme.headlineMedium!.copyWith(
+          fontSize: 30,
+          height: 1.12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        );
+    return SectionHero(
+      asset: 'assets/images/care/my_circle_hero.jpg',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Chevron y etiqueta en la MISMA línea: flecha primero, luego el
+            // rótulo de sección.
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(CupertinoIcons.back,
+                      size: 22, color: AppColors.textPrimary),
+                  tooltip: 'Care',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: _goBack,
+                ),
+                const SizedBox(width: 10),
+                const Text('MY CIRCLE', style: AppTypography.sectionLabel),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: FractionallySizedBox(
+                widthFactor: 0.82,
+                alignment: Alignment.centerLeft,
+                // Dos tonos: primera línea gris, segunda carmesí.
+                child: Text.rich(
+                  TextSpan(children: [
+                    TextSpan(
+                      text: empty ? 'Share your light —\n' : 'Your people,\n',
+                    ),
+                    TextSpan(
+                      text: empty ? 'only if you want.' : 'your rules.',
+                      style: title.copyWith(color: AppColors.primary),
+                    ),
+                  ]),
+                  style: title,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   // --- S2 · invitar (consentimiento informado) --------------------------------
   Widget _invite(BuildContext context, CircleView view) {
-    return ListView(
+    return SafeArea(
+      child: ListView(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
       children: [
         const Text('INVITE TO MY CIRCLE', style: AppTypography.sectionLabel),
@@ -268,6 +342,7 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
           ),
         ),
       ],
+    ),
     );
   }
 
@@ -279,6 +354,49 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           );
+
+  /// Card del patrón CARE: color de fondo, hojas al ~22% ancladas a la derecha
+  /// y borde por fuera del recorte. El texto va encima y sigue legible.
+  Widget _leafCard({
+    required Color background,
+    required Color border,
+    required String leafAsset,
+    required Widget child,
+  }) {
+    return SizedBox(
+      // Ancho completo: dentro de un Column los cards se encogerían al ancho de
+      // su texto más largo (y verde y rosa quedarían distintos). Forzarlo los
+      // deja iguales y a todo el ancho, como el maquetado.
+      width: double.infinity,
+      child: DecoratedBox(
+      // El borde va en PRIMER PLANO: si se pinta detrás, el relleno del card
+      // lo tapa y no se ve. Encima queda como un contorno fino y nítido.
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: border),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          children: [
+            Positioned.fill(child: ColoredBox(color: background)),
+            Positioned.fill(
+              child: Image.asset(
+                leafAsset,
+                fit: BoxFit.cover,
+                alignment: Alignment.centerRight,
+                opacity: const AlwaysStoppedAnimation(0.22),
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ),
+            Padding(padding: const EdgeInsets.all(16), child: child),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
 
   Widget _memberRow(CircleMember member) {
     return Container(
@@ -342,13 +460,10 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
 
   Widget _mirror(CircleView view) {
     final v = view.sharedView;
-    return Container(
-      padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEDF6F4),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFCDE4DF)),
-      ),
+    return _leafCard(
+      background: const Color(0xFFEDF6F4),
+      border: const Color(0xFFCDE4DF),
+      leafAsset: 'assets/images/care/card1.png',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -383,13 +498,10 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
       fontSize: 11.5, height: 1.6, color: Color(0xFF35544F));
 
   Widget _neverSee() {
-    return Container(
-      padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFDF0F3),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-      ),
+    return _leafCard(
+      background: const Color(0xFFFDF0F3),
+      border: AppColors.border,
+      leafAsset: 'assets/images/care/card2.png',
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -299,9 +299,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // cansada — el momento en que la contención vale.
                 CompanionInvite(state: result.checkIn.emotionalState),
               ],
-              // La puerta al acompañante, siempre al pie y siempre callada:
-              // Aura jamás inicia; ella entra si quiere.
-              const CompanionDoor(),
+              // La puerta permanente al acompañante se retiró del Home: el
+              // acceso a Aura vive ahora en la tab Care (un card, entre las
+              // demás puertas de apoyo). La invitación CONTEXTUAL de días duros
+              // (arriba) sí se mantiene: es contención en el momento que pesa.
             ],
           ),
         ),
