@@ -210,10 +210,22 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     super.initState();
     _nameController =
         TextEditingController(text: ref.read(onboardingControllerProvider).name);
-    // El selector de sentimientos NO se abre solo: se lanzaba aquí con un
-    // postFrame y aparecía a pantalla completa sin que ella tocara nada, justo
-    // en el paso más íntimo. Lo abre "Choose how I feel" (o tocar la línea),
-    // que ya existen. Ella decide cuándo.
+    // Edad y peques abren su bottom sheet AL ENTRAR: el control aparece listo,
+    // sin un toque de más. Es seguro porque el sheet sí tiene salida —se
+    // arrastra, se toca fuera o se cierra con "Done"—, así que no encierra.
+    //
+    // El de sentimientos NO se abre solo, y esa diferencia es deliberada: es a
+    // pantalla completa y tapa la frase entera; que apareciera sin tocar nada,
+    // justo en el paso más íntimo, quitaba la sensación de control.
+    if (widget.activeSegment == _Segment.age ||
+        widget.activeSegment == _Segment.children) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.activeSegment == _Segment.age
+            ? _openAgeSheet()
+            : _openChildrenSheet();
+      });
+    }
   }
 
   /// Campo del nombre DENTRO de la línea (maquetado: se escribe en la frase).
