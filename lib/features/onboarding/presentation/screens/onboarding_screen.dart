@@ -521,19 +521,18 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
 
   /// Control bajo la línea (solo cuando el dato no se escribe en la línea).
   Widget? _lineControl(OnboardingState state) {
-    final controller = ref.read(onboardingControllerProvider.notifier);
     return switch (widget.activeSegment) {
       _Segment.name => null, // se escribe en la propia línea
-      _Segment.age => _Stepper(
-          value: state.age,
-          placeholder: "I'd rather not say",
-          min: 16,
-          max: 99,
-          initial: 25, // punto de partida del maquetado
-          onChanged: controller.setAge,
+      // Edad y peques viven en un bottom sheet, no apretados contra el botón
+      // (llegaban a tapar la frase en pantallas pequeñas), y con el MISMO
+      // gesto: los dos datos opcionales se piden igual.
+      _Segment.age => TextButton(
+          onPressed: _openAgeSheet,
+          child: Text(
+            state.age == null ? 'Tell me my age' : 'Change this',
+            style: const TextStyle(color: AppColors.textSecondary),
+          ),
         ),
-      // Peques: el número y las edades viven en un bottom sheet, no apretados
-      // contra el botón (llegaban a tapar la frase en pantallas pequeñas).
       _Segment.children => TextButton(
           onPressed: _openChildrenSheet,
           child: Text(
@@ -552,7 +551,12 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   }
 
   /// Bottom sheet de peques: número y edades, con su propia salida.
-  Future<void> _openChildrenSheet() {
+  Future<void> _openChildrenSheet() => _openSheet(const _ChildrenSheet());
+
+  /// Bottom sheet de la edad.
+  Future<void> _openAgeSheet() => _openSheet(const _AgeSheet());
+
+  Future<void> _openSheet(Widget child) {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.white,
@@ -560,7 +564,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (_) => const _ChildrenSheet(),
+      builder: (_) => child,
     );
   }
 
@@ -652,18 +656,16 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   /// Control de edición dentro del resumen (el texto no se pierde). El nombre
   /// no tiene control aquí: se edita inline en su línea de la frase.
   Widget _editControl(OnboardingState state, _Segment segment) {
-    final controller = ref.read(onboardingControllerProvider.notifier);
     return switch (segment) {
       _Segment.name => const SizedBox.shrink(),
-      _Segment.age => _Stepper(
-          value: state.age,
-          placeholder: "I'd rather not say",
-          min: 16,
-          max: 99,
-          initial: 25,
-          onChanged: controller.setAge,
+      // Al reeditar desde el resumen, edad y peques abren su bottom sheet.
+      _Segment.age => TextButton(
+          onPressed: _openAgeSheet,
+          child: const Text(
+            'Change this',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
-      // Al reeditar desde el resumen, los peques abren el mismo bottom sheet.
       _Segment.children => TextButton(
           onPressed: _openChildrenSheet,
           child: const Text(
@@ -955,6 +957,74 @@ class _Sentence extends StatelessWidget {
   }
 }
 
+/// Andamio común de los bottom sheets del onboarding: asa, contenido y el
+/// botón de cerrar. Los datos se guardan al tocar, así que "Done" solo cierra.
+class _OnboardingSheet extends StatelessWidget {
+  const _OnboardingSheet({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Asa: dice "esto se arrastra y se cierra".
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8E0F0),
+                borderRadius: BorderRadius.circular(50),
+              ),
+            ),
+            const SizedBox(height: 18),
+            ...children,
+            const SizedBox(height: 22),
+            SoftPrimaryButton(
+              label: 'Done',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet de la edad: el mismo stepper, con su propia salida.
+class _AgeSheet extends ConsumerWidget {
+  const _AgeSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final age = ref.watch(onboardingControllerProvider.select((s) => s.age));
+    final controller = ref.read(onboardingControllerProvider.notifier);
+
+    return _OnboardingSheet(
+      children: [
+        const Text(
+          'How old are you?',
+          style: TextStyle(fontSize: 12, color: AppColors.entryHint),
+        ),
+        const SizedBox(height: 14),
+        _Stepper(
+          value: age,
+          placeholder: "I'd rather not say",
+          min: 16,
+          max: 99,
+          initial: 25, // punto de partida del maquetado
+          onChanged: controller.setAge,
+        ),
+      ],
+    );
+  }
+}
+
 /// Stepper −/+ del maquetado (edad y nº de peques).
 class _Stepper extends StatelessWidget {
   const _Stepper({
@@ -1054,23 +1124,8 @@ class _ChildrenSheet extends ConsumerWidget {
       controller.setChildren(count: count ?? 0, ages: next);
     }
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
-        child: Column(
-      mainAxisSize: MainAxisSize.min,
+    return _OnboardingSheet(
       children: [
-        // Asa del sheet: dice "esto se arrastra y se cierra".
-        Container(
-          width: 40,
-          height: 4,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE8E0F0),
-            borderRadius: BorderRadius.circular(50),
-          ),
-        ),
-        const SizedBox(height: 18),
         // Num-chips del maquetado v2: elegir el número en UN tap.
         const Text(
           'How many kids?',
@@ -1140,14 +1195,7 @@ class _ChildrenSheet extends ConsumerWidget {
             ],
           ),
         ],
-        const SizedBox(height: 22),
-        SoftPrimaryButton(
-          label: 'Done',
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ],
-        ),
-      ),
     );
   }
 }
