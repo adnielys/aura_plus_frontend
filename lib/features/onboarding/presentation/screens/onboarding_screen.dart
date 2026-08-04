@@ -352,6 +352,9 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           child: _activeLine(state),
         ),
         const Spacer(),
+        // Edad y peques no dejan nada aquí: el control, el porqué y el "Skip"
+        // viven DENTRO de su bottom sheet. Se reabre tocando el valor en la
+        // frase, así que el paso queda limpio.
         if (control != null)
           TweenAnimationBuilder<double>(
             key: ValueKey('ctrl-${widget.activeSegment}'),
@@ -362,49 +365,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
                 Opacity(opacity: value, child: child),
             child: control,
           ),
-        // Edad y peques son OPCIONALES en el controlador, pero nada lo decía:
-        // se pedían datos personales sin permiso visible de saltarlos ni una
-        // razón, justo tras prometer "sin metas, nada que demostrar".
-        if (_optionalNote != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            _optionalNote!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: AppTypography.serif,
-              fontStyle: FontStyle.italic,
-              fontSize: 12.5,
-              height: 1.45,
-              color: AppColors.entryHint,
-            ),
-          ),
-          TextButton(
-            onPressed: ref.read(onboardingControllerProvider.notifier).next,
-            child: const Text(
-              'Skip for now',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.entryAccent,
-              ),
-            ),
-          ),
-        ],
         const SizedBox(height: 10),
       ],
     );
   }
-
-  /// Por qué se pregunta esto, y que puede saltarse. Solo en los opcionales.
-  String? get _optionalNote => switch (widget.activeSegment) {
-        _Segment.age =>
-          'Only so Aura can pace your days. You can skip this — it changes '
-              'nothing about what she offers you.',
-        _Segment.children =>
-          'It helps Aura suggest gestures that fit your home. Skipping is '
-              'just as valid.',
-        _ => null,
-      };
 
   /// Línea ya respondida del párrafo (valor en magenta, sin subrayado).
   Widget _staticLine(OnboardingState state, _Segment segment) {
@@ -501,24 +465,34 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
             _inlineNameRow(serif),
           ],
         ),
-      _Segment.age => Text.rich(
-          TextSpan(children: [
-            TextSpan(text: 'I am ', style: serif),
-            value(state.age?.toString(), '··'),
-            TextSpan(text: ' years old', style: serif),
-          ]),
-          textAlign: TextAlign.center,
+      // Tocar la línea reabre el sheet: es la única forma de volver a él una
+      // vez cerrado, y el subrayado del valor ya invita a tocarlo.
+      _Segment.age => GestureDetector(
+          onTap: _openAgeSheet,
+          behavior: HitTestBehavior.opaque,
+          child: Text.rich(
+            TextSpan(children: [
+              TextSpan(text: 'I am ', style: serif),
+              value(state.age?.toString(), '··'),
+              TextSpan(text: ' years old', style: serif),
+            ]),
+            textAlign: TextAlign.center,
+          ),
         ),
-      _Segment.children => Text.rich(
-          TextSpan(children: [
-            TextSpan(text: 'with ', style: serif),
-            value(state.childrenCount?.toString(), '··'),
-            TextSpan(
-              text: (state.childrenCount ?? 2) == 1 ? ' child' : ' children',
-              style: serif,
-            ),
-          ]),
-          textAlign: TextAlign.center,
+      _Segment.children => GestureDetector(
+          onTap: _openChildrenSheet,
+          behavior: HitTestBehavior.opaque,
+          child: Text.rich(
+            TextSpan(children: [
+              TextSpan(text: 'with ', style: serif),
+              value(state.childrenCount?.toString(), '··'),
+              TextSpan(
+                text: (state.childrenCount ?? 2) == 1 ? ' child' : ' children',
+                style: serif,
+              ),
+            ]),
+            textAlign: TextAlign.center,
+          ),
         ),
       _Segment.feeling => Text.rich(
           TextSpan(children: [
@@ -535,23 +509,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   Widget? _lineControl(OnboardingState state) {
     return switch (widget.activeSegment) {
       _Segment.name => null, // se escribe en la propia línea
-      // Edad y peques viven en un bottom sheet, no apretados contra el botón
-      // (llegaban a tapar la frase en pantallas pequeñas), y con el MISMO
-      // gesto: los dos datos opcionales se piden igual.
-      _Segment.age => TextButton(
-          onPressed: _openAgeSheet,
-          child: Text(
-            state.age == null ? 'Tell me my age' : 'Change this',
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-      _Segment.children => TextButton(
-          onPressed: _openChildrenSheet,
-          child: Text(
-            state.childrenCount == null ? 'Tell me about them' : 'Change this',
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
+      // Edad y peques NO dejan control aquí: todo (stepper, el porqué y el
+      // "Skip") vive dentro de su bottom sheet, que se abre al entrar al paso
+      // y se reabre tocando el valor en la frase.
+      _Segment.age || _Segment.children => null,
       _Segment.feeling => TextButton(
           onPressed: _openFeelingsModal,
           child: const Text(
@@ -971,13 +932,17 @@ class _Sentence extends StatelessWidget {
 
 /// Andamio común de los bottom sheets del onboarding: asa, contenido y el
 /// botón de cerrar. Los datos se guardan al tocar, así que "Done" solo cierra.
-class _OnboardingSheet extends StatelessWidget {
-  const _OnboardingSheet({required this.children});
+class _OnboardingSheet extends ConsumerWidget {
+  const _OnboardingSheet({required this.children, required this.note});
 
   final List<Widget> children;
 
+  /// Por qué se pregunta el dato. Va DENTRO del sheet, junto al "Skip": es
+  /// donde se decide, no en la pantalla de detrás.
+  final String note;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       top: false,
       child: Padding(
@@ -996,7 +961,34 @@ class _OnboardingSheet extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             ...children,
-            const SizedBox(height: 22),
+            const SizedBox(height: 18),
+            Text(
+              note,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: AppTypography.serif,
+                fontStyle: FontStyle.italic,
+                fontSize: 12.5,
+                height: 1.45,
+                color: AppColors.entryHint,
+              ),
+            ),
+            TextButton(
+              // Saltar cierra el sheet Y avanza: el dato es opcional de verdad.
+              onPressed: () {
+                Navigator.of(context).pop();
+                ref.read(onboardingControllerProvider.notifier).next();
+              },
+              child: const Text(
+                'Skip for now',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.entryAccent,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
             SoftPrimaryButton(
               label: 'Done',
               onPressed: () => Navigator.of(context).pop(),
@@ -1018,6 +1010,8 @@ class _AgeSheet extends ConsumerWidget {
     final controller = ref.read(onboardingControllerProvider.notifier);
 
     return _OnboardingSheet(
+      note: 'Only so Aura can pace your days. You can skip this — it changes '
+          'nothing about what she offers you.',
       children: [
         const Text(
           'How old are you?',
@@ -1137,6 +1131,8 @@ class _ChildrenSheet extends ConsumerWidget {
     }
 
     return _OnboardingSheet(
+      note: 'It helps Aura suggest gestures that fit your home. Skipping is '
+          'just as valid.',
       children: [
         // Num-chips del maquetado v2: elegir el número en UN tap.
         const Text(
