@@ -134,7 +134,7 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
       padding: EdgeInsets.zero,
       children: [
         SectionHeader(
-          asset: 'assets/images/care/profile_hero.png',
+          asset: 'assets/images/care/cycle_hero.png',
           eyebrow: 'MY CYCLE',
           title: [
             const TextSpan(text: 'If you want, '),

@@ -41,7 +41,7 @@ class MessageStyleScreen extends ConsumerWidget {
           padding: EdgeInsets.zero,
           children: [
             SectionHeader(
-              asset: 'assets/images/care/profile_hero.png',
+              asset: 'assets/images/care/voice_hero.png',
               eyebrow: 'HOW AURA SPEAKS TO YOU',
               title: [
                 const TextSpan(text: 'Same warmth, '),
@@ -66,9 +66,10 @@ class MessageStyleScreen extends ConsumerWidget {
                   fontSize: 13.5, height: 1.5, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
-            for (final style in MessageStyle.values) ...[
+            for (final (i, style) in MessageStyle.values.indexed) ...[
               _StyleOption(
                 style: style,
+                leafAsset: _leafAssets[i % _leafAssets.length],
                 selected: data.messageStyle == style,
                 onTap: () => updateMessageStyle(ref, style),
               ),
@@ -97,33 +98,59 @@ class MessageStyleScreen extends ConsumerWidget {
   }
 }
 
+/// Acuarela de fondo por opción, en el orden del enum: rosa para la voz
+/// cálida, teal para la breve y la mixta para la que explica el porqué.
+const _leafAssets = [
+  'assets/images/care/card2.png',
+  'assets/images/care/card1.png',
+  'assets/images/care/card3.png',
+];
+
 class _StyleOption extends StatelessWidget {
   const _StyleOption({
     required this.style,
+    required this.leafAsset,
     required this.selected,
     required this.onTap,
   });
 
   final MessageStyle style;
+  final String leafAsset;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return Material(
+      color: selected ? const Color(0xFFFFF8FA) : AppColors.surface,
       borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFFF8FA) : AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
-            width: selected ? 1.5 : 1,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.border,
+              width: selected ? 1.5 : 1,
+            ),
           ),
-        ),
-        child: Column(
+          child: Stack(
+            children: [
+              // Hojas al 22% DETRÁS del texto, ancladas a la derecha (mismo
+              // tratamiento que las puertas del tab Care).
+              Positioned.fill(
+                child: Image.asset(
+                  leafAsset,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topRight,
+                  opacity: const AlwaysStoppedAnimation(0.22),
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -181,7 +208,11 @@ class _StyleOption extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

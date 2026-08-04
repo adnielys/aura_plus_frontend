@@ -194,7 +194,7 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
           color: AppColors.primary,
         );
     return SectionHero(
-      asset: 'assets/images/care/directory_hero_v2.png',
+      asset: 'assets/images/care/support_hero.png',
       child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
               child: Column(

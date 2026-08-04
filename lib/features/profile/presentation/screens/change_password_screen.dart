@@ -99,7 +99,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           padding: EdgeInsets.zero,
           children: [
             SectionHeader(
-              asset: 'assets/images/care/profile_hero.png',
+              asset: 'assets/images/care/password_hero.png',
               eyebrow: 'CHANGE PASSWORD',
               title: [
                 const TextSpan(text: 'A '),

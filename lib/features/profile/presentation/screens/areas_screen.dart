@@ -120,7 +120,7 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
             // Cabecera ESTÁNDAR (220dp), misma acuarela y papel que
             // Notificaciones.
             SectionHero(
-              asset: 'assets/images/care/my_circle_hero.jpg',
+              asset: 'assets/images/care/areas_hero.png',
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 24, 0),
                 child: Column(

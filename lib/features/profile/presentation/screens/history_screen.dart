@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/aura_note.dart';
 import '../../../../shared/widgets/section_hero.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
@@ -146,7 +147,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               padding: EdgeInsets.zero,
               children: [
                 SectionHeader(
-                  asset: 'assets/images/care/profile_hero.png',
+                  asset: 'assets/images/care/history_hero.png',
                   eyebrow: 'YOUR STORY',
                   title: [
                     const TextSpan(text: 'Everything you built '),
@@ -191,16 +192,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     )),
                   ),
                 if (days.isNotEmpty && !more) ...[
-                  const SizedBox(height: 8),
-                  const Center(
-                    child: Text(
-                      'Your whole story stays with you —\nas far back as your first day.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 11.5,
-                          height: 1.5,
-                          color: AppColors.textSecondary),
-                    ),
+                  const SizedBox(height: 14),
+                  // La promesa, con la voz de Aura (mismo widget que Care).
+                  const AuraNote(
+                    icon: Text('✦',
+                        style:
+                            TextStyle(fontSize: 17, color: AppColors.primary)),
+                    title: [
+                      TextSpan(text: 'Your whole story '),
+                      TextSpan(
+                          text: 'stays with you',
+                          style: TextStyle(color: AppColors.secondary)),
+                      TextSpan(text: '.'),
+                    ],
+                    subtitle: 'As far back as your first day.',
                   ),
                 ],
                 if (days.isNotEmpty) ...[

@@ -69,9 +69,41 @@ class _AppShellState extends ConsumerState<AppShell> {
     ),
   ];
 
+  /// A qué pestaña PERTENECE cada subpantalla. Sin esto, al entrar en Ajustes
+  /// (notificaciones, idioma, historial…) la comparación exacta no encontraba
+  /// pestaña y la barra se quedaba entera en gris: dejaba de decir dónde estás.
+  ///
+  /// Las rutas compartidas (círculo, directorio, chat) se asignan a Care, que
+  /// es su casa: también se llega desde Profile, pero la barra solo puede
+  /// marcar una.
+  static const _tabOfRoute = <String, String>{
+    // Constelación
+    AppRoutes.galaxy: AppRoutes.constellation,
+    // Profile · ajustes
+    AppRoutes.notification: AppRoutes.profile,
+    AppRoutes.areas: AppRoutes.profile,
+    AppRoutes.areaGestures: AppRoutes.profile,
+    AppRoutes.messageStyle: AppRoutes.profile,
+    AppRoutes.language: AppRoutes.profile,
+    AppRoutes.history: AppRoutes.profile,
+    AppRoutes.historyDay: AppRoutes.profile,
+    AppRoutes.habits: AppRoutes.profile,
+    AppRoutes.habitCreate: AppRoutes.profile,
+    AppRoutes.changePassword: AppRoutes.profile,
+    AppRoutes.cycle: AppRoutes.profile,
+    // Care
+    AppRoutes.care: AppRoutes.support,
+    AppRoutes.careConsent: AppRoutes.support,
+    AppRoutes.careRequest: AppRoutes.support,
+    AppRoutes.supportCircle: AppRoutes.support,
+    AppRoutes.companion: AppRoutes.support,
+  };
+
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
+    final matched = GoRouterState.of(context).matchedLocation;
+    // La subpantalla mantiene encendida la pestaña a la que pertenece.
+    final location = _tabOfRoute[matched] ?? matched;
 
     Widget item(
         ({

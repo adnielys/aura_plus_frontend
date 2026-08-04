@@ -121,7 +121,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
             padding: EdgeInsets.zero,
             children: [
               SectionHeader(
-                asset: 'assets/images/care/profile_hero.png',
+                asset: 'assets/images/care/habits_hero.png',
                 eyebrow: 'ALL MICROHABITS',
                 title: [
                   const TextSpan(text: 'Small gestures, '),

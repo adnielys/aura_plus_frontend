@@ -46,7 +46,7 @@ class LanguageScreen extends ConsumerWidget {
           padding: EdgeInsets.zero,
           children: [
             SectionHeader(
-              asset: 'assets/images/care/profile_hero.png',
+              asset: 'assets/images/care/language_hero.png',
               eyebrow: 'LANGUAGE',
               title: [
                 const TextSpan(text: 'The language '),
