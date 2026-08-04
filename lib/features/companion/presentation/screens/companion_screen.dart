@@ -101,7 +101,7 @@ class _CompanionScreenState extends ConsumerState<CompanionScreen> {
     return Scaffold(
       // Papel cálido (no el gris del resto de la app): la conversación es un
       // espacio aparte, más íntimo.
-      backgroundColor: _paper,
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           // Botánica inferior, muy tenue: da aire al hilo cuando hay pocos
@@ -129,8 +129,7 @@ class _CompanionScreenState extends ConsumerState<CompanionScreen> {
             // Cabecera ESTÁNDAR (misma altura que Care, My circle y Profile),
             // fundida al papel cálido del chat en vez de al gris de la app.
             SectionHero(
-              asset: 'assets/images/care/card3.png',
-              fadeTo: _paper,
+              asset: 'assets/images/care/chat_hero.png',
               // Mismo patrón que Care · My circle · Profile: todo a la
               // IZQUIERDA — rótulo pequeño en la línea del chevron y el titular
               // debajo. Así el texto tampoco pisa la botánica de la derecha.
@@ -334,9 +333,6 @@ class _CompanionScreenState extends ConsumerState<CompanionScreen> {
   }
 }
 
-/// Papel cálido del chat y tinta templada del subtítulo: esta pantalla tiene su
-/// propia atmósfera, más íntima que el resto de la app.
-const Color _paper = Color(0xFFFDF8F6);
 const Color _warmInk = Color(0xFFB08968);
 
 /// Primer turno: lo dice la app, no el modelo — y no pide nada.

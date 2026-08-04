@@ -36,6 +36,7 @@ class _CareScreenState extends ConsumerState<CareScreen> {
     final referral = ref.watch(careCurrentReferralProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: referral.when(
           loading: () => const Center(
@@ -193,7 +194,7 @@ class _DirectoryViewState extends ConsumerState<_DirectoryView> {
           color: AppColors.primary,
         );
     return SectionHero(
-      asset: 'assets/images/care/directory_hero.png',
+      asset: 'assets/images/care/directory_hero_v2.png',
       child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
               child: Column(

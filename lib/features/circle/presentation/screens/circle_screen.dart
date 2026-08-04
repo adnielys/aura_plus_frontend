@@ -227,7 +227,7 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
           color: AppColors.textPrimary,
         );
     return SectionHero(
-      asset: 'assets/images/care/my_circle_hero.jpg',
+      asset: 'assets/images/care/circle_hero.png',
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
         child: Column(

@@ -176,7 +176,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     int? stars,
   ) {
     return SectionHero(
-      asset: 'assets/images/care/my_circle_hero.jpg',
+      asset: 'assets/images/care/profile_hero.png',
       child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
               child: Column(
@@ -434,8 +434,9 @@ class _Row extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: iconBackground ?? AppColors.roseTint,
-                // Cápsula CIRCULAR, como el maquetado.
-                shape: BoxShape.circle,
+                // Cápsula de esquinas REDONDEADAS (no círculo): mismo lenguaje
+                // que los iconos de Care y Notificaciones.
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(icon, size: 20, color: iconColor ?? AppColors.primary),
             ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
 import '../../../../shared/widgets/habit_icons.dart';
@@ -94,6 +95,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
     final catalog = ref.watch(habitsCatalogProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: catalog.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -116,20 +118,39 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
               : <HabitArea>[_filter!];
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
+            padding: EdgeInsets.zero,
             children: [
-              const Text('ALL MICROHABITS', style: AppTypography.sectionLabel),
-              const SizedBox(height: 4),
+              SectionHeader(
+                asset: 'assets/images/care/profile_hero.png',
+                eyebrow: 'ALL MICROHABITS',
+                title: [
+                  const TextSpan(text: 'Small gestures, '),
+                  TextSpan(
+                    text: 'never a list.',
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic, color: AppColors.primary),
+                  ),
+                ],
+                onBack: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.profile),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               Text(
                 '${habits.length} small gestures'
                 '${mineTotal > 0 ? ' · $mineTotal mine' : ''}'
                 ' · Aura picks for you each day',
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 13.5,
+                  height: 1.5,
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextField(
                 controller: _searchController,
                 onChanged: (value) => setState(() => _query = value),
@@ -289,16 +310,7 @@ class _HabitsCatalogScreenState extends ConsumerState<HabitsCatalogScreen> {
                   _HabitRow(habit: habit, style: _areaStyle[area]!),
                 const SizedBox(height: 14),
               ],
-              Center(
-                child: TextButton(
-                  onPressed: () => context.go(AppRoutes.profile),
-                  child: const Text(
-                    '← Back',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+                  ],
                 ),
               ),
             ],

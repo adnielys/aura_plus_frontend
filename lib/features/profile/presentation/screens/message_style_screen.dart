@@ -7,6 +7,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/aura_note.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../providers/profile_provider.dart';
 
 /// Cómo le habla Aura (Bloque 2 · Q4): selector de voz con ejemplo por opción.
@@ -26,6 +28,7 @@ class MessageStyleScreen extends ConsumerWidget {
         );
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: profile.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -35,27 +38,34 @@ class MessageStyleScreen extends ConsumerWidget {
           ),
         ),
         data: (data) => ListView(
-          padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
+          padding: EdgeInsets.zero,
           children: [
-            const Text('HOW AURA SPEAKS TO YOU',
-                style: AppTypography.sectionLabel),
-            const SizedBox(height: 10),
-            Text.rich(
-              TextSpan(children: [
-                TextSpan(text: 'Same warmth, ', style: serif),
+            SectionHeader(
+              asset: 'assets/images/care/profile_hero.png',
+              eyebrow: 'HOW AURA SPEAKS TO YOU',
+              title: [
+                const TextSpan(text: 'Same warmth, '),
                 TextSpan(
                   text: 'your volume.',
                   style: serif.copyWith(
                       fontStyle: FontStyle.italic, color: AppColors.primary),
                 ),
-              ]),
+              ],
+              onBack: () => context.canPop()
+                  ? context.pop()
+                  : context.go(AppRoutes.profile),
             ),
-            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             const Text(
               'Aura never judges — but you choose how she wraps her words.',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(
+                  fontSize: 13.5, height: 1.5, color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             for (final style in MessageStyle.values) ...[
               _StyleOption(
                 style: style,
@@ -64,24 +74,20 @@ class MessageStyleScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
             ],
-            const SizedBox(height: 4),
-            const Center(
-              child: Text(
-                'Change it whenever you want — no questions asked.',
-                style:
-                    TextStyle(fontSize: 11, color: AppColors.textSecondary),
-              ),
+            const SizedBox(height: 8),
+            const AuraNote(
+              icon: Text('✦',
+                  style: TextStyle(fontSize: 17, color: AppColors.primary)),
+              title: [
+                TextSpan(text: 'Change it '),
+                TextSpan(
+                    text: 'whenever you want',
+                    style: TextStyle(color: AppColors.secondary)),
+                TextSpan(text: '.'),
+              ],
+              subtitle: 'No questions asked.',
             ),
-            Center(
-              child: TextButton(
-                onPressed: () => context.go(AppRoutes.profile),
-                child: const Text(
-                  '← Back',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                ],
               ),
             ),
           ],

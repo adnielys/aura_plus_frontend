@@ -3,8 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/aura_note.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../cycle_estimate.dart';
@@ -94,49 +98,70 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
     final cycle = ref.watch(cycleProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: cycle.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(
+      backgroundColor: AppColors.background,
+      // El SafeArea superior lo aplica cada vista: la invitación lo trae en su
+      // cabecera estándar; las demás lo envuelven aquí.
+      body: cycle.when(
+        loading: () =>
+            const SafeArea(child: Center(child: CircularProgressIndicator())),
+        error: (_, _) => SafeArea(
+          child: Center(
             child: TextButton(
               onPressed: () => ref.invalidate(cycleProvider),
               child: const Text('Try again'),
             ),
           ),
-          data: (view) {
-            if (_settingUp) return _setup(context);
-            if (view == null) return _invitation(context);
-            return switch (view.mode) {
+        ),
+        data: (view) {
+          if (_settingUp) return SafeArea(child: _setup(context));
+          if (view == null) return _invitation(context);
+          return SafeArea(
+            child: switch (view.mode) {
               'tracking' => _tracking(context, view),
               'paused' => _paused(context),
               _ => _off(context),
-            };
-          },
-        ),
+            },
+          );
+        },
       ),
     );
   }
 
   // --- C1 · invitación (opt-in real) ---------------------------------------
   Widget _invitation(BuildContext context) {
+    final serif = _serif(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+      padding: EdgeInsets.zero,
       children: [
-        const Text('MY CYCLE', style: AppTypography.sectionLabel),
-        const SizedBox(height: 10),
-        Text(
-          'If you want, tell me about your cycle.',
-          style: _serif(context),
+        SectionHeader(
+          asset: 'assets/images/care/profile_hero.png',
+          eyebrow: 'MY CYCLE',
+          title: [
+            const TextSpan(text: 'If you want, '),
+            TextSpan(
+              text: 'tell me about your cycle.',
+              style: serif.copyWith(
+                  fontStyle: FontStyle.italic, color: AppColors.primary),
+            ),
+          ],
+          titleWidthFactor: 0.78,
+          onBack: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.profile),
         ),
-        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
         const Text(
           "It helps me shape your days with more care. It's never required, "
           'nothing is predicted without asking, and you can turn it off — or '
           'erase it all — whenever you want.',
           style: TextStyle(
-              fontSize: 12.5, height: 1.55, color: AppColors.textSecondary),
+              fontSize: 13.5, height: 1.5, color: AppColors.textSecondary),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 20),
         _door(
           'I get my period',
           'Two small questions, only if you know them.',
@@ -152,19 +177,22 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
           'Nothing is stored beyond this choice.',
           () => _run(() => setupCycle(ref, mode: 'off')),
         ),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceTint,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Text(
-            '🔒 This stays between you and Aura. Never in notifications, '
-            'never shared with anyone — not even a support person. You can '
-            'delete it completely, any time.',
-            style: TextStyle(
-                fontSize: 11.5, height: 1.55, color: AppColors.textSecondary),
+        const SizedBox(height: 16),
+        // Promesa de privacidad con la voz de Aura (mismo widget que Care).
+        const AuraNote(
+          icon: Icon(Icons.lock_outline_rounded,
+              size: 19, color: AppColors.primary),
+          title: [
+            TextSpan(text: 'This stays '),
+            TextSpan(
+                text: 'between you and Aura',
+                style: TextStyle(color: AppColors.secondary)),
+            TextSpan(text: '.'),
+          ],
+          subtitle: 'Never in notifications, never shared — not even with a '
+              'support person. You can delete it any time.',
+        ),
+            ],
           ),
         ),
       ],

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/aura_note.dart';
 import '../../../companion/presentation/providers/companion_provider.dart';
 import '../providers/care_providers.dart';
 
@@ -211,7 +212,18 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
             onTap: () => context.push(AppRoutes.supportCircle),
           ),
           const SizedBox(height: 20),
-          const _PrivacyNote(),
+          const AuraNote(
+            icon: Icon(Icons.lock_outline_rounded,
+                size: 19, color: AppColors.primary),
+            title: [
+              TextSpan(text: 'Your '),
+              TextSpan(
+                  text: 'privacy',
+                  style: TextStyle(color: AppColors.secondary)),
+              TextSpan(text: ' is our priority'),
+            ],
+            subtitle: 'You’re in control of what you share',
+          ),
         ],
       ),
     );
@@ -324,74 +336,5 @@ class _CareCard extends StatelessWidget {
   }
 }
 
-/// Nota de privacidad con el estilo del mensaje de Aura: fondo oscuro con
-/// resplandor y texto serif itálica. Conserva el candado (en vez del punto).
-class _PrivacyNote extends StatelessWidget {
-  const _PrivacyNote();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: BoxDecoration(
-        // Mismo degradado con resplandor que el aura-message del maquetado.
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1A0820), Color(0xFF4A0828)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: const BoxDecoration(
-              color: AppColors.roseTint,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.lock_outline_rounded,
-                size: 19, color: AppColors.primary),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  const TextSpan(children: [
-                    TextSpan(text: 'Your '),
-                    TextSpan(
-                        text: 'privacy',
-                        style: TextStyle(color: AppColors.secondary)),
-                    TextSpan(text: ' is our priority'),
-                  ]),
-                  style: const TextStyle(
-                    fontFamily: AppTypography.serif,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 15,
-                    height: 1.3,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'You’re in control of what you share',
-                  style: TextStyle(
-                    fontFamily: AppTypography.serif,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 13,
-                    height: 1.35,
-                    color: Colors.white.withValues(alpha: 0.72),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// La nota de privacidad vive ahora en el widget compartido AuraNote
+// (lib/shared/widgets/aura_note.dart), que comparte con Notificaciones.

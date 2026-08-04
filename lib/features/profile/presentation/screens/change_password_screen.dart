@@ -7,6 +7,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 
 /// Cambiar contraseña con sesión abierta (perfil · SESSION). Exige la actual;
@@ -93,17 +94,35 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         );
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 40, 28, 24),
+      backgroundColor: AppColors.background,
+      body: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            Text('A new password.', style: serif),
-            const SizedBox(height: 8),
+            SectionHeader(
+              asset: 'assets/images/care/profile_hero.png',
+              eyebrow: 'CHANGE PASSWORD',
+              title: [
+                const TextSpan(text: 'A '),
+                TextSpan(
+                  text: 'new password.',
+                  style: serif.copyWith(
+                      fontStyle: FontStyle.italic, color: AppColors.primary),
+                ),
+              ],
+              onBack: () => context.canPop()
+                  ? context.pop()
+                  : context.go(AppRoutes.profile),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(28, 0, 28, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
             const Text(
               'For your safety this signs you out on any other device — '
               'this one stays in.',
               style: TextStyle(
-                  fontSize: 13, height: 1.55, color: AppColors.textSecondary),
+                  fontSize: 13.5, height: 1.5, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
             _field(_current, 'Current password'),
@@ -125,20 +144,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               onPressed: _submit,
               isLoading: _busy,
             ),
-            Center(
-              child: TextButton(
-                onPressed: () => context.go(AppRoutes.profile),
-                child: const Text(
-                  '← Back',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary),
-                ),
+                ],
               ),
             ),
           ],
         ),
-      ),
     );
   }
 

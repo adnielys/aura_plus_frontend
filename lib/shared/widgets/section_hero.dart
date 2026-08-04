@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 
 /// Cabecera ilustrada ESTÁNDAR de las pantallas de sección (Care · My circle ·
 /// Profile): banda de altura fija con la acuarela anclada arriba y una base que
@@ -73,6 +74,82 @@ class SectionHero extends StatelessWidget {
           ),
           SafeArea(bottom: false, child: child),
         ],
+      ),
+    );
+  }
+}
+
+/// Cabecera de sección LISTA PARA USAR: [SectionHero] + flecha atrás, rótulo en
+/// carmesí y titular serif. Es el patrón de Profile · Notificaciones · Mis
+/// áreas, empaquetado para que todas las subpantallas se escriban igual.
+///
+/// El [title] va en spans para poder resaltar la última parte en carmesí
+/// itálica, como "The map of your life, *no goals.*".
+class SectionHeader extends StatelessWidget {
+  const SectionHeader({
+    super.key,
+    required this.asset,
+    required this.eyebrow,
+    required this.title,
+    required this.onBack,
+    this.titleWidthFactor = 0.70,
+  });
+
+  final String asset;
+  final String eyebrow;
+  final List<InlineSpan> title;
+  final VoidCallback onBack;
+
+  /// Ancho del titular: acotado para que no pise la botánica de la derecha.
+  final double titleWidthFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    final serif = Theme.of(context).textTheme.headlineMedium!.copyWith(
+          fontSize: 28,
+          height: 1.18,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        );
+    return SectionHero(
+      asset: asset,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 24, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back,
+                    size: 24, color: AppColors.textPrimary),
+                tooltip: 'Back',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
+                onPressed: onBack,
+              ),
+            ),
+            const SizedBox(height: 22),
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(eyebrow,
+                      style: AppTypography.sectionLabel
+                          .copyWith(color: AppColors.primary)),
+                  const SizedBox(height: 8),
+                  FractionallySizedBox(
+                    widthFactor: titleWidthFactor,
+                    alignment: Alignment.centerLeft,
+                    child: Text.rich(TextSpan(children: title), style: serif),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

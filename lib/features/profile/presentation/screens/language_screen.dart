@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/aura_note.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../providers/profile_provider.dart';
 
 /// En qué idioma le habla Aura. Un tap = PATCH /profile, sin preguntas ni
@@ -32,6 +33,7 @@ class LanguageScreen extends ConsumerWidget {
         );
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: profile.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -41,21 +43,28 @@ class LanguageScreen extends ConsumerWidget {
           ),
         ),
         data: (data) => ListView(
-          padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
+          padding: EdgeInsets.zero,
           children: [
-            const Text('LANGUAGE', style: AppTypography.sectionLabel),
-            const SizedBox(height: 10),
-            Text.rich(
-              TextSpan(children: [
-                TextSpan(text: 'The language ', style: serif),
+            SectionHeader(
+              asset: 'assets/images/care/profile_hero.png',
+              eyebrow: 'LANGUAGE',
+              title: [
+                const TextSpan(text: 'The language '),
                 TextSpan(
                   text: 'Aura speaks to you in.',
                   style: serif.copyWith(
                       fontStyle: FontStyle.italic, color: AppColors.primary),
                 ),
-              ]),
+              ],
+              onBack: () => context.canPop()
+                  ? context.pop()
+                  : context.go(AppRoutes.profile),
             ),
-            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             for (final lang in AppLanguage.values) ...[
               _LanguageOption(
                 lang: lang,
@@ -64,28 +73,21 @@ class LanguageScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
             ],
-            const SizedBox(height: 4),
-            const Center(
-              child: Text(
-                'Aura writes to you in this language. The app itself is still '
-                'in English while we translate it, carefully.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 11,
-                    height: 1.5,
-                    color: AppColors.textSecondary),
-              ),
+            const SizedBox(height: 8),
+            const AuraNote(
+              icon: Text('✦',
+                  style: TextStyle(fontSize: 17, color: AppColors.primary)),
+              title: [
+                TextSpan(text: 'Aura writes to you in '),
+                TextSpan(
+                    text: 'this language',
+                    style: TextStyle(color: AppColors.secondary)),
+                TextSpan(text: '.'),
+              ],
+              subtitle: 'The app itself is still in English while we '
+                  'translate it, carefully.',
             ),
-            Center(
-              child: TextButton(
-                onPressed: () => context.go(AppRoutes.profile),
-                child: const Text(
-                  '← Back',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                ],
               ),
             ),
           ],

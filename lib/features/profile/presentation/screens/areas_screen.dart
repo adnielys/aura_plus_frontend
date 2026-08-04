@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,8 +6,12 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/aura_note.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../../../check_in/presentation/providers/areas_presence_provider.dart';
 import '../providers/profile_provider.dart';
+
+/// Papel cálido, el mismo de Notificaciones: pantalla contemplativa, no ajustes.
 
 /// Estilo e identidad de cada área (Documento Maestro §06 — definiciones
 /// EXACTAS). Mismos tonos que las HabitCards.
@@ -98,56 +101,93 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
     final lit = ref.watch(areasPresenceProvider).valueOrNull ?? const {};
     final mainPain = ref.watch(profileProvider).valueOrNull?.mainPain;
     final serif = Theme.of(context).textTheme.headlineMedium!.copyWith(
-          fontSize: 20,
-          height: 1.35,
-          fontWeight: FontWeight.w600,
+          fontSize: 28,
+          height: 1.18,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         );
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // El margen superior lo aplica la cabecera (SectionHero).
+          SafeArea(
+            top: false,
+            child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => context.go(AppRoutes.profile),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+            // Cabecera ESTÁNDAR (220dp), misma acuarela y papel que
+            // Notificaciones.
+            SectionHero(
+              asset: 'assets/images/care/my_circle_hero.jpg',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 24, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(CupertinoIcons.back,
-                        size: 14, color: AppColors.textSecondary),
-                    SizedBox(width: 6),
-                    Text('Profile',
-                        style: TextStyle(
-                            fontSize: 13, color: AppColors.textSecondary)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back,
+                            size: 24, color: AppColors.textPrimary),
+                        tooltip: 'Back',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        visualDensity: VisualDensity.compact,
+                        // Vuelve a DONDE se entró; el go a Profile es red de
+                        // seguridad (antes iba fijo a Profile).
+                        onPressed: () => context.canPop()
+                            ? context.pop()
+                            : context.go(AppRoutes.profile),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('MY LIFE AREAS',
+                              style: AppTypography.sectionLabel
+                                  .copyWith(color: AppColors.primary)),
+                          const SizedBox(height: 8),
+                          FractionallySizedBox(
+                            widthFactor: 0.70,
+                            alignment: Alignment.centerLeft,
+                            child: Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                    text: 'The map of your life, ',
+                                    style: serif),
+                                TextSpan(
+                                  text: 'no goals.',
+                                  style: serif.copyWith(
+                                      fontStyle: FontStyle.italic,
+                                      color: AppColors.primary),
+                                ),
+                              ]),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 6),
-            const Text('MY LIFE AREAS', style: AppTypography.sectionLabel),
-            const SizedBox(height: 10),
-            Text.rich(
-              TextSpan(children: [
-                TextSpan(text: 'The map of your life, ', style: serif),
-                TextSpan(
-                  text: 'no goals.',
-                  style: serif.copyWith(
-                      fontStyle: FontStyle.italic, color: AppColors.primary),
-                ),
-              ]),
-            ),
-            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             const Text(
               'Your day spreads its light across these four. Aura balances '
               "them for you — you don't have to keep score.",
               style: TextStyle(
-                  fontSize: 12.5, height: 1.55, color: AppColors.textSecondary),
+                  fontSize: 13.5, height: 1.5, color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
             for (final area in HabitArea.values)
               _AreaCard(
                 area: area,
@@ -212,15 +252,29 @@ class _AreasScreenState extends ConsumerState<AreasScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "This only helps me walk with you better. It doesn't change "
-              'your stars or ask anything of you.',
-              style: TextStyle(
-                  fontSize: 10.5, height: 1.5, color: Color(0xFFA79FAD)),
+            const SizedBox(height: 16),
+            // Promesa de Aura, con su voz (mismo widget que Care y
+            // Notificaciones): esto no evalúa ni pide nada.
+            const AuraNote(
+              icon: Text('✦',
+                  style: TextStyle(fontSize: 17, color: AppColors.primary)),
+              title: [
+                TextSpan(text: 'This only helps me '),
+                TextSpan(
+                    text: 'walk with you',
+                    style: TextStyle(color: AppColors.secondary)),
+                TextSpan(text: ' better.'),
+              ],
+              subtitle:
+                  "It doesn't change your stars or ask anything of you.",
+            ),
+                ],
+              ),
             ),
           ],
         ),
+          ),
+        ],
       ),
     );
   }

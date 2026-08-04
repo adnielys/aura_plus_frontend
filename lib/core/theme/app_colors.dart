@@ -23,6 +23,7 @@ abstract final class AppColors {
   static const Color background = Color(0xFFFAFAFA);
   static const Color surface = Color(0xFFFFFFFF);
 
+
   /// Superficie lila suave (--surface): pills, iconos en cápsula.
   static const Color surfaceTint = Color(0xFFF5F0FA);
 

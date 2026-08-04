@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/section_hero.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
 import '../providers/history_provider.dart';
@@ -116,6 +117,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         );
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: history.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -141,22 +143,29 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               return false;
             },
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(24, 54, 24, 24),
+              padding: EdgeInsets.zero,
               children: [
-                const Text('YOUR STORY', style: AppTypography.sectionLabel),
-                const SizedBox(height: 10),
-                Text.rich(
-                  TextSpan(children: [
-                    TextSpan(text: 'Everything you built ', style: serif),
+                SectionHeader(
+                  asset: 'assets/images/care/profile_hero.png',
+                  eyebrow: 'YOUR STORY',
+                  title: [
+                    const TextSpan(text: 'Everything you built '),
                     TextSpan(
                       text: 'stays yours.',
                       style: serif.copyWith(
                           fontStyle: FontStyle.italic,
                           color: AppColors.primary),
                     ),
-                  ]),
+                  ],
+                  onBack: () => context.canPop()
+                      ? context.pop()
+                      : context.go(AppRoutes.profile),
                 ),
-                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 Text(
                   days.isEmpty
                       ? 'Your story starts with your first check-in.'
@@ -231,17 +240,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 4),
-                Center(
-                  child: TextButton(
-                    onPressed: () => context.go(AppRoutes.profile),
-                    child: const Text(
-                      '← Back',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ],
