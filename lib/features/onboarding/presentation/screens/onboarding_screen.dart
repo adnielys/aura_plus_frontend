@@ -58,7 +58,22 @@ class OnboardingScreen extends ConsumerWidget {
                 child: Padding(
                   key: ValueKey(state.stepIndex),
                   padding: const EdgeInsets.fromLTRB(28, 0, 28, 8),
-                  child: _StepContent(step: state.stepIndex),
+                  // Scrollable SIN perder los Spacer: los pasos eran una Column
+                  // rígida, así que con varios sentimientos elegidos —o en una
+                  // pantalla pequeña— el contenido desbordaba. El IntrinsicHeight
+                  // mantiene el anclaje abajo cuando sobra sitio y deja hacer
+                  // scroll cuando falta.
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(minHeight: constraints.maxHeight),
+                        child: IntrinsicHeight(
+                          child: _StepContent(step: state.stepIndex),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -96,8 +111,10 @@ class _TopBar extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: canGoBack
             ? IconButton(
-                icon: const Icon(CupertinoIcons.back, size: 18),
-                color: AppColors.textSecondary,
+                // Es la vía principal para corregir una respuesta: a 18px y en
+                // gris claro casi no se veía.
+                icon: const Icon(CupertinoIcons.back, size: 22),
+                color: AppColors.entryInk,
                 tooltip: 'Back',
                 onPressed: onBack,
               )
@@ -115,20 +132,33 @@ class _StepDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        for (var i = 0; i < kOnboardingSteps; i++)
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            width: i == active ? 18 : 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: i <= active ? AppColors.entryAccent : AppColors.entryBorder,
-              borderRadius: BorderRadius.circular(50),
-            ),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var i = 0; i < kOnboardingSteps; i++)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == active ? 18 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: i <= active
+                      ? AppColors.entryAccent
+                      : AppColors.entryBorder,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        // Cuánto queda, en palabras: con 7 pasos unos puntos de 6px no bastan
+        // — y el resumen del paso 4 se leía como un final que no era.
+        Text(
+          'Step ${active + 1} of $kOnboardingSteps',
+          style: const TextStyle(fontSize: 11, color: AppColors.entryHint),
+        ),
       ],
     );
   }
@@ -180,16 +210,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     super.initState();
     _nameController =
         TextEditingController(text: ref.read(onboardingControllerProvider).name);
-    // Transición del maquetado: al llegar al paso del sentimiento, el selector
-    // se abre solo como modal a pantalla completa.
-    if (widget.activeSegment == _Segment.feeling) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted &&
-            ref.read(onboardingControllerProvider).feelings.isEmpty) {
-          _openFeelingsModal();
-        }
-      });
-    }
+    // El selector de sentimientos NO se abre solo: se lanzaba aquí con un
+    // postFrame y aparecía a pantalla completa sin que ella tocara nada, justo
+    // en el paso más íntimo. Lo abre "Choose how I feel" (o tocar la línea),
+    // que ya existen. Ella decide cuándo.
   }
 
   /// Campo del nombre DENTRO de la línea (maquetado: se escribe en la frase).
@@ -249,7 +273,11 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   Future<void> _openFeelingsModal() {
     return showGeneralDialog(
       context: context,
-      barrierDismissible: false,
+      // Se puede salir sin elegir: el modal trae su propio "atrás" y el gesto
+      // del sistema funciona. barrierLabel es OBLIGATORIO si barrierDismissible
+      // es true — sin él Flutter lanza una aserción y el modal ni se abre.
+      barrierDismissible: true,
+      barrierLabel: 'Close',
       transitionDuration: const Duration(milliseconds: 300),
       transitionBuilder: (_, animation, _, child) => FadeTransition(
         opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
@@ -322,10 +350,49 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
                 Opacity(opacity: value, child: child),
             child: control,
           ),
+        // Edad y peques son OPCIONALES en el controlador, pero nada lo decía:
+        // se pedían datos personales sin permiso visible de saltarlos ni una
+        // razón, justo tras prometer "sin metas, nada que demostrar".
+        if (_optionalNote != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _optionalNote!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: AppTypography.serif,
+              fontStyle: FontStyle.italic,
+              fontSize: 12.5,
+              height: 1.45,
+              color: AppColors.entryHint,
+            ),
+          ),
+          TextButton(
+            onPressed: ref.read(onboardingControllerProvider.notifier).next,
+            child: const Text(
+              'Skip for now',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.entryAccent,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 10),
       ],
     );
   }
+
+  /// Por qué se pregunta esto, y que puede saltarse. Solo en los opcionales.
+  String? get _optionalNote => switch (widget.activeSegment) {
+        _Segment.age =>
+          'Only so Aura can pace your days. You can skip this — it changes '
+              'nothing about what she offers you.',
+        _Segment.children =>
+          'It helps Aura suggest gestures that fit your home. Skipping is '
+              'just as valid.',
+        _ => null,
+      };
 
   /// Línea ya respondida del párrafo (valor en magenta, sin subrayado).
   Widget _staticLine(OnboardingState state, _Segment segment) {
@@ -465,7 +532,15 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           initial: 25, // punto de partida del maquetado
           onChanged: controller.setAge,
         ),
-      _Segment.children => _ChildrenControl(state: state),
+      // Peques: el número y las edades viven en un bottom sheet, no apretados
+      // contra el botón (llegaban a tapar la frase en pantallas pequeñas).
+      _Segment.children => TextButton(
+          onPressed: _openChildrenSheet,
+          child: Text(
+            state.childrenCount == null ? 'Tell me about them' : 'Change this',
+            style: const TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
       _Segment.feeling => TextButton(
           onPressed: _openFeelingsModal,
           child: const Text(
@@ -474,6 +549,19 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           ),
         ),
     };
+  }
+
+  /// Bottom sheet de peques: número y edades, con su propia salida.
+  Future<void> _openChildrenSheet() {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => const _ChildrenSheet(),
+    );
   }
 
   /// Estado final del maquetado (#onboarding.done): cabecera + imagen + frase
@@ -504,7 +592,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           Center(
             child: Image.asset(
               'assets/images/onboarding/feelings-header.png',
-              height: 170,
+              height: 215,
               fit: BoxFit.contain,
             ),
           ),
@@ -517,7 +605,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           nameEditor: editing == _Segment.name
               ? _inlineNameRow(Theme.of(context).textTheme.displaySmall!
                   .copyWith(
-                    fontSize: 28,
+                    fontSize: 33,
                     fontWeight: FontWeight.w400,
                     height: 1.36,
                     color: AppColors.entryInk,
@@ -575,7 +663,14 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           initial: 25,
           onChanged: controller.setAge,
         ),
-      _Segment.children => _ChildrenControl(state: state),
+      // Al reeditar desde el resumen, los peques abren el mismo bottom sheet.
+      _Segment.children => TextButton(
+          onPressed: _openChildrenSheet,
+          child: const Text(
+            'Change this',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
       _Segment.feeling => const SizedBox.shrink(),
     };
   }
@@ -599,7 +694,16 @@ class _FeelingsModal extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 18),
+            // Salida visible: antes solo se salía eligiendo un sentimiento.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(CupertinoIcons.back,
+                    size: 22, color: AppColors.entryInk),
+                tooltip: 'Back',
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
             Text(
               'How do you feel today?',
               textAlign: TextAlign.center,
@@ -748,7 +852,7 @@ class _Sentence extends StatelessWidget {
         .textTheme
         .displaySmall!
         .copyWith(
-          fontSize: 28,
+          fontSize: 33,
           fontWeight: FontWeight.w400,
           height: 1.36,
           color: AppColors.entryInk,
@@ -764,8 +868,8 @@ class _Sentence extends StatelessWidget {
           fontStyle: missing ? FontStyle.italic : FontStyle.normal,
           decoration:
               segment == active ? TextDecoration.underline : TextDecoration.none,
-          decorationColor: AppColors.entryAccent.withValues(alpha: 0.45),
-          decorationThickness: 2,
+          decorationColor: AppColors.entryAccent.withValues(alpha: 0.4),
+          decorationThickness: 1.5,
         ),
       );
     }
@@ -934,13 +1038,12 @@ class _Stepper extends StatelessWidget {
 }
 
 /// Control de peques: stepper 0–4+ y, si hay, chips de edades (multi).
-class _ChildrenControl extends ConsumerWidget {
-  const _ChildrenControl({required this.state});
-
-  final OnboardingState state;
+class _ChildrenSheet extends ConsumerWidget {
+  const _ChildrenSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
     final count = state.childrenCount;
     final ages = state.childrenAges;
@@ -951,8 +1054,23 @@ class _ChildrenControl extends ConsumerWidget {
       controller.setChildren(count: count ?? 0, ages: next);
     }
 
-    return Column(
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
+        child: Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
+        // Asa del sheet: dice "esto se arrastra y se cierra".
+        Container(
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE8E0F0),
+            borderRadius: BorderRadius.circular(50),
+          ),
+        ),
+        const SizedBox(height: 18),
         // Num-chips del maquetado v2: elegir el número en UN tap.
         const Text(
           'How many kids?',
@@ -1022,7 +1140,14 @@ class _ChildrenControl extends ConsumerWidget {
             ],
           ),
         ],
+        const SizedBox(height: 22),
+        SoftPrimaryButton(
+          label: 'Done',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ],
+        ),
+      ),
     );
   }
 }
@@ -1374,32 +1499,55 @@ class _MomentChip extends StatelessWidget {
 class _CancelLink extends ConsumerWidget {
   const _CancelLink();
 
+  /// Borra TODO lo respondido, así que pregunta. Antes bastaba un toque —y el
+  /// enlace vive justo encima del botón primario, donde va el pulgar—, así que
+  /// un roce en el último paso tiraba siete respuestas sin decir nada.
+  Future<void> _confirm(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Start again?'),
+        content: const Text(
+          "Everything you've told me so far will be cleared — your name, how "
+          'you feel, all of it.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Keep what I wrote'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Start again',
+                style: TextStyle(color: AppColors.entryAccent)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      ref.read(onboardingControllerProvider.notifier).restart();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return TextButton(
-      onPressed: ref.read(onboardingControllerProvider.notifier).restart,
-      child: Row(
+      onPressed: () => _confirm(context, ref),
+      // Discreto a propósito: es una salida de emergencia, no una acción que
+      // deba competir con "Continue".
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+          Text(
             'Cancel and start again',
-            // Regular, no bold (el TextButton hereda w600 del labelLarge).
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
+              color: AppColors.entryHint,
             ),
           ),
-          const SizedBox(width: 8),
-          Container(
-            width: 22,
-            height: 22,
-            decoration: const BoxDecoration(
-              color: Color(0xFFECEAEE),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(CupertinoIcons.xmark, size: 13, color: Color(0xFF8B8692)),
-          ),
+          SizedBox(width: 6),
+          Icon(CupertinoIcons.xmark, size: 11, color: AppColors.entryHint),
         ],
       ),
     );
@@ -1431,55 +1579,78 @@ class _EmotionalContract extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Hero del maquetado (cofre) a todo el ancho, arriba.
-            Image.asset(
-              'assets/images/onboarding/chest.png',
-              width: double.infinity,
-              fit: BoxFit.contain,
+            // Hero del maquetado (cofre) arriba, con TOPE de altura: sin él, en
+            // pantallas estrechas y altas el contain crecía a lo alto y
+            // apretaba el texto contra el botón.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.34,
+              ),
+              child: Image.asset(
+                'assets/images/onboarding/chest.png',
+                width: double.infinity,
+                fit: BoxFit.contain,
+              ),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(30, 6, 30, 28),
                 child: Column(
                   children: [
-                    const SizedBox(height: 4),
-                    const Text('✦',
-                        style: TextStyle(
-                            fontSize: 30, color: AppColors.entryAccent)),
-                    const SizedBox(height: 20),
-                    // Frase-contrato: nombre en carmesí, el resto en tinta.
-                    Text.rich(
-                      TextSpan(children: [
-                        TextSpan(
-                          text: "That's all I need, ",
-                          style: serif.copyWith(
-                              color: AppColors.entryInk, height: 1.35),
+                    // El bloque de texto se CENTRA en el espacio libre: antes
+                    // iba pegado arriba con un Spacer detrás, y dejaba un vacío
+                    // enorme entre el párrafo y el botón.
+                    Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('✦',
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    color: AppColors.entryAccent)),
+                            const SizedBox(height: 16),
+                            // Frase-contrato: nombre en carmesí, resto en tinta.
+                            Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: "That's all I need, ",
+                                  style: serif.copyWith(
+                                      color: AppColors.entryInk, height: 1.35),
+                                ),
+                                TextSpan(
+                                  text: name,
+                                  style: serif.copyWith(
+                                      color: AppColors.entryAccent,
+                                      height: 1.35),
+                                ),
+                                TextSpan(
+                                  text: '.',
+                                  style: serif.copyWith(
+                                      color: AppColors.entryInk, height: 1.35),
+                                ),
+                              ]),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            // Sin salto forzado: con el \n la primera frase
+                            // desbordaba y dejaba "prove." sola en su línea.
+                            // Que fluya reparte líneas parejas y quita el hueco
+                            // entre una frase y otra.
+                            const Text(
+                              'There are no goals to meet here, nothing to '
+                              "prove. We begin whenever you're ready.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 15,
+                                height: 1.45,
+                                color: AppColors.entryMuted,
+                              ),
+                            ),
+                          ],
                         ),
-                        TextSpan(
-                          text: name,
-                          style: serif.copyWith(
-                              color: AppColors.entryAccent, height: 1.35),
-                        ),
-                        TextSpan(
-                          text: '.',
-                          style: serif.copyWith(
-                              color: AppColors.entryInk, height: 1.35),
-                        ),
-                      ]),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'There are no goals to meet here, nothing to prove.\n'
-                      "We begin whenever you're ready.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        height: 1.6,
-                        color: AppColors.entryMuted,
                       ),
                     ),
-                    const Spacer(),
                     SoftPrimaryButton(
                       label: 'Enter my space',
                       onPressed: onEnter,
