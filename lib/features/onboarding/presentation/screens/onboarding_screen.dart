@@ -1808,34 +1808,35 @@ class _EmotionalContract extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // El cofre CAE hasta casi tocar el texto: clavado arriba dejaba un
-            // vacío grande entre la ilustración y "That's all I need". Los dos
-            // Expanded (este y el de abajo) reparten el hueco por igual, así
-            // que el texto y el botón se quedan donde estaban.
+            // Cofre y frase son UN bloque, centrado en la vertical de lo que
+            // queda sobre el botón. Antes eran dos Expanded repartiendo el
+            // hueco a partes iguales, pero como el cofre vive dentro del de
+            // arriba, todo el aire sobrante se acumulaba debajo del texto y la
+            // pantalla se leía vacía por abajo.
             //
-            // Mantiene el tope de altura: sin él, en pantallas estrechas y
-            // altas el contain crecía a lo alto y apretaba el texto.
+            // El scroll es el seguro de una pantalla corta: si el bloque no
+            // cabe, se desplaza en vez de desbordar (el Center lo deja quieto
+            // mientras quepa).
             Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.34,
-                  ),
-                  child: Image.asset(
-                    'assets/images/onboarding/chest.png',
-                    width: double.infinity,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 14, 30, 0),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      child: Center(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Tope de altura: sin él, en pantallas estrechas y altas
+                      // el contain crecía a lo alto y apretaba el texto.
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.34,
+                        ),
+                        child: Image.asset(
+                          'assets/images/onboarding/chest.png',
+                          width: double.infinity,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 14, 30, 0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -1884,13 +1885,11 @@ class _EmotionalContract extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+              ),
             ),
-            // Segundo hueco flexible: reparte el aire con el de arriba, de modo
-            // que el texto conserva su sitio y el botón sigue anclado abajo.
-            const Expanded(child: SizedBox.shrink()),
             Padding(
               padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
               child: SoftPrimaryButton(
