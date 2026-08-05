@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/notifications/local_daily_notifications.dart';
 import '../../../../core/notifications/push_registrar.dart';
@@ -25,6 +26,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   static const _crimson = Color(0xFFD60B51);
   static const _duration = Duration(milliseconds: 3300);
+
+  /// Ancho del logo en el maquetado (`.splash-logo{width:150px}`).
+  static const _logoWidth = 150.0;
+
+  /// Alto = ancho · relación del viewBox del SVG (176 × 176,4).
+  static const _logoHeight = _logoWidth * 176.4 / 176;
+
+  /// Dónde aterriza el destello: el hueco de la estrella DENTRO del logo.
+  /// En el viewBox la estrella ocupa x 39,6–77,7 e y 74,1–112,2 —centro
+  /// (58,65 · 93,15)— y el logo se centra en (88 · 88,2); la diferencia,
+  /// escalada a 150 px, da este desplazamiento. Su lado (38,1) escalado son
+  /// 32,5 px, o sea 0,18 del destello de 180: de ahí el factor de encogido.
+  static const _sparkLanding = Offset(-25.0, 4.2);
 
   late final AnimationController _controller;
 
@@ -101,11 +115,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           final sparkScale =
               (0.2 + 0.8 * sparkIn) * (1 - 0.82 * sparkFall);
           final sparkAngle = (-45 + 45 * sparkIn) * math.pi / 180;
-          final sparkDy = -96.0 * sparkFall; // aterriza junto al logo
+          // Aterriza EN la estrella del logo, no junto a él.
+          final sparkOffset = _sparkLanding * sparkFall;
 
-          // 2450–3000 ms: barrido del nombre. 1950–2600: aparece la marca.
-          final markIn = Curves.easeOut.transform(_t(1950, 2600));
-          final wordWipe = Curves.easeInOut.transform(_t(2450, 3000));
+          // 1950–2600 ms: la "A" barre de arriba abajo. 2450–3000: el nombre
+          // barre de izquierda a derecha. La curva es el cubic-bezier
+          // (.4,0,.2,1) del maquetado, que en Flutter es fastOutSlowIn.
+          final markWipe = Curves.fastOutSlowIn.transform(_t(1950, 2600));
+          final wordWipe = Curves.fastOutSlowIn.transform(_t(2450, 3000));
 
           return Stack(
             alignment: Alignment.center,
@@ -133,7 +150,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               // Destello principal de 4 puntas.
               if (sparkIn > 0)
                 Transform.translate(
-                  offset: Offset(0, sparkDy),
+                  offset: sparkOffset,
                   child: Transform.rotate(
                     angle: sparkAngle,
                     child: Transform.scale(
@@ -145,26 +162,36 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     ),
                   ),
                 ),
-              // Logo: "AURA PLUS" fijo al centro, revelado con barrido
-              // izquierda→derecha (el recorte crece, el texto no se mueve).
-              Transform.translate(
-                offset: const Offset(0, 4),
-                child: Opacity(
-                  opacity: markIn,
-                  child: ClipRect(
-                    clipper: _WipeClipper(progress: wordWipe),
-                    child: Text(
-                      'AURA PLUS',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(
-                            color: Colors.white,
-                            fontSize: 30,
-                            letterSpacing: 6,
-                          ),
+              // El logo REAL (aura_logo.svg), quieto en el centro y revelado
+              // en dos capas recortadas, como el maquetado. La estrella que
+              // el propio logo trae queda siempre fuera del recorte (el
+              // recorte de la marca empieza en el 45%): su sitio lo ocupa el
+              // destello animado, que para eso aterriza justo ahí.
+              SizedBox(
+                width: _logoWidth,
+                height: _logoHeight,
+                child: Stack(
+                  children: [
+                    // La "A": el borde inferior del recorte baja del 100% al
+                    // 35%, así se descubre de arriba abajo.
+                    ClipRect(
+                      clipper: _InsetClipper(
+                        left: 0.45,
+                        bottom: 1 - 0.65 * markWipe,
+                      ),
+                      child: const _AuraLogo(),
                     ),
-                  ),
+                    // "AURA PLUS": la banda entre el 70% y el 82% de la
+                    // altura, descubierta de izquierda a derecha.
+                    ClipRect(
+                      clipper: _InsetClipper(
+                        top: 0.70,
+                        bottom: 0.18,
+                        right: 1 - wordWipe,
+                      ),
+                      child: const _AuraLogo(),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -176,19 +203,56 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 }
 
-/// Recorte de barrido izquierda→derecha (wordWipe del maquetado).
-class _WipeClipper extends CustomClipper<Rect> {
-  const _WipeClipper({required this.progress});
-
-  final double progress;
-
-  @override
-  Rect getClip(Size size) =>
-      Rect.fromLTWH(0, 0, size.width * progress, size.height);
+/// El logo, siempre en blanco: el maquetado lo blanquea con
+/// `filter:brightness(0) invert(1)` y aquí basta teñir el SVG.
+class _AuraLogo extends StatelessWidget {
+  const _AuraLogo();
 
   @override
-  bool shouldReclip(_WipeClipper oldClipper) =>
-      oldClipper.progress != progress;
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      'assets/images/aura_logo.svg',
+      width: _SplashScreenState._logoWidth,
+      height: _SplashScreenState._logoHeight,
+      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+    );
+  }
+}
+
+/// Recorte por fracciones del lado, equivalente al `inset()` de CSS con el
+/// que el maquetado descubre cada parte del logo. Un borde que se cruza con
+/// el opuesto deja el rectángulo vacío, que es justo el estado inicial.
+class _InsetClipper extends CustomClipper<Rect> {
+  const _InsetClipper({
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+    this.left = 0,
+  });
+
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+
+  @override
+  Rect getClip(Size size) {
+    final l = size.width * left;
+    final t = size.height * top;
+    return Rect.fromLTRB(
+      l,
+      t,
+      math.max(l, size.width * (1 - right)),
+      math.max(t, size.height * (1 - bottom)),
+    );
+  }
+
+  @override
+  bool shouldReclip(_InsetClipper oldClipper) =>
+      oldClipper.top != top ||
+      oldClipper.right != right ||
+      oldClipper.bottom != bottom ||
+      oldClipper.left != left;
 }
 
 /// Mini destello: aparece girando, brilla y se apaga (miniTwinkle).
