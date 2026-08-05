@@ -100,7 +100,10 @@ class CompanionInvite extends ConsumerWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               // Carmesí OSCURO: mismo tratamiento que la puerta de Aura en Care.
-              border: Border.all(color: AppColors.primaryDark),
+              // Carmesí oscuro PÁLIDO: a plena intensidad el card parecía
+              // seleccionado en vez de uno más. El título y el icono sí van al
+              // tono fuerte.
+              border: Border.all(color: const Color(0xFFE4CBD4)),
             ),
             child: Stack(
               children: [

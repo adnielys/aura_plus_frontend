@@ -25,6 +25,11 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   static const _tealBorder = Color(0xFFCDE6E4);
   static const _roseBorder = Color(0xFFF3D5DF);
 
+  /// Borde del card de Aura: el carmesí OSCURO a plena intensidad hacía que
+  /// pareciera seleccionado, no uno más de la lista. Esta es su versión pálida,
+  /// del mismo peso visual que el teal y el rosa de los otros dos.
+  static const _auraBorder = Color(0xFFE4CBD4);
+
   @override
   void initState() {
     super.initState();
@@ -178,7 +183,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
               // Carmesí OSCURO (el aura profundo): distingue la puerta de Aura
               // del resto de puertas, en borde, título e icono.
               accent: AppColors.primaryDark,
-              border: AppColors.primaryDark,
+              border: _auraBorder,
               iconTint: AppColors.roseTint,
               leafAsset: 'assets/images/care/card3.png',
               icon: Icons.auto_awesome,

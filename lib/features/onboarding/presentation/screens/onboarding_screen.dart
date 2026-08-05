@@ -392,22 +392,40 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           ),
         );
 
+    // Volver a un dato ya respondido: edad y peques reabren su bottom sheet;
+    // el nombre vuelve a su paso (se escribe en la línea). Antes estas líneas
+    // no reaccionaban al toque, pese al "Tap any word to edit it".
+    Widget tappable(_Segment target, Widget child) => GestureDetector(
+          onTap: () => switch (target) {
+            _Segment.age => _openAgeSheet(),
+            _Segment.children => _openChildrenSheet(),
+            _Segment.feeling => _openFeelingsModal(),
+            _Segment.name =>
+              ref.read(onboardingControllerProvider.notifier).goToStep(0),
+          },
+          behavior: HitTestBehavior.opaque,
+          child: child,
+        );
+
     // El nombre ocupa SU PROPIA línea bajo "My name is" (saltos del maquetado).
     if (segment == _Segment.name) {
-      return Column(
-        children: [
-          Text('My name is', textAlign: TextAlign.center, style: serif),
-          Text.rich(
-            TextSpan(children: [
-              value(
-                state.name.trim().isEmpty ? null : state.name.trim(),
-                'your name',
-              ),
-              TextSpan(text: ',', style: serif),
-            ]),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      return tappable(
+        _Segment.name,
+        Column(
+          children: [
+            Text('My name is', textAlign: TextAlign.center, style: serif),
+            Text.rich(
+              TextSpan(children: [
+                value(
+                  state.name.trim().isEmpty ? null : state.name.trim(),
+                  'your name',
+                ),
+                TextSpan(text: ',', style: serif),
+              ]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       );
     }
 
@@ -429,7 +447,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
       _Segment.feeling => <TextSpan>[],
     };
 
-    return Text.rich(TextSpan(children: spans), textAlign: TextAlign.center);
+    return tappable(
+      segment,
+      Text.rich(TextSpan(children: spans), textAlign: TextAlign.center),
+    );
   }
 
   /// La línea del paso actual, en serif grande y centrada.
@@ -588,26 +609,26 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
                     color: AppColors.entryInk,
                   ))
               : null,
+          // Tocar una palabra abre DIRECTAMENTE su control, sin un botón
+          // intermedio: edad y peques en su bottom sheet, sentimientos en su
+          // modal. Solo el nombre se edita en la propia línea.
           onLineTap: (segment) {
-            if (segment == _Segment.feeling) {
-              _openFeelingsModal();
-            } else {
-              _nameController.text = state.name;
-              setState(() => _editSegment = segment);
+            switch (segment) {
+              case _Segment.feeling:
+                _openFeelingsModal();
+              case _Segment.age:
+                _openAgeSheet();
+              case _Segment.children:
+                _openChildrenSheet();
+              case _Segment.name:
+                _nameController.text = state.name;
+                setState(() => _editSegment = segment);
             }
           },
         ),
-        if (editing != null) ...[
-          const SizedBox(height: 22),
-          TweenAnimationBuilder<double>(
-            key: ValueKey('edit-$editing'),
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 450),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) =>
-                Opacity(opacity: value, child: child),
-            child: _editControl(state, editing),
-          ),
+        // Solo el nombre entra en modo edición aquí (se escribe en su propia
+        // línea); edad, peques y sentimientos abren su sheet o su modal.
+        if (editing != null)
           Center(
             child: TextButton(
               onPressed: () => setState(() => _editSegment = null),
@@ -621,34 +642,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
               ),
             ),
           ),
-        ],
       ],
     );
   }
 
-  /// Control de edición dentro del resumen (el texto no se pierde). El nombre
-  /// no tiene control aquí: se edita inline en su línea de la frase.
-  Widget _editControl(OnboardingState state, _Segment segment) {
-    return switch (segment) {
-      _Segment.name => const SizedBox.shrink(),
-      // Al reeditar desde el resumen, edad y peques abren su bottom sheet.
-      _Segment.age => TextButton(
-          onPressed: _openAgeSheet,
-          child: const Text(
-            'Change this',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-      _Segment.children => TextButton(
-          onPressed: _openChildrenSheet,
-          child: const Text(
-            'Change this',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-      _Segment.feeling => const SizedBox.shrink(),
-    };
-  }
 }
 
 /// Modal del maquetado (feel-modal): pantalla completa con título serif, grid
@@ -1635,28 +1632,33 @@ class _EmotionalContract extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Hero del maquetado (cofre) arriba, con TOPE de altura: sin él, en
-            // pantallas estrechas y altas el contain crecía a lo alto y
-            // apretaba el texto contra el botón.
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.34,
-              ),
-              child: Image.asset(
-                'assets/images/onboarding/chest.png',
-                width: double.infinity,
-                fit: BoxFit.contain,
+            // El cofre CAE hasta casi tocar el texto: clavado arriba dejaba un
+            // vacío grande entre la ilustración y "That's all I need". Los dos
+            // Expanded (este y el de abajo) reparten el hueco por igual, así
+            // que el texto y el botón se quedan donde estaban.
+            //
+            // Mantiene el tope de altura: sin él, en pantallas estrechas y
+            // altas el contain crecía a lo alto y apretaba el texto.
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.34,
+                  ),
+                  child: Image.asset(
+                    'assets/images/onboarding/chest.png',
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(30, 6, 30, 28),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(30, 14, 30, 0),
                 child: Column(
                   children: [
-                    // El bloque de texto se CENTRA en el espacio libre: antes
-                    // iba pegado arriba con un Spacer detrás, y dejaba un vacío
-                    // enorme entre el párrafo y el botón.
-                    Expanded(
+                    SizedBox(
                       child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -1707,12 +1709,17 @@ class _EmotionalContract extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SoftPrimaryButton(
-                      label: 'Enter my space',
-                      onPressed: onEnter,
-                    ),
                   ],
                 ),
+            ),
+            // Segundo hueco flexible: reparte el aire con el de arriba, de modo
+            // que el texto conserva su sitio y el botón sigue anclado abajo.
+            const Expanded(child: SizedBox.shrink()),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
+              child: SoftPrimaryButton(
+                label: 'Enter my space',
+                onPressed: onEnter,
               ),
             ),
           ],
