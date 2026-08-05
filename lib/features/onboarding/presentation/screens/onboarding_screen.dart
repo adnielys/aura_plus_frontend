@@ -22,6 +22,7 @@ class OnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
+    final editing = ref.watch(_editingSegmentProvider);
 
     // Errores del envío: mensaje suave, sin detalle técnico (UX_14).
     ref.listen(
@@ -82,13 +83,26 @@ class OnboardingScreen extends ConsumerWidget {
             _StepDots(active: state.stepIndex),
             Padding(
               padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
-              child: SoftPrimaryButton(
-                label: state.isLastStep ? 'Start with Aura+' : 'Continue',
-                onPressed: state.canContinue
-                    ? (state.isLastStep ? controller.submit : controller.next)
-                    : null,
-                isLoading: state.isSubmitting,
-              ),
+              // Reeditando un dato de la frase, el botón CIERRA la edición y
+              // deja donde estabas; no avanza. Antes tocar el nombre y darle a
+              // "Continue" te empujaba al paso siguiente.
+              child: editing != null
+                  ? SoftPrimaryButton(
+                      label: 'Done',
+                      onPressed: () =>
+                          ref.read(_editingSegmentProvider.notifier).state =
+                              null,
+                    )
+                  : SoftPrimaryButton(
+                      label:
+                          state.isLastStep ? 'Start with Aura+' : 'Continue',
+                      onPressed: state.canContinue
+                          ? (state.isLastStep
+                              ? controller.submit
+                              : controller.next)
+                          : null,
+                      isLoading: state.isSubmitting,
+                    ),
             ),
           ],
         ),
@@ -175,6 +189,14 @@ class _CapitalizeFirst extends TextInputFormatter {
 /// Segmentos de la frase; su orden es el de los pasos 0–3.
 enum _Segment { name, age, children, feeling }
 
+/// Dato que se está reeditando desde la frase (null = ninguno).
+///
+/// Vive FUERA del State porque el botón primario está en la pantalla y tiene
+/// que saberlo: mientras se edita, ese botón cierra la edición y NO avanza de
+/// paso. Si no, tocar el nombre y confirmar te empujaba al paso siguiente en
+/// vez de devolverte donde estabas.
+final _editingSegmentProvider = StateProvider<_Segment?>((ref) => null);
+
 class _StepSentence extends ConsumerStatefulWidget {
   const _StepSentence({required this.activeSegment});
 
@@ -191,7 +213,6 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
 
   /// Edición desde el resumen (done): el párrafo COMPLETO se mantiene, solo la
   /// imagen cede su lugar al control del dato tocado (maquetado).
-  _Segment? _editSegment;
 
   @override
   void initState() {
@@ -403,7 +424,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     // El nombre ocupa SU PROPIA línea bajo "My name is" (saltos del maquetado).
     // Al tocarlo, esa línea SE CONVIERTE en el campo: solo teclado, sin sheet.
     if (segment == _Segment.name) {
-      final editing = _editSegment == _Segment.name;
+      final editing = ref.watch(_editingSegmentProvider) == _Segment.name;
       final line = Column(
         children: [
           Text('My name is', textAlign: TextAlign.center, style: serif),
@@ -545,7 +566,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   /// sin sheet y sin mover el paso.
   void _startEditingName() {
     _nameController.text = ref.read(onboardingControllerProvider).name;
-    setState(() => _editSegment = _Segment.name);
+    ref.read(_editingSegmentProvider.notifier).state = _Segment.name;
   }
 
   Future<void> _openChildrenSheet() => _openSheet(const _ChildrenSheet());
@@ -571,7 +592,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   /// para dar lugar al control del dato tocado (la de sentimientos reabre el
   /// modal, que también conserva el texto al volver).
   Widget _doneSummary(OnboardingState state) {
-    final editing = _editSegment;
+    final editing = ref.watch(_editingSegmentProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -634,7 +655,8 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
         if (editing != null)
           Center(
             child: TextButton(
-              onPressed: () => setState(() => _editSegment = null),
+              onPressed: () =>
+                  ref.read(_editingSegmentProvider.notifier).state = null,
               child: const Text(
                 'Done',
                 style: TextStyle(
