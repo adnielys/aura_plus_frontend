@@ -1063,8 +1063,9 @@ class _AgeSheet extends ConsumerWidget {
   }
 }
 
-/// Stepper −/+ del maquetado (edad y nº de peques).
-class _Stepper extends StatelessWidget {
+/// Stepper −/+ del maquetado, con el número TAMBIÉN tecleable: llegar a 42
+/// desde 25 son 17 toques, y eso es carga mental, no acompañamiento.
+class _Stepper extends StatefulWidget {
   const _Stepper({
     required this.value,
     required this.placeholder,
@@ -1082,10 +1083,64 @@ class _Stepper extends StatelessWidget {
   final ValueChanged<int> onChanged;
 
   @override
+  State<_Stepper> createState() => _StepperState();
+}
+
+class _StepperState extends State<_Stepper> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.value?.toString() ?? '');
+
+  @override
+  void didUpdateWidget(covariant _Stepper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Los ± cambian el valor desde fuera; el campo los sigue. La comparación
+    // con el texto actual evita pisarle el cursor mientras teclea.
+    final incoming = widget.value?.toString() ?? '';
+    if (widget.value != oldWidget.value && incoming != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: incoming,
+        selection: TextSelection.collapsed(offset: incoming.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Mientras teclea solo se confirma lo que YA es una respuesta válida: con
+  /// "1" a medio escribir un 18 no se puede saltar a 16 y quitarle el dígito
+  /// de las manos.
+  void _onTyped(String text) {
+    final typed = int.tryParse(text);
+    if (typed == null) return;
+    if (typed < widget.min || typed > widget.max) return;
+    if (typed != widget.value) widget.onChanged(typed);
+  }
+
+  /// Al soltar el campo se ordena lo tecleado: fuera de rango se acerca al
+  /// borde (un ajuste, nunca un error) y vacío vuelve al último valor.
+  void _commit() {
+    final typed = int.tryParse(_controller.text);
+    if (typed == null) {
+      _controller.text = widget.value?.toString() ?? '';
+      return;
+    }
+    final clamped = typed.clamp(widget.min, widget.max);
+    if (clamped.toString() != _controller.text) {
+      _controller.text = clamped.toString();
+    }
+    if (clamped != widget.value) widget.onChanged(clamped);
+  }
+
+  @override
   Widget build(BuildContext context) {
     void step(int delta) {
-      final next = ((value ?? initial) + delta).clamp(min, max);
-      onChanged(next);
+      final next =
+          ((widget.value ?? widget.initial) + delta).clamp(widget.min, widget.max);
+      widget.onChanged(next);
     }
 
     // Botones ± del maquetado: círculos grises rellenos, sin borde.
@@ -1107,9 +1162,12 @@ class _Stepper extends StatelessWidget {
           ),
         );
 
-    // Sin tocar aún: el número de partida en rosado tenue; al tocar ±, crimson.
-    final untouched = value == null;
-    final display = (value ?? initial).toString();
+    // Sin tocar aún: el número de partida en rosado tenue (va de hint, así el
+    // campo arranca vacío y el primer dígito no pelea con nada); al tocar ±
+    // o teclear, crimson.
+    final untouched = widget.value == null;
+    final number =
+        Theme.of(context).textTheme.headlineMedium!.copyWith(fontSize: 24);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1128,15 +1186,33 @@ class _Stepper extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: Text(
-            display,
+          child: TextField(
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontSize: 24,
-                  color: untouched
-                      ? AppColors.entryPlaceholder
-                      : AppColors.entryAccent,
-                ),
+            cursorColor: AppColors.entryAccent,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(widget.max.toString().length),
+            ],
+            style: number.copyWith(color: AppColors.entryAccent),
+            // isCollapsed + sin borde: el TextField no aporta geometría, la
+            // pastilla sigue siendo la del maquetado.
+            decoration: InputDecoration(
+              isCollapsed: true,
+              border: InputBorder.none,
+              hintText: widget.initial.toString(),
+              hintStyle: number.copyWith(color: AppColors.entryPlaceholder),
+            ),
+            onChanged: _onTyped,
+            onSubmitted: (_) {
+              _commit();
+              FocusScope.of(context).unfocus();
+            },
+            // Tocar fuera (los ±, "Skip", "Done") llega ANTES que su pulsación:
+            // por eso lo tecleado se confirma aunque salga sin darle a "done".
+            onTapOutside: (_) => _commit(),
           ),
         ),
         button('+', () => step(1)),
