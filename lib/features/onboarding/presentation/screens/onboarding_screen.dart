@@ -160,10 +160,10 @@ class _StepContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (step) {
+      // Dos párrafos acumulativos con el mismo cromo: el personal (nombre,
+      // edad, peques, sentimiento) y el del día (lo que pesa, tiempo, momento).
       0 || 1 || 2 || 3 => _StepSentence(activeSegment: _Segment.values[step]),
-      4 => const _StepMainPain(),
-      5 => const _StepTime(),
-      _ => const _StepMoment(),
+      _ => _ClosingStep(active: _ClosingSegment.values[step - 4]),
     };
   }
 }
@@ -1245,96 +1245,262 @@ class _ChildrenSheet extends ConsumerWidget {
 /// Andamio de los pasos finales: la frase arriba con el valor tejido en
 /// carmesí, el control anclado abajo con su microcopy empático, y el enlace
 /// de cancelar — misma distribución que los pasos de la frase personal.
-class _FirstPersonStep extends StatefulWidget {
-  const _FirstPersonStep({
-    required this.spans,
-    required this.chipsLabel,
-    required this.control,
-    this.microcopy,
-  });
+/// Los tres datos del cierre; su orden es el de los pasos 4–6.
+enum _ClosingSegment { pain, time, moment }
 
-  /// Las líneas de la frase (serif gris con el valor en carmesí).
-  final List<InlineSpan> spans;
+/// Bloque de cierre (pasos 5–7): SEGUNDO párrafo acumulativo, con el mismo
+/// cromo que el personal — rótulo, ilustración y la frase creciendo línea a
+/// línea. Antes cada uno era una frase suelta sin cabecera ni imagen, y el
+/// flujo se partía en dos: se sentía como otro formulario.
+class _ClosingStep extends ConsumerStatefulWidget {
+  const _ClosingStep({required this.active});
 
-  /// Título del sheet ("What weighs on you most?").
-  final String chipsLabel;
-
-  /// Los chips. DEBE ser reactivo (un Consumer): vive dentro del sheet, así
-  /// que un widget ya construido se quedaría congelado al elegir.
-  final Widget control;
-
-  /// Reflejo empático bajo los chips (tono del Sistema Emocional).
-  final Widget? microcopy;
+  final _ClosingSegment active;
 
   @override
-  State<_FirstPersonStep> createState() => _FirstPersonStepState();
+  ConsumerState<_ClosingStep> createState() => _ClosingStepState();
 }
 
-class _FirstPersonStepState extends State<_FirstPersonStep> {
+class _ClosingStepState extends ConsumerState<_ClosingStep> {
   @override
   void initState() {
     super.initState();
-    // Igual que edad, peques y sentimientos: el control aparece al entrar y no
-    // cuelga bajo la frase. Se vuelve a él tocando la palabra.
+    // Igual que el resto: el control aparece al entrar y no cuelga bajo la
+    // frase. Se vuelve a él tocando la palabra.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _openSheet();
+      if (mounted) _openSheet(widget.active);
     });
   }
 
-  Future<void> _openSheet() => showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.white,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  Future<void> _openSheet(_ClosingSegment segment) {
+    final controller = ref.read(onboardingControllerProvider.notifier);
+    final (title, control, microcopy) = switch (segment) {
+      _ClosingSegment.pain => (
+          'What weighs on you most?',
+          // Consumer: los chips viven en el sheet y deben seguir reaccionando;
+          // un widget ya construido se quedaría congelado al elegir.
+          Consumer(builder: (context, ref, _) {
+            final chosen = ref
+                .watch(onboardingControllerProvider.select((s) => s.mainPain));
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final pain in MainPain.values)
+                  SelectableChip(
+                    label: pain.label,
+                    selected: chosen == pain,
+                    onTap: () => controller.setMainPain(pain),
+                  ),
+              ],
+            );
+          }),
+          Consumer(builder: (context, ref, _) {
+            final chosen = ref
+                .watch(onboardingControllerProvider.select((s) => s.mainPain));
+            return _Microcopy(chosen == null ? null : painReflections[chosen]);
+          }),
         ),
-        builder: (_) => _ChoiceSheet(
-          title: widget.chipsLabel,
-          control: widget.control,
-          microcopy: widget.microcopy,
+      _ClosingSegment.time => (
+          'How much time do you have each day?',
+          Consumer(builder: (context, ref, _) {
+            final chosen = ref.watch(
+                onboardingControllerProvider.select((s) => s.dailyTimeSlot));
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final slot in TimeSlot.values)
+                  SelectableChip(
+                    label: slot.label,
+                    selected: chosen == slot,
+                    onTap: () => controller.setTimeSlot(slot),
+                  ),
+              ],
+            );
+          }),
+          // Anti-vergüenza REACTIVA: valida el número que ELLA dijo — jamás un
+          // benchmark que deje corta una opción (textos aprobados jul 2026).
+          Consumer(builder: (context, ref, _) {
+            final chosen = ref.watch(
+                onboardingControllerProvider.select((s) => s.dailyTimeSlot));
+            return _Microcopy(chosen == null
+                ? timeReflectionDefault
+                : timeReflections[chosen]);
+          }),
         ),
-      );
+      _ClosingSegment.moment => (
+          'When is your moment?',
+          Consumer(builder: (context, ref, _) {
+            final chosen = ref.watch(
+                onboardingControllerProvider.select((s) => s.preferredMoment));
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final moment in PreferredMoment.values)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _MomentChip(
+                      title: _momentShortLabel[moment]!,
+                      subtitle: _momentSubLabel[moment]!,
+                      selected: chosen == moment,
+                      onTap: () => controller.setMoment(moment),
+                    ),
+                  ),
+              ],
+            );
+          }),
+          // La promesa del producto (1 mensaje/día) es idéntica en las 4
+          // opciones; solo se tiñe del momento elegido (aprobados jul 2026).
+          Consumer(builder: (context, ref, _) {
+            final chosen = ref.watch(
+                onboardingControllerProvider.select((s) => s.preferredMoment));
+            return _Microcopy(chosen == null
+                ? momentReflectionDefault
+                : momentReflections[chosen]);
+          }),
+        ),
+    };
+
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) =>
+          _ChoiceSheet(title: title, control: control, microcopy: microcopy),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(onboardingControllerProvider);
+    // Misma tipografía que el párrafo personal (era 28 y se notaba el salto).
     final serif = Theme.of(context).textTheme.displaySmall!.copyWith(
-          fontSize: 28,
+          fontSize: 33,
           fontWeight: FontWeight.w400,
           height: 1.36,
           color: AppColors.entryInk,
         );
 
-    return Column(
-      children: [
-        const SizedBox(height: 34),
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 450),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) => Opacity(
-            opacity: value,
-            child: Transform.translate(
-              offset: Offset(0, 10 * (1 - value)),
-              child: child,
-            ),
+    TextSpan value(String? text, String placeholder) => TextSpan(
+          text: text ?? placeholder,
+          style: serif.copyWith(
+            color:
+                text == null ? AppColors.entryPlaceholder : AppColors.entryAccent,
+            fontWeight: text == null ? FontWeight.w400 : FontWeight.w700,
+            fontStyle: text == null ? FontStyle.italic : FontStyle.normal,
+            decoration: TextDecoration.underline,
+            decorationColor: AppColors.entryAccent.withValues(alpha: 0.4),
+            decorationThickness: 1.5,
           ),
-          // Tocar la frase reabre el sheet: es la única vía tras cerrarlo.
-          child: GestureDetector(
-            onTap: _openSheet,
-            behavior: HitTestBehavior.opaque,
-            child: Text.rich(
-              TextSpan(children: widget.spans),
-              textAlign: TextAlign.center,
-              style: serif,
-            ),
+        );
+
+    /// Una línea del párrafo. Las posteriores al paso actual aún no existen.
+    Widget line(_ClosingSegment segment, List<InlineSpan> spans) {
+      if (segment.index > widget.active.index) return const SizedBox.shrink();
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOut,
+        builder: (context, v, child) => Opacity(opacity: v, child: child),
+        // Tocar la línea reabre SU sheet, sin mover el paso.
+        child: GestureDetector(
+          onTap: () => _openSheet(segment),
+          behavior: HitTestBehavior.opaque,
+          child: Text.rich(
+            TextSpan(children: spans),
+            textAlign: TextAlign.center,
+            style: serif,
           ),
         ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Center(
+          child: Text('AND THIS IS YOUR DAY', style: AppTypography.eyebrow),
+        ),
+        const SizedBox(height: 4),
+        const Center(
+          child: Text(
+            'Tap any word to edit it',
+            style: TextStyle(fontSize: 12, color: AppColors.entryHint),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Center(
+          child: Image.asset(
+            'assets/images/onboarding/feelings-header.png',
+            height: 215,
+            fit: BoxFit.contain,
+          ),
+        ),
+        const SizedBox(height: 14),
+        line(_ClosingSegment.pain, [
+          TextSpan(text: 'Right now, the hardest part is ', style: serif),
+          value(_painValue[state.mainPain], 'this'),
+          TextSpan(text: '.', style: serif),
+        ]),
+        line(_ClosingSegment.time, [
+          TextSpan(text: 'Each day, I have about ', style: serif),
+          value(_timeValue[state.dailyTimeSlot], 'some time'),
+          TextSpan(text: ' for myself.', style: serif),
+        ]),
+        line(_ClosingSegment.moment, [
+          TextSpan(text: 'My Aura+ moment is ', style: serif),
+          value(_momentValue[state.preferredMoment], 'yours to choose'),
+          TextSpan(text: '.', style: serif),
+        ]),
         const Spacer(),
         const _CancelLink(),
       ],
     );
   }
 }
+
+/// Cómo se lee cada elección dentro del párrafo de cierre.
+const _painValue = {
+  MainPain.work: 'work',
+  MainPain.family: 'my family and home',
+  MainPain.self: 'myself',
+  MainPain.relationships: 'my relationships',
+  MainPain.all: 'everything at once',
+};
+
+const _timeValue = {
+  TimeSlot.minimal: '5 minutes',
+  TimeSlot.short: '10–20 minutes',
+  TimeSlot.medium: '30+ minutes',
+};
+
+const _momentValue = {
+  PreferredMoment.earlyMorning: 'early, before the noise',
+  PreferredMoment.morning: 'mid-morning',
+  PreferredMoment.midday: 'at midday',
+  PreferredMoment.night: 'at night, when they sleep',
+};
+
+/// Chips con subtítulo (maquetado v2).
+const _momentSubLabel = {
+  PreferredMoment.earlyMorning: 'before the noise',
+  PreferredMoment.morning: 'once the day has started',
+  PreferredMoment.midday: 'a pause in the middle',
+  PreferredMoment.night: 'when the kids sleep',
+};
+
+const _momentShortLabel = {
+  PreferredMoment.earlyMorning: 'Early morning',
+  PreferredMoment.morning: 'Mid-morning',
+  PreferredMoment.midday: 'Midday',
+  PreferredMoment.night: 'Night',
+};
 
 /// Sheet de los pasos finales: título, chips y el reflejo empático debajo.
 /// No lleva "Skip" — estos tres SÍ son obligatorios para cerrar el onboarding.
@@ -1421,228 +1587,6 @@ class _Microcopy extends StatelessWidget {
   }
 }
 
-/// Span del valor tejido en la frase: carmesí bold, o placeholder rosado.
-TextSpan _wovenValue(BuildContext context, String? text, String placeholder) {
-  final serif = Theme.of(context).textTheme.displaySmall!.copyWith(
-        fontSize: 28,
-        fontWeight: FontWeight.w400,
-        height: 1.36,
-        color: AppColors.entryInk,
-      );
-  final missing = text == null;
-  return TextSpan(
-    text: missing ? placeholder : text,
-    style: serif.copyWith(
-      color: missing ? AppColors.entryPlaceholder : AppColors.entryAccent,
-      fontWeight: missing ? FontWeight.w400 : FontWeight.w700,
-      fontStyle: missing ? FontStyle.italic : FontStyle.normal,
-      decoration: TextDecoration.underline,
-      decorationColor: AppColors.entryAccent.withValues(alpha: 0.4),
-      decorationThickness: 1.5,
-    ),
-  );
-}
-
-// ── Paso 5 · Lo que más pesa ──────────────────────────────────────────────────
-class _StepMainPain extends ConsumerWidget {
-  const _StepMainPain();
-
-  /// Cómo se lee cada elección dentro de la frase.
-  static const _sentenceValue = {
-    MainPain.work: 'work',
-    MainPain.family: 'my family and home',
-    MainPain.self: 'myself',
-    MainPain.relationships: 'my relationships',
-    MainPain.all: 'everything at once',
-  };
-
-  // Reflejo emocional (SPEC V2 §3.1): textos APROBADOS en
-  // widgets/pain_reflection.dart — mapa constante y testeable.
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(
-      onboardingControllerProvider.select((s) => s.mainPain),
-    );
-    final controller = ref.read(onboardingControllerProvider.notifier);
-    final serif = Theme.of(context).textTheme.displaySmall!.copyWith(
-          fontSize: 28,
-          fontWeight: FontWeight.w400,
-          height: 1.36,
-          color: AppColors.entryInk,
-        );
-
-    return _FirstPersonStep(
-      spans: [
-        TextSpan(text: 'Right now,\nthe hardest part is\n', style: serif),
-        _wovenValue(context, _sentenceValue[selected], 'this'),
-        TextSpan(text: '.', style: serif),
-      ],
-      chipsLabel: 'What weighs on you most?',
-      // Consumer: los chips viven en el sheet y deben seguir reaccionando.
-      control: Consumer(builder: (context, ref, _) {
-        final chosen =
-            ref.watch(onboardingControllerProvider.select((s) => s.mainPain));
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            for (final pain in MainPain.values)
-              SelectableChip(
-                label: pain.label,
-                selected: chosen == pain,
-                onTap: () => controller.setMainPain(pain),
-              ),
-          ],
-        );
-      }),
-      microcopy: Consumer(builder: (context, ref, _) {
-        final chosen =
-            ref.watch(onboardingControllerProvider.select((s) => s.mainPain));
-        return _Microcopy(chosen == null ? null : painReflections[chosen]);
-      }),
-    );
-  }
-}
-
-// ── Paso 6 · Tiempo disponible ────────────────────────────────────────────────
-class _StepTime extends ConsumerWidget {
-  const _StepTime();
-
-  static const _sentenceValue = {
-    TimeSlot.minimal: '5 minutes',
-    TimeSlot.short: '10–20 minutes',
-    TimeSlot.medium: '30+ minutes',
-  };
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(
-      onboardingControllerProvider.select((s) => s.dailyTimeSlot),
-    );
-    final controller = ref.read(onboardingControllerProvider.notifier);
-    final serif = Theme.of(context).textTheme.displaySmall!.copyWith(
-          fontSize: 28,
-          fontWeight: FontWeight.w400,
-          height: 1.36,
-          color: AppColors.entryInk,
-        );
-
-    return _FirstPersonStep(
-      spans: [
-        TextSpan(text: 'Each day,\nI have about\n', style: serif),
-        _wovenValue(context, _sentenceValue[selected], 'some time'),
-        TextSpan(text: '\nfor myself.', style: serif),
-      ],
-      chipsLabel: 'How much time do you have each day?',
-      control: Consumer(builder: (context, ref, _) {
-        final chosen = ref
-            .watch(onboardingControllerProvider.select((s) => s.dailyTimeSlot));
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            for (final slot in TimeSlot.values)
-              SelectableChip(
-                label: slot.label,
-                selected: chosen == slot,
-                onTap: () => controller.setTimeSlot(slot),
-              ),
-          ],
-        );
-      }),
-      // Anti-vergüenza REACTIVA: valida el número que ELLA dijo — jamás un
-      // benchmark que deje corta una opción (textos aprobados jul 2026).
-      microcopy: Consumer(builder: (context, ref, _) {
-        final chosen = ref
-            .watch(onboardingControllerProvider.select((s) => s.dailyTimeSlot));
-        return _Microcopy(chosen == null
-            ? timeReflectionDefault
-            : timeReflections[chosen]);
-      }),
-    );
-  }
-}
-
-// ── Paso 7 · Momento Aura+ ────────────────────────────────────────────────────
-class _StepMoment extends ConsumerWidget {
-  const _StepMoment();
-
-  static const _sentenceValue = {
-    PreferredMoment.earlyMorning: 'early,\nbefore the noise',
-    PreferredMoment.morning: 'mid-morning',
-    PreferredMoment.midday: 'at midday',
-    PreferredMoment.night: 'at night,\nwhen they sleep',
-  };
-
-  /// Chips con subtítulo (maquetado v2).
-  static const _subLabel = {
-    PreferredMoment.earlyMorning: 'before the noise',
-    PreferredMoment.morning: 'once the day has started',
-    PreferredMoment.midday: 'a pause in the middle',
-    PreferredMoment.night: 'when the kids sleep',
-  };
-
-  static const _shortLabel = {
-    PreferredMoment.earlyMorning: 'Early morning',
-    PreferredMoment.morning: 'Mid-morning',
-    PreferredMoment.midday: 'Midday',
-    PreferredMoment.night: 'Night',
-  };
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(
-      onboardingControllerProvider.select((s) => s.preferredMoment),
-    );
-    final controller = ref.read(onboardingControllerProvider.notifier);
-    final serif = Theme.of(context).textTheme.displaySmall!.copyWith(
-          fontSize: 28,
-          fontWeight: FontWeight.w400,
-          height: 1.36,
-          color: AppColors.entryInk,
-        );
-
-    return _FirstPersonStep(
-      spans: [
-        TextSpan(text: 'My Aura+\nmoment is\n', style: serif),
-        _wovenValue(context, _sentenceValue[selected], 'yours to choose'),
-        TextSpan(text: '.', style: serif),
-      ],
-      chipsLabel: 'When is your moment?',
-      control: Consumer(builder: (context, ref, _) {
-        final chosen = ref.watch(
-            onboardingControllerProvider.select((s) => s.preferredMoment));
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final moment in PreferredMoment.values)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _MomentChip(
-                  title: _shortLabel[moment]!,
-                  subtitle: _subLabel[moment]!,
-                  selected: chosen == moment,
-                  onTap: () => controller.setMoment(moment),
-                ),
-              ),
-          ],
-        );
-      }),
-      // La promesa del producto (1 mensaje/día) es idéntica en las 4
-      // opciones; solo se tiñe del momento elegido (aprobados jul 2026).
-      microcopy: Consumer(builder: (context, ref, _) {
-        final chosen = ref.watch(
-            onboardingControllerProvider.select((s) => s.preferredMoment));
-        return _Microcopy(chosen == null
-            ? momentReflectionDefault
-            : momentReflections[chosen]);
-      }),
-    );
-  }
-}
 
 /// Chip de momento con subtítulo (time-chip del maquetado v2).
 class _MomentChip extends StatelessWidget {
