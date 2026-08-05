@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -48,10 +49,11 @@ class OnboardingScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(
-              canGoBack: state.stepIndex > 0 && !state.isSubmitting,
-              onBack: controller.back,
-            ),
+            // Sin flecha de volver: no hace falta retroceder de paso porque
+            // cualquier dato se corrige tocando su palabra en la frase, y eso
+            // abre su sheet/modal SIN mover el paso — así la frase nunca
+            // pierde líneas.
+            const SizedBox(height: 28),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
@@ -94,36 +96,6 @@ class OnboardingScreen extends ConsumerWidget {
     );
   }
 }
-
-/// Barra superior mínima: solo una flecha para volver un paso (UX_01: sin
-/// acciones que compitan con el CTA).
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.canGoBack, required this.onBack});
-
-  final bool canGoBack;
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: canGoBack
-            ? IconButton(
-                // Es la vía principal para corregir una respuesta: a 18px y en
-                // gris claro casi no se veía.
-                icon: const Icon(CupertinoIcons.back, size: 22),
-                color: AppColors.entryInk,
-                tooltip: 'Back',
-                onPressed: onBack,
-              )
-            : const SizedBox.shrink(),
-      ),
-    );
-  }
-}
-
 /// Puntos de progreso: el paso activo se alarga en magenta (como el maquetado).
 class _StepDots extends StatelessWidget {
   const _StepDots({required this.active});
@@ -184,6 +156,22 @@ class _StepContent extends StatelessWidget {
 
 // ── Pasos 1–4 · Frase continua progresiva (maquetado) ────────────────────────
 
+/// Fuerza la mayúscula inicial del nombre. Solo toca el primer carácter, así
+/// que la longitud no cambia y el cursor NO salta mientras se escribe.
+class _CapitalizeFirst extends TextInputFormatter {
+  const _CapitalizeFirst();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) return newValue;
+    final fixed = newValue.text[0].toUpperCase() + newValue.text.substring(1);
+    return fixed == newValue.text ? newValue : newValue.copyWith(text: fixed);
+  }
+}
+
 /// Segmentos de la frase; su orden es el de los pasos 0–3.
 enum _Segment { name, age, children, feeling }
 
@@ -210,20 +198,19 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     super.initState();
     _nameController =
         TextEditingController(text: ref.read(onboardingControllerProvider).name);
-    // Edad y peques abren su bottom sheet AL ENTRAR: el control aparece listo,
-    // sin un toque de más. Es seguro porque el sheet sí tiene salida —se
-    // arrastra, se toca fuera o se cierra con "Done"—, así que no encierra.
-    //
-    // El de sentimientos NO se abre solo, y esa diferencia es deliberada: es a
-    // pantalla completa y tapa la frase entera; que apareciera sin tocar nada,
-    // justo en el paso más íntimo, quitaba la sensación de control.
-    if (widget.activeSegment == _Segment.age ||
-        widget.activeSegment == _Segment.children) {
+    // Edad, peques y sentimientos abren su control AL ENTRAR: aparece listo,
+    // sin un toque de más. Es seguro porque los tres tienen salida propia —los
+    // sheets se arrastran o se cierran con "Done", el modal con su cruz—, así
+    // que ninguno encierra. Para volver a ellos se toca su palabra en la frase.
+    final opener = switch (widget.activeSegment) {
+      _Segment.age => _openAgeSheet,
+      _Segment.children => _openChildrenSheet,
+      _Segment.feeling => _openFeelingsModal,
+      _Segment.name => null, // se escribe en la propia línea
+    };
+    if (opener != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        widget.activeSegment == _Segment.age
-            ? _openAgeSheet()
-            : _openChildrenSheet();
+        if (mounted) opener();
       });
     }
   }
@@ -245,6 +232,11 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
               textAlign: TextAlign.center,
               maxLength: 50,
               cursorColor: AppColors.entryAccent,
+              // El teclado propone mayúscula y el formatter la GARANTIZA:
+              // el nombre es cómo Aura la llama, y en minúscula se lee como
+              // un descuido, no como una elección.
+              textCapitalization: TextCapitalization.words,
+              inputFormatters: const [_CapitalizeFirst()],
               // Mientras se edita: itálica regular (seg-val.editing del
               // maquetado). El bold llega al confirmar la línea.
               style: serif.copyWith(
@@ -392,28 +384,32 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           ),
         );
 
-    // Volver a un dato ya respondido: edad y peques reabren su bottom sheet;
-    // el nombre vuelve a su paso (se escribe en la línea). Antes estas líneas
-    // no reaccionaban al toque, pese al "Tap any word to edit it".
+    // Volver a un dato ya respondido: cada uno abre SU sheet o su modal, y
+    // ninguno mueve el paso — así la frase de detrás nunca pierde líneas.
+    // (El nombre hacía goToStep(0) y borraba todo lo posterior.)
     Widget tappable(_Segment target, Widget child) => GestureDetector(
           onTap: () => switch (target) {
+            // El nombre NO abre sheet: su línea se convierte en el campo y
+            // sale el teclado. Se escribe en la frase, que es la gracia.
+            _Segment.name => _startEditingName(),
             _Segment.age => _openAgeSheet(),
             _Segment.children => _openChildrenSheet(),
             _Segment.feeling => _openFeelingsModal(),
-            _Segment.name =>
-              ref.read(onboardingControllerProvider.notifier).goToStep(0),
           },
           behavior: HitTestBehavior.opaque,
           child: child,
         );
 
     // El nombre ocupa SU PROPIA línea bajo "My name is" (saltos del maquetado).
+    // Al tocarlo, esa línea SE CONVIERTE en el campo: solo teclado, sin sheet.
     if (segment == _Segment.name) {
-      return tappable(
-        _Segment.name,
-        Column(
-          children: [
-            Text('My name is', textAlign: TextAlign.center, style: serif),
+      final editing = _editSegment == _Segment.name;
+      final line = Column(
+        children: [
+          Text('My name is', textAlign: TextAlign.center, style: serif),
+          if (editing)
+            _inlineNameRow(serif)
+          else
             Text.rich(
               TextSpan(children: [
                 value(
@@ -424,9 +420,11 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
               ]),
               textAlign: TextAlign.center,
             ),
-          ],
-        ),
+        ],
       );
+      // Mientras se edita no se envuelve en el GestureDetector: taparía los
+      // toques del propio campo (mover el cursor, seleccionar).
+      return editing ? line : tappable(_Segment.name, line);
     }
 
     final spans = switch (segment) {
@@ -515,36 +513,41 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
             textAlign: TextAlign.center,
           ),
         ),
-      _Segment.feeling => Text.rich(
-          TextSpan(children: [
-            TextSpan(text: 'I feel like ', style: serif),
-            value(null, 'this'),
-            TextSpan(text: '.', style: serif),
-          ]),
-          textAlign: TextAlign.center,
-        ),
-    };
-  }
-
-  /// Control bajo la línea (solo cuando el dato no se escribe en la línea).
-  Widget? _lineControl(OnboardingState state) {
-    return switch (widget.activeSegment) {
-      _Segment.name => null, // se escribe en la propia línea
-      // Edad y peques NO dejan control aquí: todo (stepper, el porqué y el
-      // "Skip") vive dentro de su bottom sheet, que se abre al entrar al paso
-      // y se reabre tocando el valor en la frase.
-      _Segment.age || _Segment.children => null,
-      _Segment.feeling => TextButton(
-          onPressed: _openFeelingsModal,
-          child: const Text(
-            'Choose how I feel',
-            style: TextStyle(color: AppColors.textSecondary),
+      // Tocar la palabra reabre el modal: es la única vía tras cerrarlo, ya
+      // que bajo la frase no queda ningún botón.
+      _Segment.feeling => GestureDetector(
+          onTap: _openFeelingsModal,
+          behavior: HitTestBehavior.opaque,
+          child: Text.rich(
+            TextSpan(children: [
+              TextSpan(text: 'I feel like ', style: serif),
+              value(
+                state.feelings.isEmpty ? null : _joinFeelings(state.feelings),
+                'this',
+              ),
+              TextSpan(text: '.', style: serif),
+            ]),
+            textAlign: TextAlign.center,
           ),
         ),
     };
   }
 
+  /// Ningún paso deja control suelto bajo la frase: cada dato vive en su sheet
+  /// o en su modal, que se abre al entrar al paso y se reabre tocando su
+  /// palabra. El nombre se escribe en la propia línea.
+  Widget? _lineControl(OnboardingState state) => null;
+
   /// Bottom sheet de peques: número y edades, con su propia salida.
+  /// Bottom sheet del nombre (solo para reeditarlo: en su paso se escribe en
+  /// la propia línea de la frase).
+  /// Editar el nombre: su línea de la frase pasa a ser el campo (con teclado),
+  /// sin sheet y sin mover el paso.
+  void _startEditingName() {
+    _nameController.text = ref.read(onboardingControllerProvider).name;
+    setState(() => _editSegment = _Segment.name);
+  }
+
   Future<void> _openChildrenSheet() => _openSheet(const _ChildrenSheet());
 
   /// Bottom sheet de la edad.
@@ -609,20 +612,20 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
                     color: AppColors.entryInk,
                   ))
               : null,
-          // Tocar una palabra abre DIRECTAMENTE su control, sin un botón
-          // intermedio: edad y peques en su bottom sheet, sentimientos en su
-          // modal. Solo el nombre se edita en la propia línea.
+          // Tocar una palabra abre DIRECTAMENTE su control: el nombre se
+          // escribe en su línea (solo teclado), edad y peques en su bottom
+          // sheet y los sentimientos en su modal. Ninguno mueve el paso, así la
+          // frase de detrás se queda entera.
           onLineTap: (segment) {
             switch (segment) {
-              case _Segment.feeling:
-                _openFeelingsModal();
+              case _Segment.name:
+                _startEditingName();
               case _Segment.age:
                 _openAgeSheet();
               case _Segment.children:
                 _openChildrenSheet();
-              case _Segment.name:
-                _nameController.text = state.name;
-                setState(() => _editSegment = segment);
+              case _Segment.feeling:
+                _openFeelingsModal();
             }
           },
         ),
@@ -666,13 +669,15 @@ class _FeelingsModal extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Salida visible: antes solo se salía eligiendo un sentimiento.
+            // Cruz de cerrar: el modal se abre solo al llegar al paso, así que
+            // la salida tiene que estar a la vista. Antes solo se salía
+            // eligiendo un sentimiento.
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.centerRight,
               child: IconButton(
-                icon: const Icon(CupertinoIcons.back,
-                    size: 22, color: AppColors.entryInk),
-                tooltip: 'Back',
+                icon: const Icon(CupertinoIcons.xmark,
+                    size: 20, color: AppColors.entryInk),
+                tooltip: 'Close',
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
@@ -943,7 +948,14 @@ class _OnboardingSheet extends ConsumerWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
+        // viewInsets: sin esto el teclado (el sheet del nombre lo abre con
+        // autofocus) tapaba el contenido entero — se veía solo el fondo.
+        padding: EdgeInsets.fromLTRB(
+          24,
+          10,
+          24,
+          20 + MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1210,7 +1222,7 @@ class _ChildrenSheet extends ConsumerWidget {
 /// Andamio de los pasos finales: la frase arriba con el valor tejido en
 /// carmesí, el control anclado abajo con su microcopy empático, y el enlace
 /// de cancelar — misma distribución que los pasos de la frase personal.
-class _FirstPersonStep extends StatelessWidget {
+class _FirstPersonStep extends StatefulWidget {
   const _FirstPersonStep({
     required this.spans,
     required this.chipsLabel,
@@ -1220,11 +1232,45 @@ class _FirstPersonStep extends StatelessWidget {
 
   /// Las líneas de la frase (serif gris con el valor en carmesí).
   final List<InlineSpan> spans;
+
+  /// Título del sheet ("What weighs on you most?").
   final String chipsLabel;
+
+  /// Los chips. DEBE ser reactivo (un Consumer): vive dentro del sheet, así
+  /// que un widget ya construido se quedaría congelado al elegir.
   final Widget control;
 
-  /// Línea validadora bajo el control (tono del Sistema Emocional).
-  final String? microcopy;
+  /// Reflejo empático bajo los chips (tono del Sistema Emocional).
+  final Widget? microcopy;
+
+  @override
+  State<_FirstPersonStep> createState() => _FirstPersonStepState();
+}
+
+class _FirstPersonStepState extends State<_FirstPersonStep> {
+  @override
+  void initState() {
+    super.initState();
+    // Igual que edad, peques y sentimientos: el control aparece al entrar y no
+    // cuelga bajo la frase. Se vuelve a él tocando la palabra.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _openSheet();
+    });
+  }
+
+  Future<void> _openSheet() => showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.white,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        builder: (_) => _ChoiceSheet(
+          title: widget.chipsLabel,
+          control: widget.control,
+          microcopy: widget.microcopy,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -1249,45 +1295,105 @@ class _FirstPersonStep extends StatelessWidget {
               child: child,
             ),
           ),
-          child: Text.rich(
-            TextSpan(children: spans),
-            textAlign: TextAlign.center,
-            style: serif,
+          // Tocar la frase reabre el sheet: es la única vía tras cerrarlo.
+          child: GestureDetector(
+            onTap: _openSheet,
+            behavior: HitTestBehavior.opaque,
+            child: Text.rich(
+              TextSpan(children: widget.spans),
+              textAlign: TextAlign.center,
+              style: serif,
+            ),
           ),
         ),
         const Spacer(),
-        Text(
-          chipsLabel,
-          style: const TextStyle(fontSize: 12, color: AppColors.entryHint),
-        ),
-        const SizedBox(height: 10),
-        control,
-        if (microcopy != null) ...[
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            // El reflejo cambia con la selección (SPEC V2 §3.1): fade suave,
-            // jamás un salto brusco — Aura responde, no interrumpe.
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Text(
-                microcopy!,
-                key: ValueKey(microcopy),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: AppTypography.serif,
-                  fontStyle: FontStyle.italic,
-                  fontSize: 13,
-                  height: 1.5,
-                  color: AppColors.entryHint,
-                ),
-              ),
-            ),
-          ),
-        ],
-        const SizedBox(height: 6),
         const _CancelLink(),
       ],
+    );
+  }
+}
+
+/// Sheet de los pasos finales: título, chips y el reflejo empático debajo.
+/// No lleva "Skip" — estos tres SÍ son obligatorios para cerrar el onboarding.
+class _ChoiceSheet extends StatelessWidget {
+  const _ChoiceSheet({
+    required this.title,
+    required this.control,
+    this.microcopy,
+  });
+
+  final String title;
+  final Widget control;
+  final Widget? microcopy;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8E0F0),
+                borderRadius: BorderRadius.circular(50),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              title,
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.entryHint),
+            ),
+            const SizedBox(height: 14),
+            control,
+            if (microcopy != null) ...[
+              const SizedBox(height: 14),
+              microcopy!,
+            ],
+            const SizedBox(height: 22),
+            SoftPrimaryButton(
+              label: 'Done',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Reflejo empático reactivo: cambia con la selección, con fade suave — Aura
+/// responde, no interrumpe (SPEC V2 §3.1).
+class _Microcopy extends StatelessWidget {
+  const _Microcopy(this.text);
+
+  final String? text;
+
+  @override
+  Widget build(BuildContext context) {
+    if (text == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: Text(
+          text!,
+          key: ValueKey(text),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: AppTypography.serif,
+            fontStyle: FontStyle.italic,
+            fontSize: 13,
+            height: 1.5,
+            color: AppColors.entryHint,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1350,20 +1456,29 @@ class _StepMainPain extends ConsumerWidget {
         TextSpan(text: '.', style: serif),
       ],
       chipsLabel: 'What weighs on you most?',
-      control: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: [
-          for (final pain in MainPain.values)
-            SelectableChip(
-              label: pain.label,
-              selected: selected == pain,
-              onTap: () => controller.setMainPain(pain),
-            ),
-        ],
-      ),
-      microcopy: selected == null ? null : painReflections[selected],
+      // Consumer: los chips viven en el sheet y deben seguir reaccionando.
+      control: Consumer(builder: (context, ref, _) {
+        final chosen =
+            ref.watch(onboardingControllerProvider.select((s) => s.mainPain));
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final pain in MainPain.values)
+              SelectableChip(
+                label: pain.label,
+                selected: chosen == pain,
+                onTap: () => controller.setMainPain(pain),
+              ),
+          ],
+        );
+      }),
+      microcopy: Consumer(builder: (context, ref, _) {
+        final chosen =
+            ref.watch(onboardingControllerProvider.select((s) => s.mainPain));
+        return _Microcopy(chosen == null ? null : painReflections[chosen]);
+      }),
     );
   }
 }
@@ -1398,23 +1513,32 @@ class _StepTime extends ConsumerWidget {
         TextSpan(text: '\nfor myself.', style: serif),
       ],
       chipsLabel: 'How much time do you have each day?',
-      control: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: [
-          for (final slot in TimeSlot.values)
-            SelectableChip(
-              label: slot.label,
-              selected: selected == slot,
-              onTap: () => controller.setTimeSlot(slot),
-            ),
-        ],
-      ),
+      control: Consumer(builder: (context, ref, _) {
+        final chosen = ref
+            .watch(onboardingControllerProvider.select((s) => s.dailyTimeSlot));
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final slot in TimeSlot.values)
+              SelectableChip(
+                label: slot.label,
+                selected: chosen == slot,
+                onTap: () => controller.setTimeSlot(slot),
+              ),
+          ],
+        );
+      }),
       // Anti-vergüenza REACTIVA: valida el número que ELLA dijo — jamás un
       // benchmark que deje corta una opción (textos aprobados jul 2026).
-      microcopy:
-          selected == null ? timeReflectionDefault : timeReflections[selected],
+      microcopy: Consumer(builder: (context, ref, _) {
+        final chosen = ref
+            .watch(onboardingControllerProvider.select((s) => s.dailyTimeSlot));
+        return _Microcopy(chosen == null
+            ? timeReflectionDefault
+            : timeReflections[chosen]);
+      }),
     );
   }
 }
@@ -1465,25 +1589,34 @@ class _StepMoment extends ConsumerWidget {
         TextSpan(text: '.', style: serif),
       ],
       chipsLabel: 'When is your moment?',
-      control: Column(
-        children: [
-          for (final moment in PreferredMoment.values)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _MomentChip(
-                title: _shortLabel[moment]!,
-                subtitle: _subLabel[moment]!,
-                selected: selected == moment,
-                onTap: () => controller.setMoment(moment),
+      control: Consumer(builder: (context, ref, _) {
+        final chosen = ref.watch(
+            onboardingControllerProvider.select((s) => s.preferredMoment));
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final moment in PreferredMoment.values)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _MomentChip(
+                  title: _shortLabel[moment]!,
+                  subtitle: _subLabel[moment]!,
+                  selected: chosen == moment,
+                  onTap: () => controller.setMoment(moment),
+                ),
               ),
-            ),
-        ],
-      ),
+          ],
+        );
+      }),
       // La promesa del producto (1 mensaje/día) es idéntica en las 4
       // opciones; solo se tiñe del momento elegido (aprobados jul 2026).
-      microcopy: selected == null
-          ? momentReflectionDefault
-          : momentReflections[selected],
+      microcopy: Consumer(builder: (context, ref, _) {
+        final chosen = ref.watch(
+            onboardingControllerProvider.select((s) => s.preferredMoment));
+        return _Microcopy(chosen == null
+            ? momentReflectionDefault
+            : momentReflections[chosen]);
+      }),
     );
   }
 }
