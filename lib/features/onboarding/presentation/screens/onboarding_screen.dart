@@ -542,10 +542,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           behavior: HitTestBehavior.opaque,
           child: Text.rich(
             TextSpan(children: [
-              TextSpan(text: 'I feel like ', style: serif),
+              TextSpan(text: 'I feel ', style: serif),
               value(
                 state.feelings.isEmpty ? null : _joinFeelings(state.feelings),
-                'this',
+                'like this',
               ),
               TextSpan(text: '.', style: serif),
             ]),
@@ -945,8 +945,8 @@ class _Sentence extends StatelessWidget {
         line(
           _Segment.feeling,
           rich([
-            TextSpan(text: 'I feel like ', style: serif),
-            value(feeling, 'this', _Segment.feeling),
+            TextSpan(text: 'I feel ', style: serif),
+            value(feeling, 'like this', _Segment.feeling),
             TextSpan(text: '.', style: serif),
           ]),
         ),
