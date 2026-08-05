@@ -1,15 +1,16 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
-import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/widgets/selectable_chip.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../providers/onboarding_controller.dart';
+import '../widgets/feelings_modal.dart';
+import '../widgets/onboarding_bits.dart';
+import '../widgets/onboarding_sentence.dart';
+import '../widgets/onboarding_sheets.dart';
 import '../widgets/pain_reflection.dart';
 
 /// Flujo de onboarding (maquetado `aura_preview`): la frase continua reúne lo
@@ -23,7 +24,7 @@ class OnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
-    final editing = ref.watch(_editingSegmentProvider);
+    final editing = ref.watch(editingSegmentProvider);
 
     // Errores del envío: mensaje suave, sin detalle técnico (UX_14).
     ref.listen(
@@ -81,7 +82,7 @@ class OnboardingScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            _StepDots(active: state.stepIndex),
+            StepDots(active: state.stepIndex),
             Padding(
               padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
               // Reeditando un dato de la frase, el botón CIERRA la edición y
@@ -91,7 +92,7 @@ class OnboardingScreen extends ConsumerWidget {
                   ? SoftPrimaryButton(
                       label: 'Done',
                       onPressed: () =>
-                          ref.read(_editingSegmentProvider.notifier).state =
+                          ref.read(editingSegmentProvider.notifier).state =
                               null,
                     )
                   : SoftPrimaryButton(
@@ -111,45 +112,6 @@ class OnboardingScreen extends ConsumerWidget {
     );
   }
 }
-/// Puntos de progreso: el paso activo se alarga en magenta (como el maquetado).
-class _StepDots extends StatelessWidget {
-  const _StepDots({required this.active});
-
-  final int active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            for (var i = 0; i < kOnboardingSteps; i++)
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: i == active ? 18 : 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: i <= active
-                      ? AppColors.entryAccent
-                      : AppColors.entryBorder,
-                  borderRadius: BorderRadius.circular(50),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        // Cuánto queda, en palabras: con 7 pasos unos puntos de 6px no bastan
-        // — y el resumen del paso 4 se leía como un final que no era.
-        Text(
-          'Step ${active + 1} of $kOnboardingSteps',
-          style: const TextStyle(fontSize: 11, color: AppColors.entryHint),
-        ),
-      ],
-    );
-  }
-}
 
 /// Selecciona el widget del paso actual. Los pasos 0–3 comparten la frase
 /// continua, que se construye progresivamente (una línea por paso).
@@ -163,7 +125,7 @@ class _StepContent extends StatelessWidget {
     return switch (step) {
       // Dos párrafos acumulativos con el mismo cromo: el personal (nombre,
       // edad, peques, sentimiento) y el del día (lo que pesa, tiempo, momento).
-      0 || 1 || 2 || 3 => _StepSentence(activeSegment: _Segment.values[step]),
+      0 || 1 || 2 || 3 => _StepSentence(activeSegment: Segment.values[step]),
       _ => _ClosingStep(active: _ClosingSegment.values[step - 4]),
     };
   }
@@ -171,39 +133,12 @@ class _StepContent extends StatelessWidget {
 
 // ── Pasos 1–4 · Frase continua progresiva (maquetado) ────────────────────────
 
-/// Fuerza la mayúscula inicial del nombre. Solo toca el primer carácter, así
-/// que la longitud no cambia y el cursor NO salta mientras se escribe.
-class _CapitalizeFirst extends TextInputFormatter {
-  const _CapitalizeFirst();
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) return newValue;
-    final fixed = newValue.text[0].toUpperCase() + newValue.text.substring(1);
-    return fixed == newValue.text ? newValue : newValue.copyWith(text: fixed);
-  }
-}
-
-/// Segmentos de la frase; su orden es el de los pasos 0–3.
-enum _Segment { name, age, children, feeling }
-
-/// Dato que se está reeditando desde la frase (null = ninguno).
-///
-/// Vive FUERA del State porque el botón primario está en la pantalla y tiene
-/// que saberlo: mientras se edita, ese botón cierra la edición y NO avanza de
-/// paso. Si no, tocar el nombre y confirmar te empujaba al paso siguiente en
-/// vez de devolverte donde estabas.
-final _editingSegmentProvider = StateProvider<_Segment?>((ref) => null);
-
 class _StepSentence extends ConsumerStatefulWidget {
   const _StepSentence({required this.activeSegment});
 
   /// Segmento del paso actual: la frase muestra las líneas hasta este segmento
   /// (las anteriores ya respondidas, esta en edición) y su control debajo.
-  final _Segment activeSegment;
+  final Segment activeSegment;
 
   @override
   ConsumerState<_StepSentence> createState() => _StepSentenceState();
@@ -225,10 +160,10 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     // sheets se arrastran o se cierran con "Done", el modal con su cruz—, así
     // que ninguno encierra. Para volver a ellos se toca su palabra en la frase.
     final opener = switch (widget.activeSegment) {
-      _Segment.age => _openAgeSheet,
-      _Segment.children => _openChildrenSheet,
-      _Segment.feeling => _openFeelingsModal,
-      _Segment.name => null, // se escribe en la propia línea
+      Segment.age => _openAgeSheet,
+      Segment.children => _openChildrenSheet,
+      Segment.feeling => _openFeelingsModal,
+      Segment.name => null, // se escribe en la propia línea
     };
     if (opener != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -258,7 +193,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
               // el nombre es cómo Aura la llama, y en minúscula se lee como
               // un descuido, no como una elección.
               textCapitalization: TextCapitalization.words,
-              inputFormatters: const [_CapitalizeFirst()],
+              inputFormatters: const [CapitalizeFirst()],
               // Se escribe YA con el estilo que tendrá en la frase (carmesí
               // bold, sin itálica): antes cambiaba de aspecto al confirmar y
               // parecía otra cosa mientras lo tecleabas.
@@ -310,7 +245,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
         opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
         child: child,
       ),
-      pageBuilder: (_, _, _) => const _FeelingsModal(),
+      pageBuilder: (_, _, _) => const FeelingsModal(),
     );
   }
 
@@ -327,7 +262,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     // (cabecera + imagen + frase completa). Antes, cada paso muestra SOLO su
     // línea y se escribe en la propia línea.
     final done =
-        widget.activeSegment == _Segment.feeling && state.feelings.isNotEmpty;
+        widget.activeSegment == Segment.feeling && state.feelings.isNotEmpty;
 
     return Column(
       children: [
@@ -336,7 +271,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
               ? SingleChildScrollView(child: _doneSummary(state))
               : _singleLineStep(state),
         ),
-        const _CancelLink(),
+        const CancelLink(),
       ],
     );
   }
@@ -349,7 +284,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     return Column(
       children: [
         const SizedBox(height: 40),
-        for (final segment in _Segment.values)
+        for (final segment in Segment.values)
           if (segment.index < widget.activeSegment.index)
             _staticLine(state, segment),
         TweenAnimationBuilder<double>(
@@ -386,7 +321,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   }
 
   /// Línea ya respondida del párrafo (valor en magenta, sin subrayado).
-  Widget _staticLine(OnboardingState state, _Segment segment) {
+  Widget _staticLine(OnboardingState state, Segment segment) {
     final serif = Theme.of(context)
         .textTheme
         .displaySmall!
@@ -410,14 +345,14 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     // Volver a un dato ya respondido: cada uno abre SU sheet o su modal, y
     // ninguno mueve el paso — así la frase de detrás nunca pierde líneas.
     // (El nombre hacía goToStep(0) y borraba todo lo posterior.)
-    Widget tappable(_Segment target, Widget child) => GestureDetector(
+    Widget tappable(Segment target, Widget child) => GestureDetector(
           onTap: () => switch (target) {
             // El nombre NO abre sheet: su línea se convierte en el campo y
             // sale el teclado. Se escribe en la frase, que es la gracia.
-            _Segment.name => _startEditingName(),
-            _Segment.age => _openAgeSheet(),
-            _Segment.children => _openChildrenSheet(),
-            _Segment.feeling => _openFeelingsModal(),
+            Segment.name => _startEditingName(),
+            Segment.age => _openAgeSheet(),
+            Segment.children => _openChildrenSheet(),
+            Segment.feeling => _openFeelingsModal(),
           },
           behavior: HitTestBehavior.opaque,
           child: child,
@@ -425,8 +360,8 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
 
     // El nombre ocupa SU PROPIA línea bajo "My name is" (saltos del maquetado).
     // Al tocarlo, esa línea SE CONVIERTE en el campo: solo teclado, sin sheet.
-    if (segment == _Segment.name) {
-      final editing = ref.watch(_editingSegmentProvider) == _Segment.name;
+    if (segment == Segment.name) {
+      final editing = ref.watch(editingSegmentProvider) == Segment.name;
       final line = Column(
         children: [
           Text('My name is', textAlign: TextAlign.center, style: serif),
@@ -447,17 +382,17 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
       );
       // Mientras se edita no se envuelve en el GestureDetector: taparía los
       // toques del propio campo (mover el cursor, seleccionar).
-      return editing ? line : tappable(_Segment.name, line);
+      return editing ? line : tappable(Segment.name, line);
     }
 
     final spans = switch (segment) {
-      _Segment.name => <TextSpan>[],
-      _Segment.age => [
+      Segment.name => <TextSpan>[],
+      Segment.age => [
           TextSpan(text: 'I am ', style: serif),
           value(state.age?.toString(), '··'),
           TextSpan(text: ' years old', style: serif),
         ],
-      _Segment.children => [
+      Segment.children => [
           TextSpan(text: 'with ', style: serif),
           value(state.childrenCount?.toString(), '··'),
           TextSpan(
@@ -465,7 +400,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
             style: serif,
           ),
         ],
-      _Segment.feeling => <TextSpan>[],
+      Segment.feeling => <TextSpan>[],
     };
 
     return tappable(
@@ -501,7 +436,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
 
     return switch (widget.activeSegment) {
       // El nombre se escribe DENTRO de la línea (campo inline subrayado).
-      _Segment.name => Column(
+      Segment.name => Column(
           children: [
             Text('My name is', textAlign: TextAlign.center, style: serif),
             _inlineNameRow(serif),
@@ -509,7 +444,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
         ),
       // Tocar la línea reabre el sheet: es la única forma de volver a él una
       // vez cerrado, y el subrayado del valor ya invita a tocarlo.
-      _Segment.age => GestureDetector(
+      Segment.age => GestureDetector(
           onTap: _openAgeSheet,
           behavior: HitTestBehavior.opaque,
           child: Text.rich(
@@ -521,7 +456,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
             textAlign: TextAlign.center,
           ),
         ),
-      _Segment.children => GestureDetector(
+      Segment.children => GestureDetector(
           onTap: _openChildrenSheet,
           behavior: HitTestBehavior.opaque,
           child: Text.rich(
@@ -538,14 +473,14 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
         ),
       // Tocar la palabra reabre el modal: es la única vía tras cerrarlo, ya
       // que bajo la frase no queda ningún botón.
-      _Segment.feeling => GestureDetector(
+      Segment.feeling => GestureDetector(
           onTap: _openFeelingsModal,
           behavior: HitTestBehavior.opaque,
           child: Text.rich(
             TextSpan(children: [
               TextSpan(text: 'I feel ', style: serif),
               value(
-                state.feelings.isEmpty ? null : _joinFeelings(state.feelings),
+                state.feelings.isEmpty ? null : joinFeelings(state.feelings),
                 'like this',
               ),
               TextSpan(text: '.', style: serif),
@@ -568,13 +503,13 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   /// sin sheet y sin mover el paso.
   void _startEditingName() {
     _nameController.text = ref.read(onboardingControllerProvider).name;
-    ref.read(_editingSegmentProvider.notifier).state = _Segment.name;
+    ref.read(editingSegmentProvider.notifier).state = Segment.name;
   }
 
-  Future<void> _openChildrenSheet() => _openSheet(const _ChildrenSheet());
+  Future<void> _openChildrenSheet() => _openSheet(const ChildrenSheet());
 
   /// Bottom sheet de la edad.
-  Future<void> _openAgeSheet() => _openSheet(const _AgeSheet());
+  Future<void> _openAgeSheet() => _openSheet(const AgeSheet());
 
   Future<void> _openSheet(Widget child) {
     return showModalBottomSheet<void>(
@@ -594,7 +529,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
   /// para dar lugar al control del dato tocado (la de sentimientos reabre el
   /// modal, que también conserva el texto al volver).
   Widget _doneSummary(OnboardingState state) {
-    final editing = ref.watch(_editingSegmentProvider);
+    final editing = ref.watch(editingSegmentProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -621,12 +556,12 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
             ),
           ),
         const SizedBox(height: 14),
-        _Sentence(
+        Sentence(
           state: state,
           active: editing ?? widget.activeSegment,
           showAll: true,
           // El nombre se edita EN su línea; numéricos en su componente debajo.
-          nameEditor: editing == _Segment.name
+          nameEditor: editing == Segment.name
               ? _inlineNameRow(Theme.of(context).textTheme.displaySmall!
                   .copyWith(
                     fontSize: 33,
@@ -641,13 +576,13 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           // frase de detrás se queda entera.
           onLineTap: (segment) {
             switch (segment) {
-              case _Segment.name:
+              case Segment.name:
                 _startEditingName();
-              case _Segment.age:
+              case Segment.age:
                 _openAgeSheet();
-              case _Segment.children:
+              case Segment.children:
                 _openChildrenSheet();
-              case _Segment.feeling:
+              case Segment.feeling:
                 _openFeelingsModal();
             }
           },
@@ -658,7 +593,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
           Center(
             child: TextButton(
               onPressed: () =>
-                  ref.read(_editingSegmentProvider.notifier).state = null,
+                  ref.read(editingSegmentProvider.notifier).state = null,
               child: const Text(
                 'Done',
                 style: TextStyle(
@@ -673,648 +608,6 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     );
   }
 
-}
-
-/// Modal del maquetado (feel-modal): pantalla completa con título serif, grid
-/// de 3 columnas con ilustraciones y "Listo". Multi-selección.
-class _FeelingsModal extends ConsumerWidget {
-  const _FeelingsModal();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final feelings = ref.watch(
-      onboardingControllerProvider.select((s) => s.feelings),
-    );
-    final controller = ref.read(onboardingControllerProvider.notifier);
-    final serif = Theme.of(context).textTheme.headlineMedium!;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Cruz de cerrar: el modal se abre solo al llegar al paso, así que
-            // la salida tiene que estar a la vista. Antes solo se salía
-            // eligiendo un sentimiento.
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                icon: const Icon(CupertinoIcons.xmark,
-                    size: 20, color: AppColors.entryInk),
-                tooltip: 'Close',
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            Text(
-              'How do you feel today?',
-              textAlign: TextAlign.center,
-              style: serif.copyWith(color: AppColors.entryAccent, fontSize: 26),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'choose all that apply',
-              style: TextStyle(fontSize: 13, color: AppColors.entryHint),
-            ),
-            const SizedBox(height: 14),
-            Expanded(
-              child: GridView.count(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                crossAxisCount: 3,
-                mainAxisSpacing: 11,
-                crossAxisSpacing: 11,
-                childAspectRatio: 0.74,
-                children: [
-                  for (final feeling in Feeling.values)
-                    _FeelingCard(
-                      feeling: feeling,
-                      selected: feelings.contains(feeling),
-                      onTap: () => controller.toggleFeeling(feeling),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 6, 24, 18),
-              child: SoftPrimaryButton(
-                label: 'Done',
-                onPressed:
-                    feelings.isEmpty ? null : () => Navigator.of(context).pop(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Tarjeta del grid de sentimientos (estilo aprobado): fondo blanco limpio,
-/// la ilustración en un marco interior redondeado y el nombre en serif debajo.
-/// Seleccionada: borde rosado más presente + sombra suave (sin cambiar fondo).
-class _FeelingCard extends StatelessWidget {
-  const _FeelingCard({
-    required this.feeling,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final Feeling feeling;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected ? AppColors.entryAccent : AppColors.entryBorder,
-            width: selected ? 1.6 : 1.1,
-          ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.entryAccent.withValues(alpha: 0.18),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          children: [
-            // Ilustración sin marco interior: solo el borde externo de la card.
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(feeling.imageAsset, fit: BoxFit.cover),
-              ),
-            ),
-            const SizedBox(height: 7),
-            Text(
-              feeling.label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              style: const TextStyle(
-                fontFamily: AppTypography.serif,
-                fontSize: 12.5,
-                height: 1.12,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// La frase continua en serif, construida PROGRESIVAMENTE (maquetado): solo se
-/// muestran las líneas ya respondidas y la del paso actual, que aparece con un
-/// fundido suave. El valor va en bold magenta; si falta, placeholder rosado.
-class _Sentence extends StatelessWidget {
-  const _Sentence({
-    required this.state,
-    required this.active,
-    this.onLineTap,
-    this.showAll = false,
-    this.nameEditor,
-  });
-
-  final OnboardingState state;
-  final _Segment active;
-
-  /// "Tap any word to edit it" (maquetado): tocar una línea vuelve a su paso.
-  final ValueChanged<_Segment>? onLineTap;
-
-  /// En el resumen (done) el párrafo COMPLETO se mantiene siempre visible,
-  /// aunque se esté editando una línea anterior.
-  final bool showAll;
-
-  /// Editor inline del nombre: al editarlo desde el resumen, la línea del
-  /// nombre se convierte en el campo (se escribe en la frase, no debajo).
-  final Widget? nameEditor;
-
-  @override
-  Widget build(BuildContext context) {
-    final serif = Theme.of(context)
-        .textTheme
-        .displaySmall!
-        .copyWith(
-          fontSize: 33,
-          fontWeight: FontWeight.w400,
-          height: 1.36,
-          color: AppColors.entryInk,
-        );
-
-    TextSpan value(String? text, String placeholder, _Segment segment) {
-      final missing = text == null;
-      return TextSpan(
-        text: missing ? placeholder : text,
-        style: serif.copyWith(
-          color: missing ? AppColors.entryPlaceholder : AppColors.entryAccent,
-          fontWeight: missing ? FontWeight.w400 : FontWeight.w700,
-          fontStyle: missing ? FontStyle.italic : FontStyle.normal,
-          decoration:
-              segment == active ? TextDecoration.underline : TextDecoration.none,
-          decorationColor: AppColors.entryAccent.withValues(alpha: 0.4),
-          decorationThickness: 1.5,
-        ),
-      );
-    }
-
-    final name = state.name.trim().isEmpty ? null : state.name.trim();
-    final age = state.age?.toString();
-    final children = state.childrenCount?.toString();
-    final feeling = _joinFeelings(state.feelings);
-
-    Widget line(_Segment segment, Widget child, {bool tappable = true}) {
-      // Progresivo: las líneas posteriores al paso actual aún no existen; la
-      // nueva entra con fadeSoft (el tween corre al insertarse en el árbol).
-      // En el resumen (showAll) nunca se ocultan.
-      if (!showAll && segment.index > active.index) {
-        return const SizedBox.shrink();
-      }
-      return TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 450),
-        curve: Curves.easeOut,
-        builder: (context, value, child) =>
-            Opacity(opacity: value, child: child),
-        child: onLineTap == null || !tappable
-            ? child
-            : GestureDetector(onTap: () => onLineTap!(segment), child: child),
-      );
-    }
-
-    Text rich(List<TextSpan> spans) => Text.rich(
-          TextSpan(children: spans),
-          textAlign: TextAlign.center,
-          style: serif,
-        );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // El nombre en SU PROPIA línea (saltos del maquetado). Si se está
-        // editando, la línea ES el campo inline (no un input aparte).
-        line(
-          _Segment.name,
-          Column(
-            children: [
-              Text('My name is', textAlign: TextAlign.center, style: serif),
-              nameEditor ??
-                  rich([
-                    value(name, 'your name', _Segment.name),
-                    TextSpan(text: ',', style: serif),
-                  ]),
-            ],
-          ),
-          tappable: nameEditor == null,
-        ),
-        line(
-          _Segment.age,
-          rich([
-            TextSpan(text: 'I am ', style: serif),
-            value(age, '··', _Segment.age),
-            TextSpan(text: ' years old', style: serif),
-          ]),
-        ),
-        line(
-          _Segment.children,
-          rich([
-            TextSpan(text: 'with ', style: serif),
-            value(children, '··', _Segment.children),
-            TextSpan(
-              text: (state.childrenCount ?? 2) == 1 ? ' child' : ' children',
-              style: serif,
-            ),
-          ]),
-        ),
-        line(
-          _Segment.feeling,
-          rich([
-            TextSpan(text: 'I feel ', style: serif),
-            value(feeling, 'like this', _Segment.feeling),
-            TextSpan(text: '.', style: serif),
-          ]),
-        ),
-      ],
-    );
-  }
-}
-
-/// Andamio común de los bottom sheets del onboarding: asa, contenido y el
-/// botón de cerrar. Los datos se guardan al tocar, así que "Done" solo cierra.
-class _OnboardingSheet extends ConsumerWidget {
-  const _OnboardingSheet({required this.children, required this.note});
-
-  final List<Widget> children;
-
-  /// Por qué se pregunta el dato. Va DENTRO del sheet, junto al "Skip": es
-  /// donde se decide, no en la pantalla de detrás.
-  final String note;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        // viewInsets: sin esto el teclado (el sheet del nombre lo abre con
-        // autofocus) tapaba el contenido entero — se veía solo el fondo.
-        padding: EdgeInsets.fromLTRB(
-          24,
-          10,
-          24,
-          20 + MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Asa: dice "esto se arrastra y se cierra".
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8E0F0),
-                borderRadius: BorderRadius.circular(50),
-              ),
-            ),
-            const SizedBox(height: 18),
-            ...children,
-            const SizedBox(height: 18),
-            Text(
-              note,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: AppTypography.serif,
-                fontStyle: FontStyle.italic,
-                fontSize: 12.5,
-                height: 1.45,
-                color: AppColors.entryHint,
-              ),
-            ),
-            TextButton(
-              // Saltar cierra el sheet Y avanza: el dato es opcional de verdad.
-              onPressed: () {
-                Navigator.of(context).pop();
-                ref.read(onboardingControllerProvider.notifier).next();
-              },
-              child: const Text(
-                'Skip for now',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.entryAccent,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            SoftPrimaryButton(
-              label: 'Done',
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Bottom sheet de la edad: el mismo stepper, con su propia salida.
-class _AgeSheet extends ConsumerWidget {
-  const _AgeSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final age = ref.watch(onboardingControllerProvider.select((s) => s.age));
-    final controller = ref.read(onboardingControllerProvider.notifier);
-
-    return _OnboardingSheet(
-      note: 'Only so Aura can pace your days. You can skip this — it changes '
-          'nothing about what she offers you.',
-      children: [
-        const Text(
-          'How old are you?',
-          style: TextStyle(fontSize: 12, color: AppColors.entryHint),
-        ),
-        const SizedBox(height: 14),
-        _Stepper(
-          value: age,
-          placeholder: "I'd rather not say",
-          min: 16,
-          max: 99,
-          initial: 25, // punto de partida del maquetado
-          onChanged: controller.setAge,
-        ),
-      ],
-    );
-  }
-}
-
-/// Stepper −/+ del maquetado, con el número TAMBIÉN tecleable: llegar a 42
-/// desde 25 son 17 toques, y eso es carga mental, no acompañamiento.
-class _Stepper extends StatefulWidget {
-  const _Stepper({
-    required this.value,
-    required this.placeholder,
-    required this.min,
-    required this.max,
-    required this.initial,
-    required this.onChanged,
-  });
-
-  final int? value;
-  final String placeholder;
-  final int min;
-  final int max;
-  final int initial;
-  final ValueChanged<int> onChanged;
-
-  @override
-  State<_Stepper> createState() => _StepperState();
-}
-
-class _StepperState extends State<_Stepper> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.value?.toString() ?? '');
-
-  @override
-  void didUpdateWidget(covariant _Stepper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Los ± cambian el valor desde fuera; el campo los sigue. La comparación
-    // con el texto actual evita pisarle el cursor mientras teclea.
-    final incoming = widget.value?.toString() ?? '';
-    if (widget.value != oldWidget.value && incoming != _controller.text) {
-      _controller.value = TextEditingValue(
-        text: incoming,
-        selection: TextSelection.collapsed(offset: incoming.length),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  /// Mientras teclea solo se confirma lo que YA es una respuesta válida: con
-  /// "1" a medio escribir un 18 no se puede saltar a 16 y quitarle el dígito
-  /// de las manos.
-  void _onTyped(String text) {
-    final typed = int.tryParse(text);
-    if (typed == null) return;
-    if (typed < widget.min || typed > widget.max) return;
-    if (typed != widget.value) widget.onChanged(typed);
-  }
-
-  /// Al soltar el campo se ordena lo tecleado: fuera de rango se acerca al
-  /// borde (un ajuste, nunca un error) y vacío vuelve al último valor.
-  void _commit() {
-    final typed = int.tryParse(_controller.text);
-    if (typed == null) {
-      _controller.text = widget.value?.toString() ?? '';
-      return;
-    }
-    final clamped = typed.clamp(widget.min, widget.max);
-    if (clamped.toString() != _controller.text) {
-      _controller.text = clamped.toString();
-    }
-    if (clamped != widget.value) widget.onChanged(clamped);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    void step(int delta) {
-      final next =
-          ((widget.value ?? widget.initial) + delta).clamp(widget.min, widget.max);
-      widget.onChanged(next);
-    }
-
-    // Botones ± del maquetado: círculos grises rellenos, sin borde.
-    Widget button(String symbol, VoidCallback onPressed) => InkWell(
-          borderRadius: BorderRadius.circular(50),
-          onTap: onPressed,
-          child: Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFFF1EFF3),
-            ),
-            child: Text(
-              symbol,
-              style: const TextStyle(fontSize: 22, color: AppColors.textPrimary),
-            ),
-          ),
-        );
-
-    // Sin tocar aún: el número de partida en rosado tenue (va de hint, así el
-    // campo arranca vacío y el primer dígito no pelea con nada); al tocar ±
-    // o teclear, crimson.
-    final untouched = widget.value == null;
-    final number =
-        Theme.of(context).textTheme.headlineMedium!.copyWith(fontSize: 24);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        button('−', () => step(-1)),
-        Container(
-          width: 104,
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF5F8),
-            borderRadius: BorderRadius.circular(50),
-            border: Border.all(
-              color: untouched ? AppColors.entryBorder : AppColors.entryAccent,
-              width: 1.5,
-            ),
-          ),
-          child: TextField(
-            controller: _controller,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.done,
-            textAlign: TextAlign.center,
-            cursorColor: AppColors.entryAccent,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(widget.max.toString().length),
-            ],
-            style: number.copyWith(color: AppColors.entryAccent),
-            // isCollapsed + sin borde: el TextField no aporta geometría, la
-            // pastilla sigue siendo la del maquetado.
-            decoration: InputDecoration(
-              isCollapsed: true,
-              border: InputBorder.none,
-              hintText: widget.initial.toString(),
-              hintStyle: number.copyWith(color: AppColors.entryPlaceholder),
-            ),
-            onChanged: _onTyped,
-            onSubmitted: (_) {
-              _commit();
-              FocusScope.of(context).unfocus();
-            },
-            // Tocar fuera (los ±, "Skip", "Done") llega ANTES que su pulsación:
-            // por eso lo tecleado se confirma aunque salga sin darle a "done".
-            onTapOutside: (_) => _commit(),
-          ),
-        ),
-        button('+', () => step(1)),
-      ],
-    );
-  }
-}
-
-/// Control de peques: stepper 0–4+ y, si hay, chips de edades (multi).
-class _ChildrenSheet extends ConsumerWidget {
-  const _ChildrenSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(onboardingControllerProvider);
-    final controller = ref.read(onboardingControllerProvider.notifier);
-    final count = state.childrenCount;
-    final ages = state.childrenAges;
-
-    void toggleAge(ChildAge age) {
-      final next = [...ages];
-      if (!next.remove(age)) next.add(age);
-      controller.setChildren(count: count ?? 0, ages: next);
-    }
-
-    return _OnboardingSheet(
-      note: 'It helps Aura suggest gestures that fit your home. Skipping is '
-          'just as valid.',
-      children: [
-        // Num-chips del maquetado v2: elegir el número en UN tap.
-        const Text(
-          'How many kids?',
-          style: TextStyle(fontSize: 12, color: AppColors.entryHint),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            for (var n = 0; n <= 5; n++)
-              InkWell(
-                borderRadius: BorderRadius.circular(50),
-                onTap: () => controller.setChildren(
-                  count: n,
-                  ages: n == 0 ? const [] : ages,
-                ),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: count == n
-                        ? AppColors.roseTint
-                        : const Color(0xFFF8F4FC),
-                    border: Border.all(
-                      color: count == n
-                          ? AppColors.entryAccent
-                          : const Color(0xFFE8E0F0),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Text(
-                    n == 5 ? '5+' : '$n',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: count == n
-                          ? AppColors.entryAccent
-                          : const Color(0xFF5A4F6A),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        if (count != null && count > 0) ...[
-          const SizedBox(height: 14),
-          const Text(
-            'What ages? (choose all that apply)',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: [
-              for (final age in ChildAge.values)
-                SelectableChip(
-                  label: age.label,
-                  selected: ages.contains(age),
-                  onTap: () => toggleAge(age),
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
 }
 
 // ── Pasos 5–7 · frase en primera persona (mezcla v2, aprobada) ───────────────
@@ -1376,7 +669,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
           Consumer(builder: (context, ref, _) {
             final chosen = ref
                 .watch(onboardingControllerProvider.select((s) => s.mainPain));
-            return _Microcopy(chosen == null ? null : painReflections[chosen]);
+            return Microcopy(chosen == null ? null : painReflections[chosen]);
           }),
         ),
       _ClosingSegment.time => (
@@ -1403,7 +696,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
           Consumer(builder: (context, ref, _) {
             final chosen = ref.watch(
                 onboardingControllerProvider.select((s) => s.dailyTimeSlot));
-            return _Microcopy(chosen == null
+            return Microcopy(chosen == null
                 ? timeReflectionDefault
                 : timeReflections[chosen]);
           }),
@@ -1419,7 +712,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
                 for (final moment in PreferredMoment.values)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: _MomentChip(
+                    child: MomentChip(
                       title: _momentShortLabel[moment]!,
                       subtitle: _momentSubLabel[moment]!,
                       selected: chosen == moment,
@@ -1434,7 +727,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
           Consumer(builder: (context, ref, _) {
             final chosen = ref.watch(
                 onboardingControllerProvider.select((s) => s.preferredMoment));
-            return _Microcopy(chosen == null
+            return Microcopy(chosen == null
                 ? momentReflectionDefault
                 : momentReflections[chosen]);
           }),
@@ -1449,7 +742,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (_) =>
-          _ChoiceSheet(title: title, control: control, microcopy: microcopy),
+          ChoiceSheet(title: title, control: control, microcopy: microcopy),
     );
   }
 
@@ -1536,7 +829,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
           TextSpan(text: '.', style: serif),
         ]),
         const Spacer(),
-        const _CancelLink(),
+        const CancelLink(),
       ],
     );
   }
@@ -1578,208 +871,6 @@ const _momentShortLabel = {
   PreferredMoment.midday: 'Midday',
   PreferredMoment.night: 'Night',
 };
-
-/// Sheet de los pasos finales: título, chips y el reflejo empático debajo.
-/// No lleva "Skip" — estos tres SÍ son obligatorios para cerrar el onboarding.
-class _ChoiceSheet extends StatelessWidget {
-  const _ChoiceSheet({
-    required this.title,
-    required this.control,
-    this.microcopy,
-  });
-
-  final String title;
-  final Widget control;
-  final Widget? microcopy;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8E0F0),
-                borderRadius: BorderRadius.circular(50),
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              title,
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.entryHint),
-            ),
-            const SizedBox(height: 14),
-            control,
-            if (microcopy != null) ...[
-              const SizedBox(height: 14),
-              microcopy!,
-            ],
-            const SizedBox(height: 22),
-            SoftPrimaryButton(
-              label: 'Done',
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Reflejo empático reactivo: cambia con la selección, con fade suave — Aura
-/// responde, no interrumpe (SPEC V2 §3.1).
-class _Microcopy extends StatelessWidget {
-  const _Microcopy(this.text);
-
-  final String? text;
-
-  @override
-  Widget build(BuildContext context) {
-    if (text == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: Text(
-          text!,
-          key: ValueKey(text),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontFamily: AppTypography.serif,
-            fontStyle: FontStyle.italic,
-            fontSize: 13,
-            height: 1.5,
-            color: AppColors.entryHint,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-/// Chip de momento con subtítulo (time-chip del maquetado v2).
-class _MomentChip extends StatelessWidget {
-  const _MomentChip({
-    required this.title,
-    required this.subtitle,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(50),
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.roseTint : const Color(0xFFF8F4FC),
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-            color: selected ? AppColors.entryAccent : const Color(0xFFE8E0F0),
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: selected
-                    ? AppColors.entryAccent
-                    : const Color(0xFF5A4F6A),
-              ),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 11,
-                color: selected
-                    ? AppColors.entryAccent.withValues(alpha: 0.55)
-                    : AppColors.entryHint,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// "Cancel and start again ✕" del maquetado: borra las respuestas y vuelve al
-/// primer paso de la frase (el paso 0 renace con el estado limpio).
-class _CancelLink extends ConsumerWidget {
-  const _CancelLink();
-
-  /// Borra TODO lo respondido, así que pregunta. Antes bastaba un toque —y el
-  /// enlace vive justo encima del botón primario, donde va el pulgar—, así que
-  /// un roce en el último paso tiraba siete respuestas sin decir nada.
-  Future<void> _confirm(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showAuraConfirm(
-      context,
-      title: 'Start again?',
-      message: "Everything you've told me so far will be cleared — your name, "
-          'how you feel, all of it.',
-      cancelLabel: 'Keep what I wrote',
-      confirmLabel: 'Start again',
-      // La entrada tiene su propio carmesí, más vivo que el de marca.
-      accent: AppColors.entryAccent,
-    );
-    if (confirmed) {
-      ref.read(onboardingControllerProvider.notifier).restart();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return TextButton(
-      onPressed: () => _confirm(context, ref),
-      // Discreto a propósito: es una salida de emergencia, no una acción que
-      // deba competir con "Continue".
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Cancel and start again',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: AppColors.entryHint,
-            ),
-          ),
-          SizedBox(width: 6),
-          Icon(CupertinoIcons.xmark, size: 11, color: AppColors.entryHint),
-        ],
-      ),
-    );
-  }
-}
-
-/// "agotada", "agotada y sola", "agotada, sola y culpable" (para la frase).
-String? _joinFeelings(List<Feeling> feelings) {
-  if (feelings.isEmpty) return null;
-  final labels = [for (final f in feelings) f.label.toLowerCase()];
-  if (labels.length == 1) return labels.single;
-  return '${labels.sublist(0, labels.length - 1).join(', ')} and ${labels.last}';
-}
 
 /// Contrato emocional (SPEC_CONTENIDO_EMOCIONAL_V2 §3.2): estado de éxito del
 /// onboarding. Sin metas ni presión — cierra el arco de entrada. La usuaria
