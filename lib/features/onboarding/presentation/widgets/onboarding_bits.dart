@@ -12,10 +12,27 @@ import '../providers/onboarding_controller.dart';
 /// Salieron de onboarding_screen.dart sin tocarles el comportamiento.
 
 /// Puntos de progreso: el paso activo se alarga en magenta (como el maquetado).
+///
+/// Cuenta por BLOQUE, no por el onboarding entero: siete puntos hacían el
+/// camino largo de mirar, y partido en dos cards el segundo bloque volvería a
+/// empezar en el punto cinco, que se lee como ir por la mitad cuando ya vas
+/// por el principio de otra cosa.
 class StepDots extends StatelessWidget {
-  const StepDots({super.key, required this.active});
+  const StepDots({
+    super.key,
+    required this.block,
+    required this.active,
+    required this.count,
+  });
 
+  /// Bloque al que pertenecen estos puntos (1 o 2).
+  final int block;
+
+  /// Paso activo dentro del bloque, 1-indexado.
   final int active;
+
+  /// Cuántos pasos tiene el bloque (4 y 3).
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +41,7 @@ class StepDots extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            for (var i = 0; i < kOnboardingSteps; i++)
+            for (var i = 1; i <= count; i++)
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -40,10 +57,10 @@ class StepDots extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        // Cuánto queda, en palabras: con 7 pasos unos puntos de 6px no bastan
-        // — y el resumen del paso 4 se leía como un final que no era.
+        // Cuánto queda, en palabras: unos puntos de 6px no bastan, y decir en
+        // qué bloque estás evita que el segundo se lea como una repetición.
         Text(
-          'Step ${active + 1} of $kOnboardingSteps',
+          'Block $block · Step $active of $count',
           style: const TextStyle(fontSize: 11, color: AppColors.entryHint),
         ),
       ],

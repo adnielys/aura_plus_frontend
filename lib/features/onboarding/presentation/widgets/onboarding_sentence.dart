@@ -162,3 +162,25 @@ String? joinFeelings(List<Feeling> feelings) {
   if (labels.length == 1) return labels.single;
   return '${labels.sublist(0, labels.length - 1).join(', ')} and ${labels.last}';
 }
+
+/// Cómo se lee cada elección dentro del párrafo de cierre.
+const painValue = {
+  MainPain.work: 'work',
+  MainPain.family: 'my family and home',
+  MainPain.self: 'myself',
+  MainPain.relationships: 'my relationships',
+  MainPain.all: 'everything at once',
+};
+
+const timeValue = {
+  TimeSlot.minimal: '5 minutes',
+  TimeSlot.short: '10–20 minutes',
+  TimeSlot.medium: '30+ minutes',
+};
+
+const momentValue = {
+  PreferredMoment.earlyMorning: 'early, before the noise',
+  PreferredMoment.morning: 'mid-morning',
+  PreferredMoment.midday: 'at midday',
+  PreferredMoment.night: 'at night, when they sleep',
+};
