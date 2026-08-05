@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
+import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/widgets/selectable_chip.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../providers/onboarding_controller.dart';
@@ -1732,28 +1733,17 @@ class _CancelLink extends ConsumerWidget {
   /// enlace vive justo encima del botón primario, donde va el pulgar—, así que
   /// un roce en el último paso tiraba siete respuestas sin decir nada.
   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Start again?'),
-        content: const Text(
-          "Everything you've told me so far will be cleared — your name, how "
-          'you feel, all of it.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Keep what I wrote'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Start again',
-                style: TextStyle(color: AppColors.entryAccent)),
-          ),
-        ],
-      ),
+    final confirmed = await showAuraConfirm(
+      context,
+      title: 'Start again?',
+      message: "Everything you've told me so far will be cleared — your name, "
+          'how you feel, all of it.',
+      cancelLabel: 'Keep what I wrote',
+      confirmLabel: 'Start again',
+      // La entrada tiene su propio carmesí, más vivo que el de marca.
+      accent: AppColors.entryAccent,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       ref.read(onboardingControllerProvider.notifier).restart();
     }
   }

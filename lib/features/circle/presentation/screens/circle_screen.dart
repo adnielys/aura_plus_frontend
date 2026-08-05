@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/widgets/section_hero.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -73,28 +74,15 @@ class _CircleScreenState extends ConsumerState<CircleScreen> {
       await _run(() => revokeCircleMember(ref, member.id));
       return;
     }
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Remove from your circle?'),
-        content: Text(
-          '${member.email} will stop seeing your weekly summary. '
+    final confirmed = await showAuraConfirm(
+      context,
+      title: 'Remove from your circle?',
+      message: '${member.email} will stop seeing your weekly summary. '
           'The link ends right away — quietly, without telling them.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Keep'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Remove',
-                style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
-      ),
+      cancelLabel: 'Keep',
+      confirmLabel: 'Remove',
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await _run(() => revokeCircleMember(ref, member.id));
     }
   }

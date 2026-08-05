@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/widgets/aura_note.dart';
 import '../../../../shared/widgets/section_hero.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
@@ -911,27 +912,15 @@ class _CycleScreenState extends ConsumerState<CycleScreen> {
       onPressed: _busy
           ? null
           : () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Erase all my cycle data?'),
-                  content: const Text(
-                      'Everything about your cycle is deleted immediately '
-                      'and completely. There is no trace left.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Keep it'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Erase everything',
-                          style: TextStyle(color: AppColors.primary)),
-                    ),
-                  ],
-                ),
+              final confirmed = await showAuraConfirm(
+                context,
+                title: 'Erase all my cycle data?',
+                message: 'Everything about your cycle is deleted immediately '
+                    'and completely. There is no trace left.',
+                cancelLabel: 'Keep it',
+                confirmLabel: 'Erase everything',
               );
-              if (confirmed == true) {
+              if (confirmed) {
                 await _run(() => deleteCycleData(ref));
               }
             },

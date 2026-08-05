@@ -11,6 +11,7 @@ import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../care/presentation/providers/care_providers.dart';
 import '../../../constellation/presentation/providers/constellation_provider.dart';
 import '../../../onboarding/presentation/providers/onboarding_controller.dart';
+import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/widgets/section_hero.dart';
 import '../providers/profile_provider.dart';
 
@@ -232,50 +233,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// Confirma y reinicia el onboarding. El servidor conserva el cielo
   /// (estrellas y constelaciones); el router la lleva de vuelta al flujo.
   Future<void> _confirmRestart(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Restart onboarding?',
-          style: TextStyle(
-            fontFamily: AppTypography.serif,
-            fontStyle: FontStyle.italic,
-            fontSize: 20,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: const Text(
-          'You will answer the first questions again. '
+    final confirmed = await showAuraConfirm(
+      context,
+      title: 'Restart onboarding?',
+      message: 'You will answer the first questions again. '
           'Your stars and constellations stay exactly as they are.',
-          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'Not now',
-              style: TextStyle(
-                fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Restart',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
+      cancelLabel: 'Not now',
+      confirmLabel: 'Restart',
     );
-    if (confirmed != true || !context.mounted) return;
+    if (!confirmed || !context.mounted) return;
 
     try {
       await ref
@@ -295,50 +261,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   /// Confirma antes de cerrar sesión: un toque accidental no debe echarla.
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Sign out?',
-          style: TextStyle(
-            fontFamily: AppTypography.serif,
-            fontStyle: FontStyle.italic,
-            fontSize: 20,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: const Text(
-          "Your space stays just as you left it. You'll sign back in whenever "
-          'you want.',
-          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'Stay',
-              style: TextStyle(
-                fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Sign out',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showAuraConfirm(
+      context,
+      title: 'Sign out?',
+      message: "Your space stays just as you left it. You'll sign back in "
+          'whenever you want.',
+      cancelLabel: 'Stay',
+      confirmLabel: 'Sign out',
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await ref.read(authControllerProvider.notifier).logout();
   }
 }

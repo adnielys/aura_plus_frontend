@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/utils/dates.dart';
 import '../providers/care_providers.dart';
 import '../widgets/care_widgets.dart';
@@ -27,47 +28,18 @@ class _CareRequestScreenState extends ConsumerState<CareRequestScreen> {
 
   Future<void> _withdraw(CareReferral referral, String name) async {
     final router = GoRouter.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Withdraw your request to $name?',
-          style: const TextStyle(
-            fontFamily: AppTypography.serif,
-            fontSize: 19,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: const Text(
-          'You can choose someone else whenever you want — '
+    final confirmed = await showAuraConfirm(
+      context,
+      title: 'Withdraw your request to $name?',
+      message: 'You can choose someone else whenever you want — '
           'or her again later. No rush.',
-          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'Leave it as is',
-              style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Withdraw it',
-              style: TextStyle(
-                  fontWeight: FontWeight.w700, color: AppColors.careAccent),
-            ),
-          ),
-        ],
-      ),
+      cancelLabel: 'Leave it as is',
+      confirmLabel: 'Withdraw it',
+      // Verde sereno: dentro del carril de cuidado, el magenta sería un
+      // extraño (misma regla que el resto de la feature).
+      accent: AppColors.careAccent,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     setState(() => _withdrawing = true);
     try {

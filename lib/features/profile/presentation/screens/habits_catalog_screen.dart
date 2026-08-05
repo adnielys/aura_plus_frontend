@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/aura_dialog.dart';
 import '../../../../shared/widgets/section_hero.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/domain/enums.dart';
@@ -424,51 +425,15 @@ class _HabitRow extends ConsumerWidget {
   /// Retirar (decisión A jul 2026): confirmación serena — sale del banco,
   /// pero cada día vivido con él queda intacto en su historia.
   Future<void> _confirmRetire(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text(
-          'Retire this gesture?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: const Text(
-          "It leaves the bank and Aura won't suggest it again. "
+    final confirmed = await showAuraConfirm(
+      context,
+      title: 'Retire this gesture?',
+      message: "It leaves the bank and Aura won't suggest it again. "
           'Every day you lived it stays in your story.',
-          style: TextStyle(
-            fontSize: 13,
-            height: 1.55,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'Keep it',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Retire',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
+      cancelLabel: 'Keep it',
+      confirmLabel: 'Retire',
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     try {
       await retireHabit(ref, id: habit.id);
     } catch (_) {
