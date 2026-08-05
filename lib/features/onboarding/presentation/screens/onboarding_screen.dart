@@ -258,12 +258,13 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
               // un descuido, no como una elección.
               textCapitalization: TextCapitalization.words,
               inputFormatters: const [_CapitalizeFirst()],
-              // Mientras se edita: itálica regular (seg-val.editing del
-              // maquetado). El bold llega al confirmar la línea.
+              // Se escribe YA con el estilo que tendrá en la frase (carmesí
+              // bold, sin itálica): antes cambiaba de aspecto al confirmar y
+              // parecía otra cosa mientras lo tecleabas.
               style: serif.copyWith(
                 color: AppColors.entryAccent,
-                fontWeight: FontWeight.w400,
-                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w700,
+                fontStyle: FontStyle.normal,
               ),
               onChanged:
                   ref.read(onboardingControllerProvider.notifier).setName,
