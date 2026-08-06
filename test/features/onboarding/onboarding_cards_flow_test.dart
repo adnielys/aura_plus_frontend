@@ -204,6 +204,28 @@ void main() {
     });
   });
 
+  group('corregir el nombre dentro de la card', () {
+    testWidgets('el botón cierra el campo, no la card', (tester) async {
+      await gotoCards(tester);
+      ctrl().openCard(1);
+      await tester.pumpAndSettle();
+
+      // Tocar el nombre lo convierte en campo: el botón cambia de oficio.
+      await tester.tap(find.text('My name is'));
+      await tester.pumpAndSettle();
+      expect(find.text('Done'), findsOneWidget);
+      expect(find.text('Save'), findsNothing);
+
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+
+      // Sigue en la card, con el campo ya cerrado y "Save" de vuelta.
+      expect(state().view, OnboardingView.editing,
+          reason: 'cerrar el campo no cierra la card');
+      expect(find.text('Save'), findsOneWidget);
+    });
+  });
+
   group('guardar una corrección', () {
     testWidgets('vuelve a las cards y conserva el cambio', (tester) async {
       await gotoCards(tester);

@@ -131,17 +131,25 @@ class _OnboardingEditScreenState extends ConsumerState<OnboardingEditScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
-              child: SoftPrimaryButton(
-                label: 'Save',
-                // Mismas reglas que el flujo: una card no se guarda a medias,
-                // pero el botón apagado lo dice sin regañar.
-                onPressed: state.isBlockComplete(card)
-                    ? () {
+              // Escribiendo el nombre, el botón CIERRA el campo y te deja
+              // donde estabas; no guarda la card. Guardar con el teclado
+              // delante y la frase a medio leer es cerrar algo que todavía no
+              // habías terminado de mirar. Es la misma regla que en los pasos.
+              child: editingName
+                  ? SoftPrimaryButton(
+                      label: 'Done',
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
                         ref.read(editingSegmentProvider.notifier).state = null;
-                        controller.saveCard();
-                      }
-                    : null,
-              ),
+                      },
+                    )
+                  : SoftPrimaryButton(
+                      label: 'Save',
+                      // Mismas reglas que el flujo: una card no se guarda a
+                      // medias, pero el botón apagado lo dice sin regañar.
+                      onPressed:
+                          state.isBlockComplete(card) ? controller.saveCard : null,
+                    ),
             ),
           ],
         ),
