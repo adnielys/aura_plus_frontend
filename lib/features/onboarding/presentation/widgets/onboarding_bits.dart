@@ -11,6 +11,20 @@ import '../providers/onboarding_controller.dart';
 /// Piezas sueltas del onboarding, compartidas por los bloques y las cards.
 /// Salieron de onboarding_screen.dart sin tocarles el comportamiento.
 
+/// La ilustración de cada bloque.
+///
+/// Son hermanas a propósito, no dos piezas sueltas: misma ventana en arco,
+/// misma mujer de perfil, mismas hojas rosadas. Lo que cambia es lo que se ve
+/// por la ventana — en la del día, el cielo recorre la jornada entera, con el
+/// sol abajo y la luna y las estrellas arriba.
+///
+/// Vive aquí y no en cada pantalla porque la usan el paso, la card y el
+/// resumen: con la ruta escrita a mano en cada sitio, el bloque del día
+/// acabó enseñando la imagen de los sentimientos en cuatro pantallas seguidas.
+String blockImage(int block) => block == 1
+    ? 'assets/images/onboarding/feelings-header.png'
+    : 'assets/images/onboarding/my-day.png';
+
 /// Puntos de progreso: el paso activo se alarga en magenta (como el maquetado).
 ///
 /// Cuenta por BLOQUE, no por el onboarding entero: siete puntos hacían el

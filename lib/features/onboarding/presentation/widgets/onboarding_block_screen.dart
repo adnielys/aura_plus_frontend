@@ -567,7 +567,7 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
         if (editing == null)
           Center(
             child: Image.asset(
-              'assets/images/onboarding/feelings-header.png',
+              blockImage(1),
               height: 215,
               fit: BoxFit.contain,
             ),
@@ -723,7 +723,7 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
         const SizedBox(height: 14),
         Center(
           child: Image.asset(
-            'assets/images/onboarding/feelings-header.png',
+            blockImage(2),
             height: 215,
             fit: BoxFit.contain,
           ),
