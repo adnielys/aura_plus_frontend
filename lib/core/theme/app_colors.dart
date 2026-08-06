@@ -71,6 +71,12 @@ abstract final class AppColors {
   static const Color entryPlaceholder = Color(0xFFE2A9BF);
   static const Color entryBorder = Color(0xFFF0C3D3);
 
+  /// Blanco cálido de la entrada. Los pasos van sobre blanco puro, pero la
+  /// pantalla de las cards lo necesita más templado: sobre blanco puro, unas
+  /// cards blancas no se despegarían del fondo y el borde rosado tendría que
+  /// hacer todo el trabajo.
+  static const Color entrySurface = Color(0xFFFDF7F8);
+
   /// Degradado del CTA de la entrada (start-btn).
   static const LinearGradient entryGradient = LinearGradient(
     colors: [entryAccent, entryAccentDark],

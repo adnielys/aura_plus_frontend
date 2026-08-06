@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/soft_primary_button.dart';
 import '../providers/onboarding_controller.dart';
 import 'onboarding_bits.dart';
@@ -63,53 +62,62 @@ class _OnboardingCardsScreenState
     final controller = ref.read(onboardingControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // Blanco cálido: sobre blanco puro las cards blancas no se despegarían.
+      backgroundColor: AppColors.entrySurface,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Sin flecha de volver: no hay a dónde: cada dato se corrige
+            // tocando su card, que es más corto que rehacer el recorrido.
             const SizedBox(height: 28),
-            const Text(
-              'THIS IS WHAT YOU TOLD ME',
-              style: TextStyle(
-                fontFamily: AppTypography.didot,
-                fontSize: 13,
-                letterSpacing: 2,
-                color: AppColors.entryHint,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              // El cabezal de Home, sin retoques: headlineMedium (serif 24
+              // bold). Es el mismo gesto —titular de pantalla— y con su propio
+              // tamaño y espaciado se leía como otra app.
+              child: Text(
+                'THIS IS WHAT YOU TOLD ME',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             const Text(
               'Slide to see both · tap one to edit it',
-              style: TextStyle(fontSize: 12, color: AppColors.entryHint),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             Expanded(
               child: Center(
                 child: PageView.builder(
                   controller: _pages,
                   itemCount: 2,
+                  // El PageView recorta a sus hijos por defecto, y cortaba la
+                  // sombra de la card en seco justo en el borde del visor: se
+                  // veía una raya, no una sombra. Con Clip.none respira fuera,
+                  // y como los puntos van DESPUÉS en la Column se pintan
+                  // encima de ella.
+                  clipBehavior: Clip.none,
                   onPageChanged: (i) => setState(() => _current = i),
-                  // Center + scroll: el PageView da altura APRETADA, así que
-                  // sin esto la card se estira a toda la pantalla, y con la
-                  // frase larga (muchos sentimientos, pantalla corta)
-                  // desbordaba por abajo. Así se queda de su tamaño mientras
-                  // quepa, y se desplaza cuando no.
-                  itemBuilder: (context, i) => Center(
-                    child: SingleChildScrollView(
-                      child: OnboardingCard(
-                        card: i + 1,
-                        state: state,
-                        active: i == _current,
-                        onTap: () => _tapCard(i),
-                      ),
-                    ),
+                  // Sin Center: la card RECIBE la altura apretada del PageView
+                  // y la ocupa entera. Es lo que hace que las dos midan igual
+                  // — el desborde lo resuelve la card por dentro.
+                  itemBuilder: (context, i) => OnboardingCard(
+                    card: i + 1,
+                    state: state,
+                    active: i == _current,
+                    onTap: () => _tapCard(i),
                   ),
                 ),
               ),
             ),
+            // Sitio para que la sombra caiga antes de los puntos.
+            const SizedBox(height: 16),
             _CarouselDots(current: _current),
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 0, 28, 8),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
               child: SoftPrimaryButton(
                 label: 'Start with Aura+',
                 // Aquí, y solo aquí, se envía. Los bloques ya no lo hacen.

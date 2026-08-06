@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../providers/onboarding_controller.dart';
+import 'onboarding_bits.dart';
 import 'onboarding_sentence.dart';
 
 /// Una de las dos cards: lo que le has contado, guardado.
 ///
-/// No es un resumen administrativo — es la frase entera, con sus palabras, en
-/// pequeño. Por eso conserva el serif y el carmesí de los valores: leerla
-/// tiene que sentirse como releer lo que dijiste, no como revisar un
-/// formulario relleno.
+/// No es un resumen administrativo — es la frase entera, con sus palabras. Por
+/// eso conserva el serif y el carmesí de los valores: leerla tiene que
+/// sentirse como releer lo que dijiste, no como revisar un formulario.
 class OnboardingCard extends StatelessWidget {
   const OnboardingCard({
     super.key,
@@ -40,54 +40,85 @@ class OnboardingCard extends StatelessWidget {
           duration: const Duration(milliseconds: 220),
           scale: active ? 1 : 0.94,
           child: Container(
-            width: 300,
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
-            padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+            // Sin ancho fijo: ocupa su hueco del carrusel, así que en una
+            // pantalla ancha crece en vez de quedarse como una pastilla.
+            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+            padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(
-                color: active
-                    ? AppColors.entryAccent.withValues(alpha: 0.35)
-                    : AppColors.entryBorder,
-                width: 1.5,
-              ),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: AppColors.entryBorder, width: 1),
+              // Sombra apenas perceptible: la card se despega del fondo
+              // cálido sin parecer que flota por encima de la pantalla.
               boxShadow: active
                   ? const [
                       BoxShadow(
-                        color: Color(0x29D60B52),
-                        blurRadius: 40,
-                        offset: Offset(0, 18),
+                        color: Color(0x14D60B52),
+                        blurRadius: 32,
+                        offset: Offset(0, 12),
                       ),
                     ]
                   : null,
             ),
+            // Altura APRETADA desde el PageView: las dos miden exactamente lo
+            // mismo aunque una frase sea más larga que la otra. Antes cada una
+            // se ajustaba a su contenido y se veían desiguales.
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   card == 1 ? 'THIS IS HOW YOU FEEL' : 'AND THIS IS YOUR DAY',
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: AppTypography.didot,
-                    fontSize: 11,
-                    letterSpacing: 2,
-                    color: AppColors.entryHint,
+                    fontSize: 14,
+                    letterSpacing: 2.6,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 14),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 110),
-                  child: Image.asset(
-                    'assets/images/onboarding/feelings-header.png',
-                    fit: BoxFit.contain,
+                // El contenido va centrado en el hueco que quede, y se
+                // desplaza solo si de verdad no cabe.
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 10),
+                          Image.asset(blockImage(card), fit: BoxFit.contain),
+                          const SizedBox(height: 18),
+                          _CardSentence(card: card, state: state),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 14),
-                _CardSentence(card: card, state: state),
-                const SizedBox(height: 16),
-                const Text(
-                  'Tap to edit ✎',
-                  style: TextStyle(fontSize: 11.5, color: AppColors.entryHint),
+                const SizedBox(height: 18),
+                // Pastilla y no texto suelto: dice que se puede TOCAR. De
+                // texto plano se leía como un pie de foto.
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(color: AppColors.entryBorder),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Tap to edit',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.entryHint,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.edit_outlined,
+                          size: 15, color: AppColors.entryPlaceholder),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -112,9 +143,9 @@ class _CardSentence extends StatelessWidget {
   Widget build(BuildContext context) {
     const serif = TextStyle(
       fontFamily: AppTypography.serif,
-      fontSize: 16.5,
+      fontSize: 21,
       height: 1.5,
-      color: AppColors.entryInk,
+      color: AppColors.textPrimary,
     );
 
     TextSpan value(String? text, String placeholder) => TextSpan(
