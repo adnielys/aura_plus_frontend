@@ -73,13 +73,13 @@ class _OnboardingCardsScreenState
             const SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              // El cabezal de Home, sin retoques: headlineMedium (serif 24
-              // bold). Es el mismo gesto —titular de pantalla— y con su propio
-              // tamaño y espaciado se leía como otra app.
+              // titleLarge (serif 20): en versales, un titular pesa más que en
+              // caja normal, así que el escalón de Home se comía la pantalla.
+              // Sigue saliendo del tema y no de un número inventado aquí.
               child: Text(
                 'THIS IS WHAT YOU TOLD ME',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             const SizedBox(height: 4),
