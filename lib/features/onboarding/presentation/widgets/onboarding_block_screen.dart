@@ -9,6 +9,7 @@ import '../../../../shared/widgets/soft_primary_button.dart';
 import '../providers/onboarding_controller.dart';
 import 'feelings_modal.dart';
 import 'onboarding_bits.dart';
+import 'onboarding_card.dart';
 import 'onboarding_fold.dart';
 import 'onboarding_sentence.dart';
 import 'onboarding_sheets.dart';
@@ -32,13 +33,31 @@ class OnboardingBlockScreen extends ConsumerWidget {
     final controller = ref.read(onboardingControllerProvider.notifier);
     final editing = ref.watch(editingSegmentProvider);
 
+    // Esta pantalla dibuja SOLO los pasos de su bloque, aunque el estado ya
+    // apunte a otro. Mientras sale deslizándose sigue viva y sigue leyendo el
+    // provider: sin esto, la del bloque 1 se ponía a pintar el bloque 2 a la
+    // vez que la que entra, montaba un segundo paso del día y su sheet se
+    // abría DOS veces.
+    final steps = block == 1 ? kBlock1Steps : kBlock2Steps;
+    final step = steps.contains(state.stepIndex) ? state.stepIndex : steps.last;
+    final stepInBlock = steps.indexOf(step) + 1;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: OnboardingFold(
           folding: state.folding,
           onFolded: controller.closeBlock,
-          builder: (context, t) => Column(
+          // En lo que se convierte esta pantalla. Es la MISMA card que verá
+          // después: si aquí se dibujara una imitación, el cambio de una a
+          // otra se notaría justo en el fotograma en que aterriza.
+          card: OnboardingCard(
+            card: block,
+            state: state,
+            active: true,
+            onTap: () {},
+          ),
+          child: Column(
             children: [
               // Sin flecha de volver: cualquier dato se corrige tocando su
               // palabra en la frase, y eso abre su control SIN mover el paso.
@@ -47,7 +66,7 @@ class OnboardingBlockScreen extends ConsumerWidget {
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: Padding(
-                    key: ValueKey(state.stepIndex),
+                    key: ValueKey(step),
                     padding: const EdgeInsets.fromLTRB(28, 0, 28, 8),
                     // Scrollable SIN perder los Spacer: con varios sentimientos
                     // elegidos —o en una pantalla pequeña— desbordaba.
@@ -57,7 +76,7 @@ class OnboardingBlockScreen extends ConsumerWidget {
                           constraints:
                               BoxConstraints(minHeight: constraints.maxHeight),
                           child: IntrinsicHeight(
-                            child: _StepContent(step: state.stepIndex),
+                            child: _StepContent(step: step),
                           ),
                         ),
                       ),
@@ -65,23 +84,21 @@ class OnboardingBlockScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              // El pie se aparta ANTES de que termine el pliegue (340 de 720
-              // ms): unos puntos de progreso encogiéndose dentro de la card
-              // dirían que aún queda camino, justo cuando acaba de cerrarse.
-              Opacity(
-                opacity: (1 - t / 0.47).clamp(0.0, 1.0),
-                child: Column(
-                  children: [
-                    StepDots(
-                      block: state.block,
-                      active: state.stepInBlock,
-                      count: state.stepsInBlock,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
-                      child: _BlockCta(state: state, editing: editing != null),
-                    ),
-                  ],
+              // El pie ya no se funde aparte: se apaga con toda la pantalla,
+              // porque lo que aparece encima es la card, no esta misma
+              // pantalla encogida.
+              StepDots(
+                block: block,
+                active: stepInBlock,
+                count: steps.length,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
+                child: _BlockCta(
+                  block: block,
+                  step: step,
+                  isLast: step == steps.last,
+                  editing: editing != null,
                 ),
               ),
             ],
@@ -94,14 +111,25 @@ class OnboardingBlockScreen extends ConsumerWidget {
 
 /// Botón del bloque. Tres estados: corrigiendo una palabra cierra la edición,
 /// el último paso cierra la card, y el resto avanza.
+/// Botón del bloque. Mira el paso de SU pantalla, no el del estado: mientras
+/// la anterior se desliza fuera, el estado ya apunta a la siguiente y el botón
+/// cambiaría de texto en plena salida.
 class _BlockCta extends ConsumerWidget {
-  const _BlockCta({required this.state, required this.editing});
+  const _BlockCta({
+    required this.block,
+    required this.step,
+    required this.isLast,
+    required this.editing,
+  });
 
-  final OnboardingState state;
+  final int block;
+  final int step;
+  final bool isLast;
   final bool editing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
 
     // Reeditando un dato, el botón CIERRA la edición y deja donde estabas; no
@@ -114,18 +142,20 @@ class _BlockCta extends ConsumerWidget {
       );
     }
 
-    if (state.isLastStepOfBlock) {
+    final answered = state.isStepAnswered(step);
+
+    if (isLast) {
       return SoftPrimaryButton(
         // Dice lo que va a pasar, no "continuar": lo que sigue es ver cómo se
         // guarda lo que acabas de contar.
-        label: state.block == 1 ? 'Close this card' : 'See both cards',
-        onPressed: state.canContinue ? controller.startFold : null,
+        label: block == 1 ? 'Close this card' : 'See both cards',
+        onPressed: answered ? controller.startFold : null,
       );
     }
 
     return SoftPrimaryButton(
       label: 'Continue',
-      onPressed: state.canContinue ? controller.next : null,
+      onPressed: answered ? controller.next : null,
     );
   }
 }
@@ -184,7 +214,13 @@ class _StepSentenceState extends ConsumerState<_StepSentence> {
     };
     if (opener != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) opener();
+        if (!mounted) return;
+        // Ni plegando ni desde el bloque que ya no es el actual: esta pantalla
+        // sigue viva mientras se desliza fuera, y su control quedaría abierto
+        // encima de la que llega.
+        final state = ref.read(onboardingControllerProvider);
+        if (state.folding || state.block != 1) return;
+        opener();
       });
     }
   }
@@ -655,7 +691,12 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
     // Igual que el resto: el control aparece al entrar y no cuelga bajo la
     // frase. Se vuelve a él tocando la palabra.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _openSheet(widget.active);
+      if (!mounted) return;
+      // Misma regla que en el bloque 1: ni plegando ni desde un bloque que ya
+      // no es el actual, o el sheet acaba abierto sobre la vista siguiente.
+      final state = ref.read(onboardingControllerProvider);
+      if (state.folding || state.block != 2) return;
+      _openSheet(widget.active);
     });
   }
 

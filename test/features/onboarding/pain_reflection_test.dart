@@ -82,7 +82,11 @@ void main() {
           child: const MaterialApp(home: OnboardingScreen()),
         ),
       );
-      container.read(onboardingControllerProvider.notifier).goToStep(5);
+      // Los pasos del día viven en el bloque 2, y cada pantalla dibuja solo
+      // los suyos: hay que cerrar el bloque 1 para llegar.
+      container.read(onboardingControllerProvider.notifier)
+        ..closeBlock()
+        ..goToStep(5);
       await tester.pumpAndSettle();
       expect(find.text(timeReflectionDefault), findsOneWidget);
 
@@ -105,8 +109,9 @@ void main() {
           child: const MaterialApp(home: OnboardingScreen()),
         ),
       );
-      // Ir directo al paso de "lo que más pesa" (índice 4).
-      container.read(onboardingControllerProvider.notifier).goToStep(4);
+      // Ir al paso de "lo que más pesa" (índice 4): es el primero del bloque
+      // 2, así que se llega cerrando el bloque 1.
+      container.read(onboardingControllerProvider.notifier).closeBlock();
       await tester.pumpAndSettle();
 
       // Sin selección: ningún reflejo en pantalla.

@@ -143,6 +143,42 @@ void main() {
       expect(find.text('See both cards'), findsNothing,
           reason: 'aún queda camino dentro del bloque');
     });
+
+    testWidgets('el modal de sentimientos no se cuela detrás del bloque 2',
+        (tester) async {
+      answerBlock1();
+      ctrl().goToStep(3);
+      await pump(tester);
+      await closeFeelingsModal(tester);
+
+      await tester.tap(find.text('Close this card'));
+      await tester.pumpAndSettle();
+
+      // El paso 4 abre su modal en initState. Si el pliegue recrea el
+      // subárbol, vuelve a dispararse y —al ser una ruta— sobrevive al cambio
+      // de vista: te quedabas con la rejilla de sentimientos de fondo y el
+      // sheet del día encima.
+      expect(find.text('How do you feel today?'), findsNothing);
+      expect(find.text('choose all that apply'), findsNothing);
+      // Detrás del sheet del día tiene que estar SU frase.
+      expect(find.textContaining('the hardest part is'), findsWidgets);
+    });
+
+    testWidgets('el sheet del día se abre UNA vez, no dos', (tester) async {
+      answerBlock1();
+      ctrl().goToStep(3);
+      await pump(tester);
+      await closeFeelingsModal(tester);
+
+      await tester.tap(find.text('Close this card'));
+      await tester.pumpAndSettle();
+
+      // La pantalla del bloque 1 sigue viva mientras se desliza fuera. Si en
+      // esos 420 ms se pusiera a leer el paso nuevo, pintaría el bloque 2 a la
+      // vez que la que entra: dos pasos del día montados, dos sheets abiertos,
+      // y al cerrar uno aparecía el otro.
+      expect(find.text('What weighs on you most?'), findsOneWidget);
+    });
   });
 
   group('las dos cards', () {
