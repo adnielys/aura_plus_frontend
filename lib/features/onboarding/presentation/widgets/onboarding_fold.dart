@@ -45,13 +45,26 @@ class _OnboardingFoldState extends State<OnboardingFold>
   static const _duration = Duration(milliseconds: 720);
 
   /// Hasta aquí la pantalla se apaga y la card aparece. Después, y solo
-  /// después, la card se aleja.
+  /// después, la card se posa.
   static const _formUntil = 0.42;
 
-  /// Lo que retrocede la card ya formada. No baja más porque al final del
-  /// pliegue tiene que estar del tamaño en que la va a encontrar en la
-  /// pantalla siguiente — si encogiera hasta un sello, aparecería de golpe.
-  static const _endScale = 0.82;
+  /// Dónde acaba la card: EXACTAMENTE el hueco que ocupa en la pantalla de las
+  /// dos cards, medido en un Pixel 6 (337×626 sobre 411×914, centrada 24 px
+  /// por encima del centro). Antes acababa en otro sitio y de otro tamaño, y
+  /// el salto al cambiar de pantalla era lo que hacía que el pliegue se
+  /// sintiera forzado: dos animaciones con una costura en medio en vez de un
+  /// solo movimiento.
+  ///
+  /// Son proporciones, no píxeles, así que aguantan otros tamaños de pantalla;
+  /// no son exactas porque el cabezal y el botón de destino no crecen con el
+  /// alto, pero el desajuste que queda es de unos pocos píxeles.
+  static const _endWidth = 0.821;
+  static const _endHeight = 0.685;
+  static const _endRise = 0.026;
+
+  /// Se forma más grande que su destino y se posa: viene de ocupar la pantalla
+  /// entera, así que aparecer ya del tamaño final se leería como un corte.
+  static const _startScale = 1.22;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -116,14 +129,18 @@ class _OnboardingFoldState extends State<OnboardingFold>
                   opacity: form,
                   child: Center(
                     child: Transform.translate(
-                      offset: Offset(0, -constraints.maxHeight * 0.04 * recede),
+                      offset: Offset(
+                        0,
+                        -constraints.maxHeight * _endRise * recede,
+                      ),
                       child: Transform.scale(
-                        scale: 1 - (1 - _endScale) * recede,
+                        // 1.22 → 1: la caja YA es la del destino, así que al
+                        // acabar la escala sobra y la card queda clavada donde
+                        // la pantalla siguiente la va a dibujar.
+                        scale: 1 + (_startScale - 1) * (1 - recede),
                         child: SizedBox(
-                          // La card necesita altura acotada (por dentro se
-                          // reparte con un Expanded). Esta es, aproximada, la
-                          // que tendrá en la pantalla de las dos cards.
-                          height: constraints.maxHeight * 0.72,
+                          width: constraints.maxWidth * _endWidth,
+                          height: constraints.maxHeight * _endHeight,
                           child: widget.card,
                         ),
                       ),

@@ -46,25 +46,34 @@ class OnboardingScreen extends ConsumerWidget {
         ),
     };
 
-    // Lo nuevo entra desde la derecha, detrás de la card que se acaba de
-    // cerrar: dice "seguimos", no "otra pantalla". Sin fundido cruzado, que
-    // con dos fondos blancos solo se vería un parpadeo.
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 420),
-      switchInCurve: Curves.easeOutCubic,
-      transitionBuilder: (child, animation) => SlideTransition(
-        position: Tween(
-          begin: const Offset(0.18, 0),
-          end: Offset.zero,
-        ).animate(animation),
-        child: FadeTransition(opacity: animation, child: child),
+    // Fondo propio. Sin él, mientras una pantalla se apartaba el hueco que
+    // dejaba no lo cubría nadie y se veía el negro de detrás de la ruta: cada
+    // vista trae su Scaffold, pero esto de aquí no era ninguna.
+    return ColoredBox(
+      color: Colors.white,
+      // Fundido y nada más. Antes lo nuevo entraba desplazándose desde la
+      // derecha, y justo después del pliegue —que acaba con la card quieta en
+      // el centro— ese empujón lateral la hacía saltar: se notaba la costura
+      // entre dos animaciones distintas en vez de una sola cosa que sigue.
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 320),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeOut,
+        // Las dos capas se cruzan en el mismo sitio, así que la que entra va
+        // encima; si no, la que sale tapa a la que llega durante el cruce.
+        layoutBuilder: (current, previous) => Stack(
+          alignment: Alignment.center,
+          children: [...previous, ?current],
+        ),
+        // Sin esto, cambiar de vista reusaría el State del bloque anterior.
+        child: KeyedSubtree(key: ValueKey(state.view), child: view),
       ),
-      // Sin esto, cambiar de vista reusaría el State del bloque anterior.
-      child: KeyedSubtree(key: ValueKey(state.view), child: view),
     );
   }
 }
 
+/// Contrato emocional (SPEC_CONTENIDO_EMOCIONAL_V2 §3.2): estado de éxito del
+/// onboarding. Sin metas ni presión — cierra el arco de entrada. La usuaria
 /// decide cuándo entrar, con un único botón.
 class _EmotionalContract extends StatefulWidget {
   const _EmotionalContract({required this.name, required this.onEnter});
