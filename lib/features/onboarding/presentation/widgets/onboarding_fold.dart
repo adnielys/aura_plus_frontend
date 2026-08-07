@@ -22,6 +22,7 @@ class OnboardingFold extends StatefulWidget {
     required this.onFolded,
     required this.child,
     required this.card,
+    this.recedes = false,
   });
 
   /// Lo enciende el controller al pulsar el CTA final del bloque.
@@ -35,6 +36,14 @@ class OnboardingFold extends StatefulWidget {
 
   /// En lo que se convierte.
   final Widget card;
+
+  /// Si la card se APARTA en vez de posarse.
+  ///
+  /// El bloque 1 da paso al 2, que sube desde abajo: su card tiene que dejar
+  /// sitio, así que se aleja y se va. El bloque 2 da paso a la pantalla que
+  /// muestra las dos, y ahí su card se queda — se posa justo en el hueco donde
+  /// la siguiente pantalla la va a dibujar.
+  final bool recedes;
 
   @override
   State<OnboardingFold> createState() => _OnboardingFoldState();
@@ -65,6 +74,10 @@ class _OnboardingFoldState extends State<OnboardingFold>
   /// Se forma más grande que su destino y se posa: viene de ocupar la pantalla
   /// entera, así que aparecer ya del tamaño final se leería como un corte.
   static const _startScale = 1.22;
+
+  /// A dónde se va la card que se aparta: más lejos y desvanecida, para dejar
+  /// el sitio limpio a la que sube desde abajo.
+  static const _awayScale = 0.74;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -126,7 +139,8 @@ class _OnboardingFoldState extends State<OnboardingFold>
               ),
               IgnorePointer(
                 child: Opacity(
-                  opacity: form,
+                  // Apartándose se desvanece al alejarse; posándose se queda.
+                  opacity: widget.recedes ? form * (1 - recede) : form,
                   child: Center(
                     child: Transform.translate(
                       offset: Offset(
@@ -134,10 +148,15 @@ class _OnboardingFoldState extends State<OnboardingFold>
                         -constraints.maxHeight * _endRise * recede,
                       ),
                       child: Transform.scale(
-                        // 1.22 → 1: la caja YA es la del destino, así que al
-                        // acabar la escala sobra y la card queda clavada donde
-                        // la pantalla siguiente la va a dibujar.
-                        scale: 1 + (_startScale - 1) * (1 - recede),
+                        // Posándose, 1.22 → 1: la caja YA es la del destino,
+                        // así que al acabar la escala sobra y la card queda
+                        // clavada donde la pantalla siguiente la va a dibujar.
+                        // Apartándose sigue de largo hasta 0.74, que es lo que
+                        // se lee como "se va", no como "se coloca".
+                        scale: widget.recedes
+                            ? _startScale +
+                                (_awayScale - _startScale) * recede
+                            : 1 + (_startScale - 1) * (1 - recede),
                         child: SizedBox(
                           width: constraints.maxWidth * _endWidth,
                           height: constraints.maxHeight * _endHeight,

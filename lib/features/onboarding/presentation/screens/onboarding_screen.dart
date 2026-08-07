@@ -57,8 +57,26 @@ class OnboardingScreen extends ConsumerWidget {
       // entre dos animaciones distintas en vez de una sola cosa que sigue.
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 320),
-        switchInCurve: Curves.easeOut,
+        switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeOut,
+        // El bloque 2 SUBE desde abajo, como una card que entra en la baraja;
+        // la del 1 se acaba de apartar y le deja el sitio. Las demás vistas se
+        // funden y ya: la de las dos cards viene de una card que se posó
+        // exactamente en su hueco, y moverla ahí sería deshacerlo.
+        transitionBuilder: (child, animation) {
+          final entra =
+              (child.key as ValueKey<OnboardingView>?)?.value ==
+                  OnboardingView.block2;
+          final fade = FadeTransition(opacity: animation, child: child);
+          if (!entra) return fade;
+          return SlideTransition(
+            position: Tween(
+              begin: const Offset(0, 0.22),
+              end: Offset.zero,
+            ).animate(animation),
+            child: fade,
+          );
+        },
         // Las dos capas se cruzan en el mismo sitio, así que la que entra va
         // encima; si no, la que sale tapa a la que llega durante el cruce.
         layoutBuilder: (current, previous) => Stack(

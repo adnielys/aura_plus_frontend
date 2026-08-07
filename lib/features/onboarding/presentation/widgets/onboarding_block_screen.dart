@@ -48,6 +48,10 @@ class OnboardingBlockScreen extends ConsumerWidget {
         child: OnboardingFold(
           folding: state.folding,
           onFolded: controller.closeBlock,
+          // El bloque 1 deja paso al 2, que sube desde abajo: su card se
+          // aparta. El 2 desemboca en la pantalla de las dos cards, y ahí la
+          // suya se queda justo donde la otra pantalla la va a dibujar.
+          recedes: block == 1,
           // En lo que se convierte esta pantalla. Es la MISMA card que verá
           // después: si aquí se dibujara una imitación, el cambio de una a
           // otra se notaría justo en el fotograma en que aterriza.
@@ -690,7 +694,15 @@ class _ClosingStepState extends ConsumerState<_ClosingStep> {
     super.initState();
     // Igual que el resto: el control aparece al entrar y no cuelga bajo la
     // frase. Se vuelve a él tocando la palabra.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Al entrar al bloque, la pantalla SUBE desde abajo: el sheet espera a que
+    // aterrice. Primero se ve la ilustración y la primera frase —de lo que va
+    // a ir la pregunta—; abrirlo encima del movimiento tapaba justo lo que se
+    // acababa de presentar. Los pasos siguientes no se mueven, así que no
+    // esperan nada.
+    final espera = widget.active == ClosingSegment.pain
+        ? const Duration(milliseconds: 380)
+        : Duration.zero;
+    Future<void>.delayed(espera, () {
       if (!mounted) return;
       // Misma regla que en el bloque 1: ni plegando ni desde un bloque que ya
       // no es el actual, o el sheet acaba abierto sobre la vista siguiente.

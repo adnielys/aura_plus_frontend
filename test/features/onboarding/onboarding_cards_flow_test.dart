@@ -164,6 +164,27 @@ void main() {
       expect(find.textContaining('the hardest part is'), findsWidgets);
     });
 
+    testWidgets('primero aterriza la card con su frase, después el sheet',
+        (tester) async {
+      answerBlock1();
+      ctrl().goToStep(3);
+      await pump(tester);
+      await closeFeelingsModal(tester);
+
+      await tester.tap(find.text('Close this card'));
+      await tester.pump(); // arranca el pliegue
+      await tester.pump(const Duration(milliseconds: 760)); // termina
+      await tester.pump(const Duration(milliseconds: 200)); // la card sube
+
+      // Lo primero que se ve del bloque nuevo es de qué va a ir la pregunta.
+      expect(find.textContaining('the hardest part is'), findsWidgets);
+      expect(find.text('What weighs on you most?'), findsNothing,
+          reason: 'abrirlo aquí taparía justo lo que se acaba de presentar');
+
+      await tester.pumpAndSettle();
+      expect(find.text('What weighs on you most?'), findsOneWidget);
+    });
+
     testWidgets('el sheet del día se abre UNA vez, no dos', (tester) async {
       answerBlock1();
       ctrl().goToStep(3);
