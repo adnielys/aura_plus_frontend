@@ -83,8 +83,12 @@ void main() {
       controller.toggleFeeling(Feeling.exhausted);
       expect(container.read(onboardingControllerProvider).canContinue, isTrue);
 
-      // Paso 4 (lo que más pesa): pide respuesta.
+      // Paso 4 (lo que más pesa): pide respuesta. Cruzar de bloque ya no es
+      // avanzar — el paso 3 cierra la card y de ahí sale el bloque 2.
       controller.next();
+      expect(container.read(onboardingControllerProvider).stepIndex, 3,
+          reason: 'next() no cruza de bloque');
+      controller.closeBlock();
       expect(container.read(onboardingControllerProvider).stepIndex, 4);
       expect(container.read(onboardingControllerProvider).canContinue, isFalse);
     });
